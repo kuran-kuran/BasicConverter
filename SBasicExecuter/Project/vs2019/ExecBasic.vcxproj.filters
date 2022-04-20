@@ -1,0 +1,170 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="ソース ファイル">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="ソース ファイル\source">
+      <UniqueIdentifier>{fbd2d3c2-2ed8-4716-bd0c-456c57f7f8d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\source\Windows">
+      <UniqueIdentifier>{584510c8-0904-4c2d-aaaf-b908dd52f9c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\library">
+      <UniqueIdentifier>{40b0d406-f755-4c13-a039-1be3e43910a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\library\zlib">
+      <UniqueIdentifier>{33c3abef-1e18-4b35-9b9a-cb473ec71a05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\library\lpng">
+      <UniqueIdentifier>{fc65454a-b145-4232-984b-492cef1b1d2a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="ExecBasic.ico">
+      <Filter>ソース ファイル\source\Windows</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\source\Data.cpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\DataManager.cpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Executer.cpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Screen.cpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Stack.cpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Variable.cpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Windows\WinMain.cpp">
+      <Filter>ソース ファイル\source\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Basic.cpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Format.cpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Png.cpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\FileData.cpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Line.cpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\String.cpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Windows\KeyBoard.cpp">
+      <Filter>ソース ファイル\source\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Windows\SoundStream.cpp">
+      <Filter>ソース ファイル\source\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\BeepMusic.cpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\source\Data.hpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\DataManager.hpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Executer.hpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Screen.hpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Stack.hpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Variable.hpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Windows\resource.h">
+      <Filter>ソース ファイル\source\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Windows\WinMain.hpp">
+      <Filter>ソース ファイル\source\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Config.hpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Format.hpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\library\lpng\png.h">
+      <Filter>ソース ファイル\library\lpng</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\library\zlib\zlib.h">
+      <Filter>ソース ファイル\library\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Png.hpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\library\zlib\zconf.h">
+      <Filter>ソース ファイル\library\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\library\lpng\pngconf.h">
+      <Filter>ソース ファイル\library\lpng</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\library\lpng\pnginfo.h">
+      <Filter>ソース ファイル\library\lpng</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\library\lpng\pngstruct.h">
+      <Filter>ソース ファイル\library\lpng</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\library\lpng\pnglibconf.h">
+      <Filter>ソース ファイル\library\lpng</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\FileData.hpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Setting.hpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Line.hpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Command.hpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\String.hpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Windows\KeyBoard.hpp">
+      <Filter>ソース ファイル\source\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Dependent.hpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Windows\SoundStream.hpp">
+      <Filter>ソース ファイル\source\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\BeepMusic.hpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Array.hpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\source\Windows\WinMain.rc">
+      <Filter>ソース ファイル\source\Windows</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
