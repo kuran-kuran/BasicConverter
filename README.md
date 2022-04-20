@@ -1,0 +1,2 @@
+# BasicConverter
+SHARP MZ-80B/2000のBASICをC++言語に変換します。VisualStudio2019でビルドするとWindowsで動作するexeファイルを作成することができます。
