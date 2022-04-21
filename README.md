@@ -58,7 +58,9 @@ SBasicConverterおよびSBasicExecuterはMIT Licenseとします。
 
 ## 作者について
 - Twitter
+
 https://twitter.com/kuran_kuran
 
 - アルゴの記憶
+
 https://daimonsoft.info/argo/
