@@ -541,7 +541,7 @@ dms::String Executer::Right(dms::String text, dms::Variable n)
 
 dms::String Executer::Mid(dms::String text, dms::Variable m, dms::Variable n)
 {
-	return text.substr(static_cast<size_t>(m.GetInt() - 1), n.GetInt());
+	return text.substr(static_cast<size_t>(m.GetInt()) - 1, n.GetInt());
 }
 
 dms::Variable Executer::Len(dms::String text)
@@ -841,14 +841,28 @@ void Executer::Music(dms::String mml)
 
 void Executer::Poke(dms::Variable address, dms::Variable data)
 {
-	this->mainMemory[address.GetInt()] = static_cast<unsigned char>(data.GetInt());
+	size_t memoryAddress = static_cast<size_t>(address.GetInt());
+	this->mainMemory[memoryAddress] = static_cast<unsigned char>(data.GetInt());
+	KeyBoard& keyBoard = KeyBoard::GetInstance();
+	if(this->mainMemory[0x952] == 0)
+	{
+		keyBoard.SetRepeat(true);
+	}
+	else if(this->mainMemory[0x952] == 166)
+	{
+		keyBoard.SetRepeat(false);
+	}
 }
 
-void Executer::Usr(dms::Variable address)
+void Executer::Usr(dms::Variable address, dms::String option)
 {
 }
 
 void Executer::Limit(dms::Variable address)
+{
+}
+
+void Executer::Out(dms::Variable ioAddress, dms::Variable data)
 {
 }
 
@@ -861,4 +875,12 @@ void Executer::DebugLog(dms::String text)
 	FileData file;
 	file.SetBuffer(&text[0], text.size());
 	file.SaveAdd("Executer.log");
+}
+
+void Executer::Run(void)
+{
+	this->executeLine = 0;
+	this->jumpLine = -1;
+	this->end = false;
+	Restore(-1);
 }

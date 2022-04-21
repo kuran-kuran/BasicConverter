@@ -19,6 +19,7 @@ public:
 	bool GetGrph(void);
 	bool GetKana(void);
 	unsigned char Get(void);
+	void SetRepeat(bool enable);
 protected:
 	KeyBoard(void);
 	~KeyBoard(void);
@@ -39,6 +40,7 @@ private:
 	bool shift;
 	bool sftlock;
 	std::map<unsigned char, Change> changeTable;
+	bool repeat;
 };
 
 #endif

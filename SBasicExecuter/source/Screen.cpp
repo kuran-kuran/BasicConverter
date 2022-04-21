@@ -11,9 +11,10 @@
 const int Screen::cursorCountMax = 18;
 
 Screen::Screen(void)
-:screenWidth(0)
+:screenBuffer(NULL)
+,screenWidth(0)
 ,screenHeight(0)
-,screenBuffer(NULL)
+,screenBufferSize(0)
 ,textScreenBuffer(NULL)
 ,textBuffer(NULL)
 ,textWidth(0)
@@ -77,7 +78,7 @@ void Screen::Initialize(int width, int height, int fontWidth, int fontHeight, un
 	this->textHeight = height / fontHeight;
 	this->scrollRight = this->textWidth - 1;
 	this->scrollBottom = this->textHeight - 1;
-	size_t screenBufferSize = static_cast<size_t>(width) * static_cast<size_t>(height) * sizeof(unsigned int);
+	this->screenBufferSize = static_cast<size_t>(width) * static_cast<size_t>(height) * sizeof(unsigned int);
 	this->screenBuffer = reinterpret_cast<unsigned int*>(malloc(screenBufferSize));
 	memset(this->screenBuffer, 0, screenBufferSize);
 	this->textScreenBuffer = reinterpret_cast<unsigned int*>(malloc(screenBufferSize));
@@ -598,8 +599,12 @@ void Screen::DrawPattern(int x, int y, unsigned char pattern, unsigned int color
 {
 	for(int i = 0; i < 8; ++i)
 	{
-		unsigned int patternColor = color * ((pattern >> i) & 1);
 		int destinationAddress = this->screenWidth * y + x + 7 - i;
+		if((destinationAddress < 0) || (destinationAddress >= this->screenBufferSize))
+		{
+			continue;
+		}
+		unsigned int patternColor = color * ((pattern >> i) & 1);
 		unsigned int writeColor = colorMask == 0xFFFFFFFF ? patternColor : (this->screenBuffer[destinationAddress] & ~colorMask) | (patternColor & colorMask);
 		this->screenBuffer[destinationAddress] = writeColor;
 	}

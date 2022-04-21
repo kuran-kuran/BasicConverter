@@ -38,6 +38,15 @@ namespace dms
 		return ToString();
 	}
 
+	Variable::operator bool() const
+	{
+		if(this->isDouble == true)
+		{
+			return this->doubleValue != 0.0;
+		}
+		return this->intValue != 0;
+	}
+
 	Variable& Variable::operator = (int value)
 	{
 		this->intValue = value;

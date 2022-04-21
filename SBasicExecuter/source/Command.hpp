@@ -397,14 +397,24 @@ inline void Poke(dms::Variable address, dms::Variable data)
 	Executer::GetInstance()->Poke(address, data);
 }
 
-inline void Usr(dms::Variable address)
+inline void Usr(dms::Variable address, dms::String option = "")
 {
-	Executer::GetInstance()->Usr(address);
+	Executer::GetInstance()->Usr(address, option);
 }
 
 inline void Limit(dms::Variable address)
 {
 	Executer::GetInstance()->Limit(address);
+}
+
+inline void Out(dms::Variable ioAddress, dms::Variable data)
+{
+	Executer::GetInstance()->Out(ioAddress, data);
+}
+
+inline void Run(void)
+{
+	Executer::GetInstance()->Run();
 }
 
 inline void DebugLog(dms::String text)

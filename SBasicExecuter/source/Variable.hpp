@@ -14,6 +14,7 @@ namespace dms
 		Variable(const Variable& value);
 		~Variable(void);
 		operator String() const;
+		operator bool() const;
 		Variable& operator = (int value);
 		Variable& operator = (double value);
 		Variable& operator = (const Variable& value);

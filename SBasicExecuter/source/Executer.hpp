@@ -100,9 +100,11 @@ public:
 	void Tempo(dms::Variable tempo);
 	void Music(dms::String mml);
 	void Poke(dms::Variable address, dms::Variable data);
-	void Usr(dms::Variable address);
+	void Usr(dms::Variable address, dms::String option = "");
 	void Limit(dms::Variable address);
 	void DebugLog(dms::String text);
+	void Out(dms::Variable ioAddress, dms::Variable data);
+	void Run(void);
 private:
 	Executer(void);
 	~Executer(void);

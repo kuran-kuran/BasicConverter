@@ -7,6 +7,7 @@ KeyBoard::KeyBoard(void)
 ,grph(false)
 ,shift(false)
 ,sftlock(false)
+,repeat(false)
 {
 	this->changeTable =
 	{
@@ -185,7 +186,15 @@ bool KeyBoard::GetKana(void)
 unsigned char KeyBoard::Get(void)
 {
 	unsigned resultCode = this->code;
-	this->code = 0;
-	this->beforeCode = 0;
+	if(this->repeat == false)
+	{
+		this->code = 0;
+		this->beforeCode = 0;
+	}
 	return resultCode;
+}
+
+void KeyBoard::SetRepeat(bool enable)
+{
+	this->repeat = enable;
 }

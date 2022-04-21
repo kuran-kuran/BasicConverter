@@ -210,24 +210,64 @@ namespace dms
 		this->buffer.push_back(0);
 	}
 
-	bool String::operator == (const char* text)
+	bool String::operator == (const char* text) const
 	{
 		return (this->size() == strlen(text) && (memcmp(&this->buffer[0], text, this->size()) == 0));
 	}
 
-	bool String::operator == (const String& text)
+	bool String::operator == (const String& text) const
 	{
 		return (this->size() == text.size() && (memcmp(&this->buffer[0], text.c_str(), this->size()) == 0));
 	}
 
-	bool String::operator != (const char* text)
+	bool String::operator != (const char* text) const
 	{
 		return (this->size() != strlen(text) && (memcmp(&this->buffer[0], text, this->size()) == 0));
 	}
 
-	bool String::operator != (const String& text)
+	bool String::operator != (const String& text) const
 	{
 		return (this->size() != text.size() && (memcmp(&this->buffer[0], text.c_str(), this->size()) == 0));
+	}
+
+	bool String::operator < (const char* text) const
+	{
+		return (this->size() != strlen(text) && (memcmp(&this->buffer[0], text, this->size()) < 0));
+	}
+
+	bool String::operator < (const String& text) const
+	{
+		return (this->size() != text.size() && (memcmp(&this->buffer[0], text.c_str(), this->size()) < 0));
+	}
+
+	bool String::operator > (const char* text) const
+	{
+		return (this->size() != strlen(text) && (memcmp(&this->buffer[0], text, this->size()) > 0));
+	}
+
+	bool String::operator > (const String& text) const
+	{
+		return (this->size() != text.size() && (memcmp(&this->buffer[0], text.c_str(), this->size()) > 0));
+	}
+
+	bool String::operator <= (const char* text) const
+	{
+		return (this->size() != strlen(text) && (memcmp(&this->buffer[0], text, this->size()) <= 0));
+	}
+
+	bool String::operator <= (const String& text) const
+	{
+		return (this->size() != text.size() && (memcmp(&this->buffer[0], text.c_str(), this->size()) <= 0));
+	}
+
+	bool String::operator >= (const char* text) const
+	{
+		return (this->size() != strlen(text) && (memcmp(&this->buffer[0], text, this->size()) >= 0));
+	}
+
+	bool String::operator >= (const String& text) const
+	{
+		return (this->size() != text.size() && (memcmp(&this->buffer[0], text.c_str(), this->size()) >= 0));
 	}
 
 	bool String::empty(void) const

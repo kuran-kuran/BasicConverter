@@ -65,6 +65,7 @@ private:
 	unsigned int* screenBuffer;
 	int screenWidth;
 	int screenHeight;
+	size_t screenBufferSize;
 	unsigned int* textScreenBuffer;
 	unsigned char* textBuffer;
 	int textWidth;

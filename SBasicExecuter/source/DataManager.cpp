@@ -45,5 +45,12 @@ dms::String DataManager::ReadString(void)
 
 void DataManager::Restore(int number)
 {
-	this->readIndex = this->dataIndex[number];
+	if(number == -1)
+	{
+		this->readIndex = 0;
+	}
+	else
+	{
+		this->readIndex = this->dataIndex[number];
+	}
 }
