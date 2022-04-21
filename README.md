@@ -14,6 +14,10 @@ https://github.com/kuran-kuran/BasicConverter
 
 BASIC中でUSR関数などでマシン語を呼んでいる場合は実行してもうまく動作しません。
 
+## ダウンロード
+
+https://github.com/kuran-kuran/BasicConverter/tree/main/Release
+
 ## ファイル構成
 ```
 -\
