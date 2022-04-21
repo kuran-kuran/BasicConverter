@@ -27,6 +27,7 @@ private:
 	void PushBrackets(void);
 	void AddBrackets(void);
 	bool PopBrackets(void);
+	bool IsBrackets(void);
 	std::vector<char> PreConvertLine(const std::vector<char>& buffer, int number);
 	void ConvertLine(const std::vector<char>& buffer, int number);
 	void AnalyzeCommand(Lexical& lexical, int number, int& subNumber, bool delimiter);
@@ -35,6 +36,7 @@ private:
 	std::string Data(const Lexical& lexical, bool delimiter, int number);
 	std::string DefKey(const Lexical& lexical, bool delimiter);
 	std::string Read(const Lexical& lexical, bool delimiter);
+	void Run(const Lexical& lexical, bool delimiter, int number, int& subNumber);
 	std::string Print(const Lexical& lexical, bool delimiter);
 	void EndPrint(int number, int& subNumber);
 	std::string For(const Lexical& lexical, bool delimiter);
@@ -94,6 +96,7 @@ private:
 	std::string BasicStringFunction(const Lexical& lexical, bool delimiter);
 	std::string BasicSign(const Lexical& lexical, bool delimiter);
 	std::string Pi(const Lexical& lexical, bool delimiter);
+	std::string Pos(const Lexical& lexical, bool delimiter);
 	bool CheckEncode(unsigned char byte);
 	bool CheckEncodeAfter(unsigned char byte);
 	std::string Encode(std::string text);
@@ -107,20 +110,22 @@ private:
 	bool CheckBasicStringFunction(const std::string& text);
 	bool CheckBasicSign(const std::string& text);
 	std::string ParseData(const std::string& data);
-	std::string ChangeStringVariableName(std::string variableName);
+	std::string ChangeVariableArrayName(std::string variableName);
+	std::string ChangeStringVariableName(std::string variableName, bool array);
 	bool IsStringVariableName(std::string variableName);
 	bool IsStringFixedVariableName(std::string variableName);
 	std::string EraseSpace(const std::string& text);
 	std::string Trim(const std::string& text, const char* trimCharacterList = " \t\v\r\n");
 	std::vector<std::string> VariableList(const std::string& text);
+	std::vector<std::string> DimVariableList(const std::string& text);
 	std::string DeleteQuotationString(std::string& text);
 	void MakeVariableList(std::string option);
 	void ReplaceNumber(void);
 	std::string ReplaceAll(std::string& replacedStr, std::string from, std::string to);
 	bool FindVariableList(std::string variableName);
 	bool FindDefFnFuncList(std::string variableName);
-	std::string FixOption(std::string sourceOption, bool print, bool delimiter);
-	bool IsNeedFixOption(std::string command);
+	std::string FixOption(std::string sourceCommand, std::string sourceOption, bool delimiter);
+	std::string FixPrintOption(std::string sourceOption, bool delimiter, bool commaToPlus);
 	std::string FixOptionNumber(std::string sourceOption);
 	void DebugLog(std::string text);
 	int space;
@@ -140,6 +145,8 @@ private:
 	std::string onVariable;
 	bool defFnFlag;
 	bool defKeyFlag;
+	bool patternFlag;
+	int patternSeparatorCount;
 	bool closeBracesFlag;
 	bool closeBracketFlag;
 	char* buffer;

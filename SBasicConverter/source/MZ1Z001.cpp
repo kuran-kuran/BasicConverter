@@ -26,6 +26,8 @@ MZ1Z001::MZ1Z001(void)
 ,onVariable()
 ,defFnFlag(false)
 ,defKeyFlag(false)
+,patternFlag(false)
+,patternSeparatorCount(0)
 ,closeBracesFlag(false)
 ,closeBracketFlag(false)
 ,buffer(NULL)
@@ -348,14 +350,15 @@ void MZ1Z001::SetVariableName(std::string& variableName, std::vector<char>& resu
 	}
 	if(variableName[0] == '$')
 	{
+		variableName.clear();
 		return;
 	}
-	// 文字列変数かどうか
 	bool string = false;
 	std::string originalVariableName = variableName;
 	if(IsStringVariableName(originalVariableName) == true)
 	{
-		variableName = ChangeStringVariableName(originalVariableName);
+		// 文字列変数または文字列配列だったら変数名を修正する
+		variableName = ChangeStringVariableName(originalVariableName, array);
 		// result内の変数名を修正する
 		result.erase(result.end() - originalVariableName.size(), result.end());
 		for(size_t i = 0; i < variableName.size(); ++ i)
@@ -363,6 +366,17 @@ void MZ1Z001::SetVariableName(std::string& variableName, std::vector<char>& resu
 			result.push_back(variableName[i]);
 		}
 		string = true;
+	}
+	else if(array == true)
+	{
+		// 配列だったら変数名を修正する
+		variableName = ChangeVariableArrayName(originalVariableName);
+		// result内の変数名を修正する
+		result.erase(result.end() - originalVariableName.size(), result.end());
+		for(size_t i = 0; i < variableName.size(); ++ i)
+		{
+			result.push_back(variableName[i]);
+		}
 	}
 	// DEF FN関数かどうか
 	bool defFn = false;
@@ -455,6 +469,19 @@ bool MZ1Z001::PopBrackets(void)
 	return false;
 }
 
+// []カッコ処理中か
+bool MZ1Z001::IsBrackets(void)
+{
+	for(size_t i = 0; i < this->bracketsCountList.size(); ++ i)
+	{
+		if(this->bracketsCountList[i] > 0)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 // 配列のカッコを()から[]に変換する
 // 文字列変数名を$マーク付きからstr付きに修正する
 std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int number)
@@ -464,8 +491,14 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 	bool searchVariable = true;
 	int phase = 1;	// 0=direct, 1=code, 2=code80, 3=codeB2
 	bool defFn = false;
+	bool data = false;
+	bool pattern = false;
+	int patternSeparatorCount = 0;
+	int patternBracketsCount = 0;
 	this->bracketsCountList.clear();
-	if(number == 2454)
+	int bracketsCount = 0;
+	unsigned char beforeByte = 0;
+	if(number == 48)
 	{
 		int a = 0;
 	}
@@ -477,6 +510,7 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 		{
 			SetVariableName(variable, result, false, number);
 			result.push_back(byte);
+			data = false;
 			break;
 		}
 		if((phase == 1) && (byte == ':'))
@@ -485,6 +519,7 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 			result.push_back(byte);
 			searchVariable = true;
 			defFn = false;
+			pattern = false;
 			continue;
 		}
 		if((phase == 1) && (byte == ';'))
@@ -496,6 +531,7 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 		}
 		if((phase == 1) && (byte == 0x80))
 		{
+			SetVariableName(variable, result, false, number);
 			result.push_back(byte);
 			phase = 2;
 		}
@@ -511,8 +547,11 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 			{
 				SetVariableName(variable, result, false, number);
 				result.push_back(byte);
-				result.push_back('_');
-				result.push_back('s');
+				if(data == false)
+				{
+					result.push_back('_');
+					result.push_back('s');
+				}
 				phase = 1;
 			}
 			else
@@ -538,6 +577,7 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 					if(IsBracketCommand(code_xx[byte]) == true)
 					{
 						AddBrackets();
+						++ bracketsCount;
 					}
 					result.push_back(byte);
 				}
@@ -561,6 +601,7 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 							{
 								byte = '[';
 								PushBrackets();
+								++ bracketsCount;
 							}
 						}
 					}
@@ -569,6 +610,26 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 						if(PopBrackets() == true)
 						{
 							byte = ']';
+						}
+						-- bracketsCount;
+					}
+					// 配列アクセス[#,#]を[#][#]に変換する
+					if((IsBrackets() == true) && (byte == ','))
+					{
+						result.push_back(']');
+						result.push_back('[');
+						break;
+					}
+					if((pattern == true) && (byte == ',') && (patternBracketsCount == bracketsCount))
+					{
+						std::string line(buffer.begin(), buffer.end());
+						++ patternSeparatorCount;
+						if(patternSeparatorCount % 2 == 0)
+						{
+							result.push_back(':');
+							result.push_back('\x80');
+							result.push_back('\xB2');
+							byte = ' ';
 						}
 					}
 					result.push_back(byte);
@@ -581,11 +642,22 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 					{
 						defFn = true;
 					}
+					if(code_80_xx[byte] == "DATA")
+					{
+						data = true;
+					}
+					if(code_80_xx[byte] == "PATTERN")
+					{
+						pattern = true;
+						patternSeparatorCount = 0;
+						patternBracketsCount = bracketsCount;
+					}
 					SetVariableName(variable, result, false, number);
 					searchVariable = IsExistVariable(code_80_xx[byte]);
 					if(IsBracketCommand(code_80_xx[byte]) == true)
 					{
 						AddBrackets();
+						++ bracketsCount;
 					}
 					result.push_back(byte);
 				}
@@ -604,6 +676,7 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 					if(IsBracketCommand(code_B2_xx[byte]) == true)
 					{
 						AddBrackets();
+						++ bracketsCount;
 					}
 					result.push_back(byte);
 				}
@@ -633,7 +706,7 @@ void MZ1Z001::ConvertLine(const std::vector<char>& buffer, int number)
 	this->forPhase = 0;
 	this->defFnFlag = false;
 	this->closeBracketFlag = false;
-	if(number == 600)
+	if(number == 3510)
 	{
 		int a = 0;
 	}
@@ -660,8 +733,10 @@ void MZ1Z001::ConvertLine(const std::vector<char>& buffer, int number)
 			AnalyzeCommand(lexical, number, subNumber, true);
 			lexical = {"NOP", ""};
 			debugLine += Format("%c", byte);
-			defKeyFlag = false;
 			remFlag = false;
+			this->defKeyFlag = false;
+			this->patternFlag = false;
+			this->patternSeparatorCount = 0;
 			continue;
 		}
 		if((phase == 1) && (byte == ';') && (this->printFlag == true) && (last == false))
@@ -787,18 +862,8 @@ void MZ1Z001::AnalyzeCommand(Lexical& lexical, int number, int& subNumber, bool 
 	{
 		return;
 	}
-	// 条件文中は=を==に変換する
-	if((this->ifStackCount > 0) && (lexical.command != "THEN"))
-	{
-		std::string option = Trim(lexical.option);
-		std::string::size_type pos = 0;
-		while((pos = option.find("=", pos)) != std::string::npos)
-		{
-			option.replace(pos, 1, "==");
-			pos += 2;
-		}
-		lexical.option = option;
-	}
+	// オプションを修正する
+	lexical.option = FixOption(lexical.command, lexical.option, delimiter);
 	// 変数リスト作成
 	if(lexical.command == "NOP")
 	{
@@ -819,6 +884,11 @@ void MZ1Z001::AnalyzeCommand(Lexical& lexical, int number, int& subNumber, bool 
 	else if (lexical.command == "READ")
 	{
 		this->result += Read(lexical, delimiter);
+	}
+	else if (lexical.command == "RUN")
+	{
+		Run(lexical, delimiter, number, subNumber);
+		return;
 	}
 	else if (lexical.command == "PRINT")
 	{
@@ -1051,7 +1121,11 @@ void MZ1Z001::AnalyzeCommand(Lexical& lexical, int number, int& subNumber, bool 
 	}
 	else if(lexical.command == "π")
 	{
-		this->result += Pi(lexical, delimiter);
+	this->result += Pi(lexical, delimiter);
+	}
+	else if(lexical.command == "POS")
+	{
+		this->result += Pos(lexical, delimiter);
 	}
 	//else
 #if false
@@ -1171,7 +1245,7 @@ std::string MZ1Z001::Read(const Lexical& lexical, bool delimiter)
 		std::string str = "str";
 		if((variableList[i].size() > str.size()) && std::equal(std::begin(str), std::end(str), std::begin(variableList[i])))
 		{
-			std::string variableName = ChangeStringVariableName(variableList[i]);
+			std::string variableName = ChangeStringVariableName(variableList[i], false);
 			result += (variableName + "=ReadString()");
 		}
 		else
@@ -1186,6 +1260,15 @@ std::string MZ1Z001::Read(const Lexical& lexical, bool delimiter)
 	return result;
 }
 
+void MZ1Z001::Run(const Lexical& lexical, bool delimiter, int number, int& subNumber)
+{
+	this->program[Number(number, subNumber)] = "Clr();";
+	++ subNumber;
+	this->program[Number(number, subNumber)] = "Run();";
+	++ subNumber;
+	this->result = "";
+}
+
 std::string MZ1Z001::Print(const Lexical& lexical, bool delimiter)
 {
 	this->printFlag = true;
@@ -1196,7 +1279,7 @@ std::string MZ1Z001::Print(const Lexical& lexical, bool delimiter)
 	{
 		option = "\"\"";
 	}
-	option = FixOption(option, true, delimiter);
+	option = FixPrintOption(option, delimiter, true);
 	if((option[0] == '\"') && (option[option.size() - 1] == '\"'))
 	{
 		result = "Print(" + option + "_s";
@@ -1412,7 +1495,7 @@ std::string MZ1Z001::End(const Lexical& lexical, bool delimiter)
 std::string MZ1Z001::On(const Lexical& lexical, bool delimiter)
 {
 	this->onFlag = true;
-	this->onVariable = Trim(lexical.option);
+	this->onVariable = FixOptionNumber(lexical.option);
 	return "";
 }
 
@@ -1425,7 +1508,7 @@ std::string MZ1Z001::Poke(const Lexical& lexical, bool delimiter)
 
 void MZ1Z001::Dim(const Lexical& lexical, bool delimiter, int number, int& subNumber)
 {
-	std::vector<std::string> variableList = VariableList(lexical.option);
+	std::vector<std::string> variableList = DimVariableList(lexical.option);
 	for(size_t i = 0; i < variableList.size(); ++ i)
 	{
 		std::string arraySize1;
@@ -1436,10 +1519,6 @@ void MZ1Z001::Dim(const Lexical& lexical, bool delimiter, int number, int& subNu
 		{
 			if(variableList[i][j] == ']')
 			{
-				break;
-			}
-			if(variableList[i][j] == ',')
-			{
 				++ phase;
 				continue;
 			}
@@ -1449,6 +1528,10 @@ void MZ1Z001::Dim(const Lexical& lexical, bool delimiter, int number, int& subNu
 			}
 			else if(phase == 1)
 			{
+				if(variableList[i][j] == '[')
+				{
+					continue;
+				}
 				arraySize2 += variableList[i][j];
 			}
 		}
@@ -1472,7 +1555,7 @@ void MZ1Z001::Dim(const Lexical& lexical, bool delimiter, int number, int& subNu
 		else
 		{
 			// 2次元配列
-			this->result = "dms::Array<" + variableType + ", " + arraySize1 + "+1>, " + arraySize2 + "> " + variableName + ";";
+			this->result = "dms::Array<dms::Array<" + variableType + ", " + arraySize2 + "+1>, " + arraySize1 + "+1> " + variableName + ";";
 		}
 		// grobalに登録
 		this->grobal.push_back(this->result);
@@ -1578,7 +1661,7 @@ std::string MZ1Z001::Clr(const Lexical& lexical, bool delimiter)
 std::string MZ1Z001::Music(const Lexical& lexical, bool delimiter)
 {
 	this->closeBracketFlag = true;
-	std::string option = FixOption(lexical.option, false, delimiter);
+	std::string option = FixPrintOption(lexical.option, delimiter, true);
 	std::string result = "Music(" + option;
 	return result;
 }
@@ -1611,7 +1694,7 @@ std::string MZ1Z001::Usr(const Lexical& lexical, bool delimiter)
 std::string MZ1Z001::Wopen(const Lexical& lexical, bool delimiter)
 {
 	this->closeBracketFlag = true;
-	std::string option = FixOption(lexical.option, false, delimiter);
+	std::string option = FixOptionNumber(lexical.option);
 	std::string result = "Wopen(" + option;
 	return result;
 }
@@ -1619,7 +1702,7 @@ std::string MZ1Z001::Wopen(const Lexical& lexical, bool delimiter)
 std::string MZ1Z001::Ropen(const Lexical& lexical, bool delimiter)
 {
 	this->closeBracketFlag = true;
-	std::string option = FixOption(lexical.option, false, delimiter);
+	std::string option = FixOptionNumber(lexical.option);
 	std::string result = "Ropen(" + option;
 	return result;
 }
@@ -1915,7 +1998,9 @@ std::string MZ1Z001::Position(const Lexical& lexical, bool delimiter)
 std::string MZ1Z001::Pattern(const Lexical& lexical, bool delimiter)
 {
 	this->closeBracketFlag = true;
-	std::string option = FixOption(lexical.option, false, delimiter);
+	this->patternFlag = false;
+	this->patternSeparatorCount = 0;
+	std::string option = FixOptionNumber(lexical.option);
 	std::string result = "Pattern(" + option;
 	return result;
 }
@@ -1931,7 +2016,7 @@ std::string MZ1Z001::Auto(const Lexical& lexical, bool delimiter)
 std::string MZ1Z001::Image(const Lexical& lexical, bool delimiter)
 {
 	this->closeBracketFlag = true;
-	std::string option = FixOption(lexical.option, false, delimiter);
+	std::string option = FixOptionNumber(lexical.option);
 	std::string result = "Image(" + option;
 	return result;
 }
@@ -2002,14 +2087,7 @@ std::string MZ1Z001::BasicStringFunction(const Lexical& lexical, bool delimiter)
 		functionName = functionName.replace(pos, 2, "(");
 	}
 	std::string option = lexical.option;
-	if(IsNeedFixOption(lexical.command) == true)
-	{
-		option = FixOption(option, false, delimiter);
-	}
-	else
-	{
-		option = FixOptionNumber(option);
-	}
+	option = FixOptionNumber(option);
 	std::string result = functionName + option;
 	return result;
 }
@@ -2040,6 +2118,15 @@ std::string MZ1Z001::BasicSign(const Lexical& lexical, bool delimiter)
 std::string MZ1Z001::Pi(const Lexical& lexical, bool delimiter)
 {
 	std::string result = "Pi()" + FixOptionNumber(lexical.option);
+	return result;
+}
+
+std::string MZ1Z001::Pos(const Lexical& lexical, bool delimiter)
+{
+	std::string command = lexical.option.substr(0, 1).c_str();
+	std::transform(command.begin(), command.end(), command.begin(), tolower);
+	std::string option = lexical.option.substr(1);
+	std::string result = "Pos" + command +"()" + FixOptionNumber(option);
 	return result;
 }
 
@@ -2232,18 +2319,44 @@ bool MZ1Z001::CheckBasicSign(const std::string& text)
 // データを文字列のarrayに変換する
 std::string MZ1Z001::ParseData(const std::string& data)
 {
+	std::string sourceData = data;
+	if(data.empty() == true)
+	{
+		return "{}";
+	}
+	if(sourceData[sourceData.size() -1] == ',')
+	{
+		sourceData.erase(-- sourceData.end());
+	}
 	std::string result = "{\"";
 	bool doubleQuotation = false;
 	bool encodeAfter = false;
-	for(size_t i = 0; i < data.size(); ++i)
+	for(size_t i = 0; i < sourceData.size(); ++i)
 	{
-		unsigned char byte = static_cast<unsigned char>(data[i]);
+		unsigned char byte = static_cast<unsigned char>(sourceData[i]);
 		if (doubleQuotation == true)
 		{
 			if(byte == '\"')
 			{
 				doubleQuotation = false;
 				continue;
+			}
+			if(CheckEncode(byte) == true)
+			{
+				result += Format("\\x%02X", byte);
+				encodeAfter = true;
+			}
+			else
+			{
+				if(encodeAfter == true)
+				{
+					result += Format("\\x%02X", byte);
+				}
+				else
+				{
+					result += Format("%c", byte);
+				}
+				encodeAfter = false;
 			}
 		}
 		else
@@ -2275,7 +2388,7 @@ std::string MZ1Z001::ParseData(const std::string& data)
 				}
 				else
 				{
-					result += data[i];
+					result += Format("%c", byte);
 				}
 				encodeAfter = false;
 			}
@@ -2287,13 +2400,35 @@ std::string MZ1Z001::ParseData(const std::string& data)
 
 // 文字列変数名を変更する
 // A$ => strA
-std::string MZ1Z001::ChangeStringVariableName(std::string variableName)
+std::string MZ1Z001::ChangeVariableArrayName(std::string variableName)
 {
+	variableName = "array" + variableName;
+	return variableName;
+}
+
+// 文字列変数名を変更する
+// A$ => strA
+std::string MZ1Z001::ChangeStringVariableName(std::string variableName, bool array)
+{
+	std::string prefix = "";
 	size_t dollarPos = variableName.find_last_of('$');
 	if(dollarPos != std::string::npos)
 	{
+		prefix = "str";
+		if(array == true)
+		{
+			prefix += "Array";
+		}
 		variableName = variableName.erase(dollarPos);
-		variableName = "str" + variableName;
+		variableName = prefix + variableName;
+	}
+	else
+	{
+		if(array == true)
+		{
+			prefix += "array";
+		}
+		variableName = prefix + variableName;
 	}
 	return variableName;
 }
@@ -2370,6 +2505,30 @@ std::vector<std::string> MZ1Z001::VariableList(const std::string& text)
 		offset = pos + separatorLength;
 	}
 	return variableList;
+}
+
+// Dim関数用,で区切られた変数リストを取得する
+std::vector<std::string> MZ1Z001::DimVariableList(const std::string& text)
+{
+	std::vector<std::string> variableList = VariableList(text);
+	// 2次元配列を修復する
+	std::vector<std::string> resultVariableList;
+	size_t destinationIndex = 0;
+	for(size_t i = 0; i < variableList.size(); ++ i)
+	{
+		size_t length = variableList[i].size();
+		if(variableList[i].find("rray") != std::string::npos)
+		{
+			resultVariableList.push_back(variableList[i]);
+			++ destinationIndex;
+		}
+		else
+		{
+			resultVariableList[destinationIndex - 1] += ",";
+			resultVariableList[destinationIndex - 1] += variableList[i];
+		}
+	}
+	return resultVariableList;
 }
 
 // ダブルクォーテーションで囲まれた文字列をスペースで埋める
@@ -2488,15 +2647,29 @@ bool MZ1Z001::FindDefFnFuncList(std::string variableName)
 	return false;
 }
 
-// Optionを修正する
-std::string MZ1Z001::FixOption(std::string sourceOption, bool print, bool delimiter)
+// オプションを修正する
+std::string MZ1Z001::FixOption(std::string sourceCommand, std::string sourceOption, bool delimiter)
+{
+	// 条件文中は=を==に変換する
+	std::string option = Trim(sourceOption);
+	if((this->ifStackCount > 0) && (sourceCommand != "THEN"))
+	{
+		std::string::size_type pos = 0;
+		while((pos = option.find("=", pos)) != std::string::npos)
+		{
+			option.replace(pos, 1, "==");
+			pos += 2;
+		}
+	}
+	return option;
+}
+
+// Print文のセミコロンを+に変換する
+std::string MZ1Z001::FixPrintOption(std::string sourceOption, bool delimiter, bool commaToPlus)
 {
 	std::string result;
 	std::string option = FixOptionNumber(sourceOption);
 	int phase = 0; // 0=nop, 1=direct
-	bool firstQuotation = true;
-	std::string variable;
-	bool first = true;
 	for(size_t i = 0; i < option.size(); ++ i)
 	{
 		bool last = (i == option.size() - 1);
@@ -2504,15 +2677,6 @@ std::string MZ1Z001::FixOption(std::string sourceOption, bool print, bool delimi
 		if(byte == '\"')
 		{
 			phase = 1 - phase;
-/*
-			if(firstQuotation == true)
-			{
-				if(phase == 1)
-				{
-					result += "dms::String(";
-				}
-			}
-*/
 		}
 		else if(byte == '[')
 		{
@@ -2524,7 +2688,7 @@ std::string MZ1Z001::FixOption(std::string sourceOption, bool print, bool delimi
 		}
 		if(phase == 0)
 		{
-			if(byte == ';')
+			if((byte == ';') || ((byte == ',') && (commaToPlus == true)))
 			{
 				if((last == true) && (delimiter == true))
 				{
@@ -2533,35 +2697,11 @@ std::string MZ1Z001::FixOption(std::string sourceOption, bool print, bool delimi
 				}
 				else
 				{
-					byte = '+';
-				}
-			}
-			// 変数に使える文字かどうか
-			if(IsFixedVariableNameChar(byte, first) == true)
-			{
-				variable += Format("%c", byte);
-				first = false;
-			}
-			else
-			{
-				// Print文中の数値変数にはToString()を付ける
-				if((variable.empty() == false) && (print == true))
-				{
-/*
-					if(IsStringFixedVariableName(variable) == false)
+					if((i > 0) && (option[i - 1] == ';'))
 					{
-						if(FindVariableList(variable) == true)
-						{
-							if(byte == ']')
-							{
-								result += Format("%c", byte);
-								byte = 0;
-							}
-						}
+						continue;
 					}
-*/
-					variable.clear();
-					first = true;
+					byte = '+';
 				}
 			}
 		}
@@ -2569,54 +2709,11 @@ std::string MZ1Z001::FixOption(std::string sourceOption, bool print, bool delimi
 		{
 			result += Format("%c", byte);
 		}
-		if(last == true)
-		{
-			// Print文中の数値変数にはToString()を付ける
-			if((variable.empty() == false) && (print == true))
-			{
-/*
-				if(IsStringFixedVariableName(variable) == false)
-				{
-					if(FindVariableList(variable) == true)
-					{
-						result += ".ToString()";
-					}
-				}
-*/
-				variable.clear();
-			}
-		}
-		if(byte == '\"')
-		{
-			if(firstQuotation == true)
-			{
-				if(phase == 0)
-				{
-					firstQuotation = false;
-				}
-			}
-		}
 	}
 	return result;
 }
 
-// Optionを修正するコマンドかどうか
-bool MZ1Z001::IsNeedFixOption(std::string command)
-{
-	std::vector<std::string> commandTable =
-	{
-		"PRINT", "MUSIC", "WOPEN", "ROPEN", "PATTERN", "IMAGE/P", "LEFT$(", "RIGHT$(", "MID$("
-	};
-	auto iter = std::find(commandTable.begin(), commandTable.end(), command);
-	size_t index = std::distance(commandTable.begin(), iter);
-	if(index != commandTable.size())
-	{
-		return true;
-	}
-	return false;
-}
-
-// 数値リテラルをdms::Variable()で囲む
+// 数値リテラルに_nまたは_fをつける
 // $####も16進数の数値リテラル扱いにして\xを先頭につける
 std::string MZ1Z001::FixOptionNumber(std::string sourceOption)
 {
@@ -2631,6 +2728,7 @@ std::string MZ1Z001::FixOptionNumber(std::string sourceOption)
 	{
 		bool last = (i == option.size() - 1);
 		unsigned char byte = static_cast<unsigned char>(option[i]);
+		unsigned char nextByte = last ? 0 : static_cast<unsigned char>(option[i + 1]);
 		if(byte == '\"')
 		{
 			phase = 1 - phase;
@@ -2652,7 +2750,7 @@ std::string MZ1Z001::FixOptionNumber(std::string sourceOption)
 					variableOrNumber = true;
 					enableMinus = false;
 				}
-				else if((byte >= '0') && (byte <= '9') || (byte == '.') || ((enableMinus == true) && (number.empty() == true) && byte == '-'))
+				else if((byte >= '0') && (byte <= '9') || (byte == '.') || ((enableMinus == true) && (number.empty() == true) && byte == '-' && (nextByte >= '0') && (nextByte <= '9')))
 				{
 					// 数値
 					number += Format("%c", byte);
@@ -2711,6 +2809,10 @@ std::string MZ1Z001::FixOptionNumber(std::string sourceOption)
 		if(byte > 0)
 		{
 			result += Format("%c", byte);
+		}
+		if(number.empty() == false)
+		{
+			int a = 0;
 		}
 	}
 	return result;
