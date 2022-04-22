@@ -183,6 +183,14 @@ void BeepMusic::GetBuffer(std::vector<short>& buffer, size_t size)
 	}
 }
 
+void BeepMusic::Beep(unsigned char tone)
+{
+	double cycle = static_cast<double>(tone) / 3.1847;
+	double length = cycle * 19.0;
+	Tone toneData = {cycle, length};
+	this->toneList.push(toneData);
+}
+
 bool BeepMusic::Playing(void)
 {
 	return !this->outOfData;

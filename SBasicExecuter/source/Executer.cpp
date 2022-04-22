@@ -856,6 +856,12 @@ void Executer::Poke(dms::Variable address, dms::Variable data)
 
 void Executer::Usr(dms::Variable address, dms::String option)
 {
+	if(address.GetInt() == 0x0F14)
+	{
+		// Beep
+		dms::Variable tone = Peek(0x0F1A);
+		this->beepMusic.Beep(tone.GetInt());
+	}
 }
 
 void Executer::Limit(dms::Variable address)
