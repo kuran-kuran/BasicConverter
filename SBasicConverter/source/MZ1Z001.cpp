@@ -185,6 +185,13 @@ bool MZ1Z001::Convert(const std::string filepath, const std::string outputFilepa
 		writeData += ".clear();";
 		writeData += "\n";
 	}
+	for(size_t i = 0; i < this->dimVariableList.size(); ++ i)
+	{
+		writeData += "\t";
+		writeData += this->dimVariableList[i];
+		writeData += ".clear();";
+		writeData += "\n";
+	}
 	writeData += "}\n";
 	writeData += "\n";
 	// ÉfÅ[É^
