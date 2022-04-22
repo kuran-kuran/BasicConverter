@@ -84,6 +84,8 @@ void Executer::Initialize(std::vector<void (*)(void)> lineList, unsigned int* fr
 	this->graphicMemory[0].assign(graphicMemorySize, 0);
 	this->graphicMemory[1].assign(graphicMemorySize, 0);
 	this->graphicMemory[2].assign(graphicMemorySize, 0);
+	// オートリピート設定
+	this->mainMemory[0x952] = 166;
 	// タブ位置設定
 	this->mainMemory[0x11C1] = 5;
 	this->mainMemory[0x11C2] = 10;
@@ -759,6 +761,26 @@ void Executer::StoreInput(void)
 	{
 		EndInput();
 		this->screen.ReturnText();
+	}
+	else if((getText[0] >= 0x70) && (getText[0] <= 0x79))
+	{
+		int functionKeyIndex = getText[0] - 0x70;
+		dms::String inputText = this->defKey[functionKeyIndex];
+		if(inputText.empty() == false)
+		{
+			for(size_t i = 0; i < inputText.size(); ++ i)
+			{
+				dms::String inputCharacter = dms::Format("%c", inputText[i]);
+				if(inputCharacter == "\x7F")
+				{
+					EndInput();
+					this->screen.ReturnText();
+					break;
+				}
+				this->inputText += inputCharacter;
+				Print(inputCharacter, false);
+			}
+		}
 	}
 	else if(getText.empty() == false)
 	{
