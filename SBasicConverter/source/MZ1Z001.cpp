@@ -1220,7 +1220,7 @@ std::string MZ1Z001::DefKey(const Lexical& lexical, bool delimiter)
 	bool encodeAfter = false;
 	for(size_t i = pos + 1; i < option.size(); ++ i )
 	{
-		if(CheckEncode(option[i]) == true)
+		if((CheckEncode(option[i]) == true) && (option[i] != '\\'))
 		{
 			result += Format("\\x%02X", static_cast<unsigned char>(option[i]));
 			encodeAfter = true;
