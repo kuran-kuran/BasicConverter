@@ -13,6 +13,7 @@ public:
 	void MML(const dms::String& mml);
 	void SetTempo(int tempo);
 	void GetBuffer(std::vector<short>& buffer, size_t size);
+	void Beep(unsigned char tone);
 	bool Playing(void);
 private:
 	struct Tone

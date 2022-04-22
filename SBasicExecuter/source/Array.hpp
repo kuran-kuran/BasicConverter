@@ -28,5 +28,14 @@ namespace dms
 		{
 			return storage[i.GetInt()];
 		}
+
+		void clear(void)
+		{
+			size_t storageSize = sizeof(storage) / sizeof(T);
+			for(size_t i = 0; i < storageSize; ++ i)
+			{
+				storage[i].clear();
+			}
+		}
 	};
 }

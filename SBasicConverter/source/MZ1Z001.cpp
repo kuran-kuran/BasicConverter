@@ -108,7 +108,7 @@ bool MZ1Z001::Convert(const std::string filepath, const std::string outputFilepa
 	// 使用変数一覧
 	for(size_t i = 0; i < this->variableList.size(); ++i)
 	{
-		printf("%s\n", this->variableList[i].c_str());
+		DebugLog(Format("%s\n", this->variableList[i].c_str()).c_str());
 	}
 	// プログラム出力
 	std::string writePath = filepath;
@@ -182,6 +182,13 @@ bool MZ1Z001::Convert(const std::string filepath, const std::string outputFilepa
 	{
 		writeData += "\t";
 		writeData += this->variableList[i];
+		writeData += ".clear();";
+		writeData += "\n";
+	}
+	for(size_t i = 0; i < this->dimVariableList.size(); ++ i)
+	{
+		writeData += "\t";
+		writeData += this->dimVariableList[i];
 		writeData += ".clear();";
 		writeData += "\n";
 	}
@@ -853,7 +860,7 @@ void MZ1Z001::ConvertLine(const std::vector<char>& buffer, int number)
 			}
 		}
 	}
-	printf("%s\n", debugLine.c_str());
+	DebugLog(Format("%s\n", debugLine.c_str()).c_str());
 }
 
 void MZ1Z001::AnalyzeCommand(Lexical& lexical, int number, int& subNumber, bool delimiter)
