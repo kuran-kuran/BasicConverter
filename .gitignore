@@ -1,1 +1,4 @@
 /SBasicConverter/project/vs2019/*.mzt
+/SBasicConverter/project/vs2019/x64
+/SBasicConverter/project/vs2019/.vs
+/SBasicExecuter/Project/vs2019/ExecBasic.vcxproj.user
