@@ -2,6 +2,13 @@
 
 ## ダウンロード
 
+### Version 0.9.1
+
+- USR($0F14)でBEEP音が鳴らないのを修正した。
+- CLRしても配列が初期化されないのを修正した。
+
+[SBasicConverterVer0_9_1.zip](https://github.com/kuran-kuran/BasicConverter/raw/develop/Release/SBasicConverterVer0_9_1.zip)
+
 ### Version 0.9.0
 
 - ある程度動作したので公開した。
