@@ -11,41 +11,44 @@ static const unsigned int OPTION_HELP   = 0x00000001;
 int main(int argc, char* argv[])
 {
 	unsigned int option = 0;
-	std::string path1;
+	std::string path1 = "KORO.mzt";
 	std::string path2;
 	int i;
 	// オプション取得
-	if(argc > 1)
+	if(path1.empty() == true)
 	{
-		for(i = 1; i < argc; i ++)
+		if(argc > 1)
 		{
-			if((argv[i][0] == '/') || (argv[i][0] == '-'))
+			for(i = 1; i < argc; i ++)
 			{
-				if(_strnicmp(&argv[i][1], "HELP", 4) == 0)
+				if((argv[i][0] == '/') || (argv[i][0] == '-'))
 				{
-					option |= OPTION_HELP;
+					if(_strnicmp(&argv[i][1], "HELP", 4) == 0)
+					{
+						option |= OPTION_HELP;
+					}
+					else if(_strnicmp(&argv[i][1], "?", 1) == 0)
+					{
+						option |= OPTION_HELP;
+					}
 				}
-				else if(_strnicmp(&argv[i][1], "?", 1) == 0)
+				else
 				{
-					option |= OPTION_HELP;
-				}
-			}
-			else
-			{
-				if(path1.empty())
-				{
-					path1 = argv[i];
-				}
-				else if(path2.empty())
-				{
-					path2 = argv[i];
+					if(path1.empty())
+					{
+						path1 = argv[i];
+					}
+					else if(path2.empty())
+					{
+						path2 = argv[i];
+					}
 				}
 			}
 		}
-	}
-	else
-	{
-		option |= OPTION_HELP;
+		else
+		{
+			option |= OPTION_HELP;
+		}
 	}
 	// タイトル表示
 	std::cout << NAME << " version." << VERSION << "\n";
