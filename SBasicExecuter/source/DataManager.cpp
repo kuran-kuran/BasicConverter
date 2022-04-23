@@ -51,6 +51,14 @@ void DataManager::Restore(int number)
 	}
 	else
 	{
+		for(std::map<int, int>::iterator iter = this->dataIndex.begin(); iter != this->dataIndex.end(); ++ iter)
+		{
+			if(iter->first >= number)
+			{
+				number = iter->first;
+				break;
+			}
+		}
 		this->readIndex = this->dataIndex[number];
 	}
 }
