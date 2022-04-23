@@ -1,4 +1,4 @@
-# MZ-80B/2000 BASICコンバータ 0.9.1
+# MZ-80B/2000 BASICコンバータ 0.9.2
 SHARP MZ-80B/2000のBASICをC++言語に変換します。VisualStudio2019でビルドするとWindowsで動作するexeファイルを作成することができます。
 
 https://github.com/kuran-kuran/BasicConverter
@@ -46,19 +46,9 @@ VisualStudio2019でExecBasic.slnファイルを開きビルドしてください
 その場合はプログラムを自分で直すかあきらめてください。
 作成したexeファイルを実行するときはexeと同じフォルダにmz2000font.pngを置いてください。
 
-## 変更履歴
-2022/04/21 ver.0.9.0
-- ある程度動作したので公開した。
-
-2022/04/22 ver.0.9.1
-- USR($0F14)でBEEP音が鳴らないのを修正した。
-- CLRしても配列が初期化されないのを修正した。
-
 ## 既知のバグ
-- 計算式中の比較=を==に変換できない。
 - RESTOREの行番号先にDATA文が無いとビルドできない。
 - GOTOの行番号先にプログラムが無いとビルドできない。
-- INPUT中にファンクションキーが効かない。
 
 ## ライセンス
 SBasicConverterおよびSBasicExecuterはMIT Licenseとします。
