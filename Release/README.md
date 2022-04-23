@@ -2,6 +2,12 @@
 
 ## ダウンロード
 
+### Version 0.9.3
+
+- RESTOREの行番号先にDATA文が無い場合に対応した。
+
+[SBasicConverterVer0_9_3.zip](https://github.com/kuran-kuran/BasicConverter/raw/main/Release/SBasicConverterVer0_9_3.zip)
+
 ### Version 0.9.2
 
 - INPUT中にファンクションキーが効くように修正した。
