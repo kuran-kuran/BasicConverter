@@ -168,12 +168,20 @@ bool MZ1Z001::Convert(const std::string filepath, const std::string outputFilepa
 	writeData += "// Grobal\n";
 	writeData += "Executer* executer = Executer::GetInstance();\n";
 	writeData += "bool end = false;\n";
+	bool strTI = false;
 	for(size_t i = 0; i < this->grobal.size(); ++ i)
 	{
 		writeData += this->grobal[i];
 		writeData += "\n";
+		if(this->grobal[i].find("strTI") != std::string::npos)
+		{
+			strTI = true;
+		}
 	}
-	writeData += "dms::String strTI;\n";
+	if(strTI == false)
+	{
+		writeData += "dms::String strTI;\n";
+	}
 	writeData += "\n";
 	// Clrä÷êî
 	writeData += "// Initialize variable\n";
@@ -348,17 +356,18 @@ bool MZ1Z001::IsFixedVariableNameChar(unsigned char byte, bool first)
 }
 
 // ïœêîÇìoò^Ç∑ÇÈÅAïœêîñºÇïœçXÇ∑ÇÈ
-void MZ1Z001::SetVariableName(std::string& variableName, std::vector<char>& result, bool array, int number)
+// ìoò^èoóàÇΩÇÁtrueÇï‘Ç∑
+bool MZ1Z001::SetVariableName(std::string& variableName, std::vector<char>& result, bool array, int number)
 {
 	// ãÛÇ»ÇÁâΩÇ‡ÇµÇ»Ç¢
 	if(variableName.empty() == true)
 	{
-		return;
+		return false;
 	}
 	if(variableName[0] == '$')
 	{
 		variableName.clear();
-		return;
+		return false;
 	}
 	bool string = false;
 	std::string originalVariableName = variableName;
@@ -395,12 +404,7 @@ void MZ1Z001::SetVariableName(std::string& variableName, std::vector<char>& resu
 	if((array == true) || (defFn == true))
 	{
 		variableName.clear();
-		return;
-	}
-	if(CheckReserved(originalVariableName) == true)
-	{
-		variableName.clear();
-		return;
+		return true;
 	}
 	bool find = false;
 	if(this->variableList.empty() == false)
@@ -430,6 +434,7 @@ void MZ1Z001::SetVariableName(std::string& variableName, std::vector<char>& resu
 		}
 	}
 	variableName.clear();
+	return true;
 }
 
 bool MZ1Z001::IsBracketCommand(std::string command)
@@ -505,7 +510,11 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 	this->bracketsCountList.clear();
 	int bracketsCount = 0;
 	unsigned char beforeByte = 0;
-	if(number == 48)
+	bool first = true;
+	bool firstVariable = false;
+	bool defKey = false;
+	unsigned char* buf = (unsigned char*)&buffer[0];
+	if(number == 11634)
 	{
 		int a = 0;
 	}
@@ -518,6 +527,7 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 			SetVariableName(variable, result, false, number);
 			result.push_back(byte);
 			data = false;
+			defKey = false;
 			break;
 		}
 		if((phase == 1) && (byte == ':'))
@@ -527,24 +537,38 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 			searchVariable = true;
 			defFn = false;
 			pattern = false;
+			firstVariable = false;
+			first = true;
 			continue;
 		}
 		if((phase == 1) && (byte == ';'))
 		{
-			SetVariableName(variable, result, false, number);
+			if(SetVariableName(variable, result, false, number) == true)
+			{
+				firstVariable = first;
+				first = false;
+			}
 			result.push_back(byte);
 			searchVariable = true;
 			continue;
 		}
 		if((phase == 1) && (byte == 0x80))
 		{
-			SetVariableName(variable, result, false, number);
+			if(SetVariableName(variable, result, false, number) == true)
+			{
+				firstVariable = first;
+				first = false;
+			}
 			result.push_back(byte);
 			phase = 2;
 		}
 		else if((phase == 1) && (byte == 0xB2))
 		{
-			SetVariableName(variable, result, false, number);
+			if(SetVariableName(variable, result, false, number) == true)
+			{
+				firstVariable = first;
+				first = false;
+			}
 			result.push_back(byte);
 			phase = 3;
 		}
@@ -552,7 +576,11 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 		{
 			if (phase == 0)
 			{
-				SetVariableName(variable, result, false, number);
+				if(SetVariableName(variable, result, false, number) == true)
+				{
+					firstVariable = first;
+					first = false;
+				}
 				result.push_back(byte);
 				if(data == false)
 				{
@@ -563,7 +591,11 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 			}
 			else
 			{
-				SetVariableName(variable, result, false, number);
+				if(SetVariableName(variable, result, false, number) == true)
+				{
+					firstVariable = first;
+					first = false;
+				}
 				result.push_back(byte);
 				phase = 0;
 			}
@@ -573,13 +605,21 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 			switch(phase)
 			{
 			case 0:
-				SetVariableName(variable, result, false, number);
+				if(SetVariableName(variable, result, false, number) == true)
+				{
+					firstVariable = first;
+					first = false;
+				}
 				result.push_back(byte);
 				break;
 			case 1:
 				if(code_xx[byte] != 0)
 				{
-					SetVariableName(variable, result, false, number);
+					if(SetVariableName(variable, result, false, number) == true)
+					{
+						firstVariable = first;
+					}
+					first = false;
 					searchVariable = IsExistVariable(code_xx[byte]);
 					if(IsBracketCommand(code_xx[byte]) == true)
 					{
@@ -603,7 +643,14 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 							{
 								array = true;
 							}
-							SetVariableName(variable, result, array, number);
+							if(SetVariableName(variable, result, array, number) == true)
+							{
+								if(bracketsCount <= 0)
+								{
+									firstVariable = first;
+									first = false;
+								}
+							}
 							if(byte == '(')
 							{
 								byte = '[';
@@ -639,6 +686,17 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 							byte = ' ';
 						}
 					}
+					if(byte == '=')
+					{
+						if((byte == '=') && (defKey == false) && ((firstVariable == false) || (bracketsCount > 0)))
+						{
+							result.push_back('=');
+						}
+						if(defFn == true)
+						{
+							firstVariable = false;
+						}
+					}
 					result.push_back(byte);
 				}
 				break;
@@ -659,7 +717,35 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 						patternSeparatorCount = 0;
 						patternBracketsCount = bracketsCount;
 					}
-					SetVariableName(variable, result, false, number);
+					if(code_80_xx[byte] == "DEF KEY(")
+					{
+						defKey = true;
+					}
+					if(SetVariableName(variable, result, false, number) == true)
+					{
+						firstVariable = first;
+					}
+					first = false;
+					if(code_80_xx[byte] == "FOR")
+					{
+						firstVariable = false;
+						first = true;
+					}
+					if(code_80_xx[byte] == "THEN")
+					{
+						firstVariable = false;
+						first = true;
+					}
+					if(code_80_xx[byte] == "LET")
+					{
+						firstVariable = false;
+						first = true;
+					}
+					if(code_80_xx[byte] == "DEF FN")
+					{
+						firstVariable = true;
+						first = false;
+					}
 					searchVariable = IsExistVariable(code_80_xx[byte]);
 					if(IsBracketCommand(code_80_xx[byte]) == true)
 					{
@@ -670,7 +756,11 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 				}
 				else
 				{
-					SetVariableName(variable, result, false, number);
+					if(SetVariableName(variable, result, false, number) == true)
+					{
+						firstVariable = first;
+						first = false;
+					}
 					result.push_back(byte);
 				}
 				phase = 1;
@@ -678,7 +768,11 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 			case 3:
 				if(code_B2_xx[byte] != 0)
 				{
-					SetVariableName(variable, result, false, number);
+					if(SetVariableName(variable, result, false, number) == true)
+					{
+						firstVariable = first;
+					}
+					first = false;
 					searchVariable = IsExistVariable(code_B2_xx[byte]);
 					if(IsBracketCommand(code_B2_xx[byte]) == true)
 					{
@@ -689,7 +783,11 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 				}
 				else
 				{
-					SetVariableName(variable, result, false, number);
+					if(SetVariableName(variable, result, false, number) == true)
+					{
+						firstVariable = first;
+						first = false;
+					}
 					result.push_back(byte);
 				}
 				phase = 1;
@@ -1410,11 +1508,6 @@ std::string MZ1Z001::If(const Lexical& lexical, bool delimiter)
 	std::string result = "If(";
 	std::string option = FixOptionNumber(lexical.option);
 	std::string::size_type pos = 0;
-	while((pos = option.find("=", pos)) != std::string::npos)
-	{
-		option.replace(pos, 1, "==");
-		pos += 2;
-	}
 	result += Trim(option);
 	return result;
 }
@@ -2657,17 +2750,7 @@ bool MZ1Z001::FindDefFnFuncList(std::string variableName)
 // ÉIÉvÉVÉáÉìÇèCê≥Ç∑ÇÈ
 std::string MZ1Z001::FixOption(std::string sourceCommand, std::string sourceOption, bool delimiter)
 {
-	// èåèï∂íÜÇÕ=Ç==Ç…ïœä∑Ç∑ÇÈ
 	std::string option = Trim(sourceOption);
-	if((this->ifStackCount > 0) && (sourceCommand != "THEN"))
-	{
-		std::string::size_type pos = 0;
-		while((pos = option.find("=", pos)) != std::string::npos)
-		{
-			option.replace(pos, 1, "==");
-			pos += 2;
-		}
-	}
 	return option;
 }
 

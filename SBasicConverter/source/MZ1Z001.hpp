@@ -22,7 +22,7 @@ private:
 	bool IsExistVariable(std::string command);
 	bool IsVariableNameChar(unsigned char, bool first);
 	bool IsFixedVariableNameChar(unsigned char byte, bool first);
-	void SetVariableName(std::string& variableName, std::vector<char>& result, bool array, int number);
+	bool SetVariableName(std::string& variableName, std::vector<char>& result, bool array, int number);
 	bool IsBracketCommand(std::string command);
 	void PushBrackets(void);
 	void AddBrackets(void);
