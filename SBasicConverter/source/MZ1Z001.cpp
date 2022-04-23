@@ -207,6 +207,10 @@ bool MZ1Z001::Convert(const std::string filepath, const std::string outputFilepa
 	writeData += "void SetupData(void)\n{\n";
 	for(auto iter = this->data.begin(); iter != this->data.end(); ++ iter)
 	{
+		if(iter->second.empty() == true)
+		{
+			continue;
+		}
 		writeData += "\t";
 		writeData += iter->second;
 		writeData += ";\n";
@@ -1748,6 +1752,11 @@ std::string MZ1Z001::Restore(const Lexical& lexical, bool delimiter)
 	else
 	{
 		result = "Restore(D" + Number(lexical.option) + ")";
+		std::string result = "";
+		if(this->data.find(Number(lexical.option)) == this->data.end())
+		{
+			this->data[Number(lexical.option)] = result;
+		}
 	}
 	return result;
 }
