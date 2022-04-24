@@ -449,7 +449,7 @@ namespace dms
 		{
 			return -IsEqualDouble(this->doubleValue, static_cast<double>(value));
 		}
-		return -intValue == value;
+		return -static_cast<int>(this->intValue == value);
 	}
 
 	int Variable::operator == (double value) const
@@ -461,7 +461,7 @@ namespace dms
 	{
 		if((this->isDouble == false) && (value.IsDouble() == false))
 		{
-			return static_cast<int>(this->intValue == value.GetInt());
+			return -static_cast<int>(this->intValue == value.GetInt());
 		}
 		else if((this->isDouble == false) && (value.IsDouble() == true))
 		{
@@ -480,7 +480,7 @@ namespace dms
 		{
 			return -!IsEqualDouble(this->doubleValue, static_cast<double>(value));
 		}
-		return -static_cast<int>(intValue != value);
+		return -static_cast<int>(this->intValue != value);
 	}
 
 	int Variable::operator != (double value) const
@@ -492,7 +492,7 @@ namespace dms
 	{
 		if((this->isDouble == false) && (value.IsDouble() == false))
 		{
-			return static_cast<int>(this->intValue != value.GetInt());
+			return -static_cast<int>(this->intValue != value.GetInt());
 		}
 		else if((this->isDouble == false) && (value.IsDouble() == true))
 		{
