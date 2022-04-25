@@ -443,7 +443,7 @@ namespace dms
 		return *this;
 	}
 
-	int Variable::operator == (int value) const
+	Variable Variable::operator == (int value) const
 	{
 		if(isDouble == true)
 		{
@@ -452,16 +452,16 @@ namespace dms
 		return -static_cast<int>(this->intValue == value);
 	}
 
-	int Variable::operator == (double value) const
+	Variable Variable::operator == (double value) const
 	{
 		return -IsEqualDouble(this->doubleValue, static_cast<double>(value));
 	}
 
-	int Variable::operator == (const Variable& value) const
+	Variable Variable::operator == (const Variable& value) const
 	{
 		if((this->isDouble == false) && (value.IsDouble() == false))
 		{
-			return -static_cast<int>(this->intValue == value.GetInt());
+			return -static_cast<Variable>(this->intValue == value.GetInt());
 		}
 		else if((this->isDouble == false) && (value.IsDouble() == true))
 		{
@@ -474,25 +474,25 @@ namespace dms
 		return -IsEqualDouble(this->doubleValue, value.GetDouble());
 	}
 
-	int Variable::operator != (int value) const
+	Variable Variable::operator != (int value) const
 	{
 		if(isDouble == true)
 		{
 			return -!IsEqualDouble(this->doubleValue, static_cast<double>(value));
 		}
-		return -static_cast<int>(this->intValue != value);
+		return -static_cast<Variable>(this->intValue != value);
 	}
 
-	int Variable::operator != (double value) const
+	Variable Variable::operator != (double value) const
 	{
 		return -!IsEqualDouble(this->doubleValue, static_cast<double>(value));
 	}
 
-	int Variable::operator != (const Variable& value) const
+	Variable Variable::operator != (const Variable& value) const
 	{
 		if((this->isDouble == false) && (value.IsDouble() == false))
 		{
-			return -static_cast<int>(this->intValue != value.GetInt());
+			return -static_cast<Variable>(this->intValue != value.GetInt());
 		}
 		else if((this->isDouble == false) && (value.IsDouble() == true))
 		{
@@ -505,110 +505,110 @@ namespace dms
 		return -!IsEqualDouble(this->doubleValue, value.GetDouble());
 	}
 
-	int Variable::operator < (int value) const
+	Variable Variable::operator < (int value) const
 	{
 		if(isDouble == true)
 		{
-			return -static_cast<int>(this->doubleValue < static_cast<double>(value));
+			return -static_cast<Variable>(this->doubleValue < static_cast<double>(value));
 		}
-		return -static_cast<int>(this->intValue < value);
+		return -static_cast<Variable>(this->intValue < value);
 	}
 
-	int Variable::operator < (double value) const
+	Variable Variable::operator < (double value) const
 	{
 		if(isDouble == true)
 		{
-			return -static_cast<int>(this->doubleValue < value);
+			return -static_cast<Variable>(this->doubleValue < value);
 		}
-		return -static_cast<int>(static_cast<double>(this->intValue) < value);
+		return -static_cast<Variable>(static_cast<double>(this->intValue) < value);
 	}
 
-	int Variable::operator < (const Variable& value) const
+	Variable Variable::operator < (const Variable& value) const
 	{
 		if(value.IsDouble() == true)
 		{
-			return static_cast<int>(*this < value.GetDouble());
+			return static_cast<Variable>(*this < value.GetDouble());
 		}
-		return static_cast<int>(*this < value.GetInt());
+		return static_cast<Variable>(*this < value.GetInt());
 	}
 
-	int Variable::operator > (int value) const
+	Variable Variable::operator > (int value) const
 	{
 		if(isDouble == true)
 		{
-			return -static_cast<int>(this->doubleValue > static_cast<double>(value));
+			return -static_cast<Variable>(this->doubleValue > static_cast<double>(value));
 		}
-		return -static_cast<int>(this->intValue > value);
+		return -static_cast<Variable>(this->intValue > value);
 	}
 
-	int Variable::operator > (double value) const
+	Variable Variable::operator > (double value) const
 	{
 		if(isDouble == true)
 		{
-			return -static_cast<int>(this->doubleValue > value);
+			return -static_cast<Variable>(this->doubleValue > value);
 		}
-		return -static_cast<int>(static_cast<double>(this->intValue) > value);
+		return -static_cast<Variable>(static_cast<double>(this->intValue) > value);
 	}
 
-	int Variable::operator > (const Variable& value) const
+	Variable Variable::operator > (const Variable& value) const
 	{
 		if(value.IsDouble() == true)
 		{
-			return static_cast<int>(*this > value.GetDouble());
+			return static_cast<Variable>(*this > value.GetDouble());
 		}
-		return static_cast<int>(*this > value.GetInt());
+		return static_cast<Variable>(*this > value.GetInt());
 	}
 
-	int Variable::operator <= (int value) const
+	Variable Variable::operator <= (int value) const
 	{
 		if(isDouble == true)
 		{
-			return -static_cast<int>(this->doubleValue <= static_cast<double>(value));
+			return -static_cast<Variable>(this->doubleValue <= static_cast<double>(value));
 		}
-		return -static_cast<int>(this->intValue <= value);
+		return -static_cast<Variable>(this->intValue <= value);
 	}
 
-	int Variable::operator <= (double value) const
+	Variable Variable::operator <= (double value) const
 	{
 		if(isDouble == true)
 		{
-			return -static_cast<int>(this->doubleValue <= value);
+			return -static_cast<Variable>(this->doubleValue <= value);
 		}
-		return -static_cast<int>(static_cast<double>(this->intValue) <= value);
+		return -static_cast<Variable>(static_cast<double>(this->intValue) <= value);
 	}
 
-	int Variable::operator <= (const Variable& value) const
+	Variable Variable::operator <= (const Variable& value) const
 	{
 		if(value.IsDouble() == true)
 		{
-			return static_cast<int>(*this <= value.GetDouble());
+			return static_cast<Variable>(*this <= value.GetDouble());
 		}
-		return static_cast<int>(*this <= value.GetInt());
+		return static_cast<Variable>(*this <= value.GetInt());
 	}
 
-	int Variable::operator >= (int value) const
+	Variable Variable::operator >= (int value) const
 	{
 		if(isDouble == true)
 		{
-			return -static_cast<int>(this->doubleValue >= static_cast<double>(value));
+			return -static_cast<Variable>(this->doubleValue >= static_cast<double>(value));
 		}
-		return -static_cast<int>(this->intValue >= value);
+		return -static_cast<Variable>(this->intValue >= value);
 	}
 
-	int Variable::operator >= (double value) const
+	Variable Variable::operator >= (double value) const
 	{
 		if(isDouble == true)
 		{
 			return -static_cast<int>(this->doubleValue >= value);
 		}
-		return -static_cast<int>(static_cast<double>(this->intValue) >= value);
+		return -static_cast<Variable>(static_cast<double>(this->intValue) >= value);
 	}
 
-	int Variable::operator >= (const Variable& value) const
+	Variable Variable::operator >= (const Variable& value) const
 	{
 		if(value.IsDouble() == true)
 		{
-			return static_cast<int>(*this >= value.GetDouble());
+			return static_cast<Variable>(*this >= value.GetDouble());
 		}
 		return static_cast<int>(*this >= value.GetInt());
 	}
