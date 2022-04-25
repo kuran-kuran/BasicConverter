@@ -2,6 +2,13 @@
 
 ## ダウンロード
 
+### 2022/04/25 Version 0.9.4
+
+- 条件文の戻り値をtrue/falseからVariableの-1/0に修正しました。
+- 小文字のp以降がファンクションキーと入れ替わってしまい入力できなかったのを修正した。
+
+[SBasicConverterVer0_9_3.zip](https://github.com/kuran-kuran/BasicConverter/raw/main/Release/SBasicConverterVer0_9_3.zip)
+
 ### 2022/04/24 Version 0.9.3
 
 - RESTOREの行番号先にDATA文が無い場合に対応した。
