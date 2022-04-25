@@ -762,9 +762,9 @@ void Executer::StoreInput(void)
 		EndInput();
 		this->screen.ReturnText();
 	}
-	else if((getText[0] >= 0x70) && (getText[0] <= 0x79))
+	else if((getText[0] >= 16) && (getText[0] <= 25))
 	{
-		int functionKeyIndex = getText[0] - 0x70;
+		int functionKeyIndex = getText[0] - 16;
 		dms::String inputText = this->defKey[functionKeyIndex];
 		if(inputText.empty() == false)
 		{
