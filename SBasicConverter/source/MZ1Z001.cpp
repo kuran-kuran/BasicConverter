@@ -518,7 +518,7 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 	bool firstVariable = false;
 	bool defKey = false;
 	unsigned char* buf = (unsigned char*)&buffer[0];
-	if(number == 11634)
+	if(number == 25)
 	{
 		int a = 0;
 	}
@@ -1230,11 +1230,31 @@ void MZ1Z001::AnalyzeCommand(Lexical& lexical, int number, int& subNumber, bool 
 	}
 	else if(lexical.command == "ƒÎ")
 	{
-	this->result += Pi(lexical, delimiter);
+		this->result += Pi(lexical, delimiter);
 	}
 	else if(lexical.command == "POS")
 	{
 		this->result += Pos(lexical, delimiter);
+	}
+	else if(lexical.command == "COLOR")
+	{
+		this->result += Color(lexical, delimiter);
+	}
+	else if(lexical.command == "CCOLOR")
+	{
+		this->result += CColor(lexical, delimiter);
+	}
+	else if(lexical.command == "CIRCLE")
+	{
+		this->result += Circle(lexical, delimiter);
+	}
+	else if(lexical.command == "BOX")
+	{
+		this->result += Box(lexical, delimiter);
+	}
+	else if(lexical.command == "Paint")
+	{
+		this->result += Paint(lexical, delimiter);
 	}
 	//else
 #if false
@@ -2236,6 +2256,46 @@ std::string MZ1Z001::Pos(const Lexical& lexical, bool delimiter)
 	std::transform(command.begin(), command.end(), command.begin(), tolower);
 	std::string option = lexical.option.substr(1);
 	std::string result = "Pos" + command +"()" + FixOptionNumber(option);
+	return result;
+}
+
+std::string MZ1Z001::Color(const Lexical& lexical, bool delimiter)
+{
+	this->closeBracketFlag = true;
+	std::string option = FixOptionNumber(lexical.option);
+	std::string result = "Color(" + option;
+	return result;
+}
+
+std::string MZ1Z001::CColor(const Lexical& lexical, bool delimiter)
+{
+	this->closeBracketFlag = true;
+	std::string option = FixOptionNumber(lexical.option);
+	std::string result = "CColor(" + option;
+	return result;
+}
+
+std::string MZ1Z001::Circle(const Lexical& lexical, bool delimiter)
+{
+	this->closeBracketFlag = true;
+	std::string option = FixOptionNumber(lexical.option);
+	std::string result = "Circle(" + option;
+	return result;
+}
+
+std::string MZ1Z001::Box(const Lexical& lexical, bool delimiter)
+{
+	this->closeBracketFlag = true;
+	std::string option = FixOptionNumber(lexical.option);
+	std::string result = "Box(" + option;
+	return result;
+}
+
+std::string MZ1Z001::Paint(const Lexical& lexical, bool delimiter)
+{
+	this->closeBracketFlag = true;
+	std::string option = FixOptionNumber(lexical.option);
+	std::string result = "Paint(" + option;
 	return result;
 }
 

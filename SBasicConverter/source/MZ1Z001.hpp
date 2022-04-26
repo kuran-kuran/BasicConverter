@@ -97,6 +97,11 @@ private:
 	std::string BasicSign(const Lexical& lexical, bool delimiter);
 	std::string Pi(const Lexical& lexical, bool delimiter);
 	std::string Pos(const Lexical& lexical, bool delimiter);
+	std::string Color(const Lexical& lexical, bool delimiter);
+	std::string CColor(const Lexical& lexical, bool delimiter);
+	std::string Circle(const Lexical& lexical, bool delimiter);
+	std::string Box(const Lexical& lexical, bool delimiter);
+	std::string Paint(const Lexical& lexical, bool delimiter);
 	bool CheckEncode(unsigned char byte);
 	bool CheckEncodeAfter(unsigned char byte);
 	std::string Encode(std::string text);
