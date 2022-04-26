@@ -912,3 +912,22 @@ void Executer::Run(void)
 	this->end = false;
 	Restore(-1);
 }
+
+void Executer::Box(dms::Variable x1,dms::Variable y1,dms::Variable x2,dms::Variable y2)
+{
+	if(x1 > x2)
+	{
+		dms::Variable temp = x1;
+		x1 = x2;
+		x2 = temp;
+	}
+	if(y1 > y2)
+	{
+		dms::Variable temp = y1;
+		y1 = y2;
+		y2 = temp;
+	}
+	int width = x2.GetInt() - x1.GetInt();
+	int height = y2.GetInt() - y1.GetInt();
+	this->screen.DrawBox(x1.GetInt(), y1.GetInt(), width, height, 0xFFFFFFFF, this->colorMask);
+}

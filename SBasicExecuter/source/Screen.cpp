@@ -180,6 +180,19 @@ void Screen::DrawRectangle(int x, int y, int width, int height, unsigned int col
 	}
 }
 
+void Screen::DrawBox(int x, int y, int width, int height, unsigned int color, unsigned int colorMask)
+{
+	std::vector<int> positionList =
+	{
+		x, y,
+		x + width, y,
+		x + width, y + height,
+		x, y + height,
+		x, y
+	};
+	DrawLine(positionList, color, colorMask);
+}
+
 void Screen::DrawLine(int x0, int y0, int x1, int y1, unsigned int color, unsigned int colorMask)
 {
 	dms::Line line;

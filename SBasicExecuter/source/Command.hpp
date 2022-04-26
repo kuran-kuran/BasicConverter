@@ -422,4 +422,9 @@ inline void DebugLog(dms::String text)
 	Executer::GetInstance()->DebugLog(text);
 }
 
+inline void Box(dms::Variable x1, dms::Variable y1, dms::Variable x2, dms::Variable y2)
+{
+	Executer::GetInstance()->Box(x1, y1, x2, y2);
+}
+
 #endif

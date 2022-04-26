@@ -105,6 +105,7 @@ public:
 	void DebugLog(dms::String text);
 	void Out(dms::Variable ioAddress, dms::Variable data);
 	void Run(void);
+	void Box(dms::Variable x1, dms::Variable y1, dms::Variable x2, dms::Variable y2, dms::Variable color);
 private:
 	Executer(void);
 	~Executer(void);

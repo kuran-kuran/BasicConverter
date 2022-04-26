@@ -21,6 +21,7 @@ public:
 	void DrawPoint(int x, int y, unsigned int color, unsigned int colorMask = 0xFFFFFFFF);
 	unsigned int GetPoint(int x, int y);
 	void DrawRectangle(int x, int y, int width, int height, unsigned int color, unsigned int colorMask = 0xFFFFFFFF);
+	void DrawBox(int x, int y, int width, int height, unsigned int color, unsigned int colorMask = 0xFFFFFFFF);
 	void DrawLine(int x1, int y1, int x2, int y2, unsigned int color, unsigned int colorMask = 0xFFFFFFFF);
 	void DrawLine(std::vector<int>& positionList, unsigned int color, unsigned int colorMask = 0xFFFFFFFF);
 	void DrawSprite(const unsigned int* buffer, int x, int y, int width, int height, bool enableColorKey, unsigned int colorKey);
