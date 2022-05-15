@@ -3,8 +3,6 @@
 #include "resource.h"
 #include "KeyBoard.hpp"
 #include "../Format.hpp"
-#include "../FileData.hpp"
-#include "../Json.hpp"
 #include "../Config.hpp"
 
 #pragma comment(lib, "Winmm.lib")
@@ -27,12 +25,8 @@ HBITMAP bitmapHandle;
 LPBYTE bitmapInfoBuffer;
 LPDWORD bitmap;
 LPBITMAPINFO bitmapInfo;
-struct Setting
-{
-	int screenScale;
-	int execSpeed;
-};
-Setting setting = {1, 5};
+int screenScale = 1;
+int execSpeed = 5;
 
 // DIBSectionとScreenバッファのサイズは同じ、ウインドウに転送するときに拡大して大きさを整える
 void InitializeCreateDIBSection(HWND windowHandle)
@@ -108,20 +102,6 @@ void SetWindowSize(int screenScale)
 	SetWindowPos(windowHandle, HWND_TOP, position.left, position.top, rect.right, rect.bottom, SWP_SHOWWINDOW);
 }
 
-int GetSpeedId(int speed)
-{
-	int id = ID_SPEEDx1;
-	static std::vector<int> speedTable = {1, 5, 10, 25, 100, 500, 1000, INT_MAX};
-	for(int i = 0; i < static_cast<int>(speedTable.size()); ++ i)
-	{
-		if(speedTable[i] == speed)
-		{
-			return i;
-		}
-	}
-	return id;
-}
-
 void UncheckSpeedMenu(void)
 {
 	CheckMenuItem(GetMenu(windowHandle), ID_SPEED_MIN, MF_BYCOMMAND | MF_UNCHECKED);
@@ -132,35 +112,6 @@ void UncheckSpeedMenu(void)
 	CheckMenuItem(GetMenu(windowHandle), ID_SPEEDx100, MF_BYCOMMAND | MF_UNCHECKED);
 	CheckMenuItem(GetMenu(windowHandle), ID_SPEEDx200, MF_BYCOMMAND | MF_UNCHECKED);
 	CheckMenuItem(GetMenu(windowHandle), ID_SPEED_MAX, MF_BYCOMMAND | MF_UNCHECKED);
-}
-
-// 設定読み込み
-void LoadSetting(void)
-{
-	FileData settingFile;
-	if(settingFile.Load("Setting.json") == true)
-	{
-		std::string jsonText = reinterpret_cast<char*>(settingFile.GetBuffer());
-		dms::Json settingJson;
-		settingJson.Set(jsonText);
-		setting.screenScale = dms::Json::Int(settingJson["screenScale"]);
-		setting.execSpeed = dms::Json::Int(settingJson["execSpeed"]);
-	}
-}
-
-// 設定書き込み
-void SaveSetting(void)
-{
-	dms::Json settingJson;
-	settingJson.SetData("screenScale", setting.screenScale);
-	settingJson.SetData("execSpeed", setting.execSpeed);
-	std::string jsonText = settingJson.Encode();
-	if(jsonText.empty() == false)
-	{
-		FileData settingFile;
-		settingFile.SetBuffer(&jsonText[0], jsonText.size());
-		settingFile.Save("Setting.json");
-	}
 }
 
 LRESULT CALLBACK WndProc(HWND windowHandle, UINT message, WPARAM wParam, LPARAM lParam)
@@ -180,62 +131,62 @@ LRESULT CALLBACK WndProc(HWND windowHandle, UINT message, WPARAM wParam, LPARAM 
 			CheckMenuItem(GetMenu(windowHandle), ID_WINDOWSIZEx1, MF_BYCOMMAND | MF_CHECKED);
 			CheckMenuItem(GetMenu(windowHandle), ID_WINDOWSIZEx2, MF_BYCOMMAND | MF_UNCHECKED);
 			CheckMenuItem(GetMenu(windowHandle), ID_WINDOWSIZEx3, MF_BYCOMMAND | MF_UNCHECKED);
-			setting.screenScale = 1;
-			SetWindowSize(setting.screenScale);
+			screenScale = 1;
+			SetWindowSize(screenScale);
 			break;
 		case ID_WINDOWSIZEx2:
 			CheckMenuItem(GetMenu(windowHandle), ID_WINDOWSIZEx1, MF_BYCOMMAND | MF_UNCHECKED);
 			CheckMenuItem(GetMenu(windowHandle), ID_WINDOWSIZEx2, MF_BYCOMMAND | MF_CHECKED);
 			CheckMenuItem(GetMenu(windowHandle), ID_WINDOWSIZEx3, MF_BYCOMMAND | MF_UNCHECKED);
-			setting.screenScale = 2;
-			SetWindowSize(setting.screenScale);
+			screenScale = 2;
+			SetWindowSize(screenScale);
 			break;
 		case ID_WINDOWSIZEx3:
 			CheckMenuItem(GetMenu(windowHandle), ID_WINDOWSIZEx1, MF_BYCOMMAND | MF_UNCHECKED);
 			CheckMenuItem(GetMenu(windowHandle), ID_WINDOWSIZEx2, MF_BYCOMMAND | MF_UNCHECKED);
 			CheckMenuItem(GetMenu(windowHandle), ID_WINDOWSIZEx3, MF_BYCOMMAND | MF_CHECKED);
-			setting.screenScale = 3;
-			SetWindowSize(setting.screenScale);
+			screenScale = 3;
+			SetWindowSize(screenScale);
 			break;
 		case ID_SPEED_MIN:
 			UncheckSpeedMenu();
 			CheckMenuItem(GetMenu(windowHandle), ID_SPEED_MIN, MF_BYCOMMAND | MF_CHECKED);
-			setting.execSpeed = 1;
+			execSpeed = 1;
 			break;
 		case ID_SPEEDx1:
 			UncheckSpeedMenu();
 			CheckMenuItem(GetMenu(windowHandle), ID_SPEEDx1, MF_BYCOMMAND | MF_CHECKED);
-			setting.execSpeed = 5;
+			execSpeed = 5;
 			break;
 		case ID_SPEEDx2:
 			UncheckSpeedMenu();
 			CheckMenuItem(GetMenu(windowHandle), ID_SPEEDx2, MF_BYCOMMAND | MF_CHECKED);
-			setting.execSpeed = 10;
+			execSpeed = 10;
 			break;
 		case ID_SPEEDx5:
 			UncheckSpeedMenu();
 			CheckMenuItem(GetMenu(windowHandle), ID_SPEEDx5, MF_BYCOMMAND | MF_CHECKED);
-			setting.execSpeed = 25;
+			execSpeed = 25;
 			break;
 		case ID_SPEEDx20:
 			UncheckSpeedMenu();
 			CheckMenuItem(GetMenu(windowHandle), ID_SPEEDx20, MF_BYCOMMAND | MF_CHECKED);
-			setting.execSpeed = 100;
+			execSpeed = 100;
 			break;
 		case ID_SPEEDx100:
 			UncheckSpeedMenu();
 			CheckMenuItem(GetMenu(windowHandle), ID_SPEEDx100, MF_BYCOMMAND | MF_CHECKED);
-			setting.execSpeed = 500;
+			execSpeed = 500;
 			break;
 		case ID_SPEEDx200:
 			UncheckSpeedMenu();
 			CheckMenuItem(GetMenu(windowHandle), ID_SPEEDx200, MF_BYCOMMAND | MF_CHECKED);
-			setting.execSpeed = 1000;
+			execSpeed = 1000;
 			break;
 		case ID_SPEED_MAX:
 			UncheckSpeedMenu();
 			CheckMenuItem(GetMenu(windowHandle), ID_SPEED_MAX, MF_BYCOMMAND | MF_CHECKED);
-			setting.execSpeed = INT_MAX;
+			execSpeed = INT_MAX;
 			break;
 		default:
 			return DefWindowProc(windowHandle, message, wParam, lParam);
@@ -251,7 +202,6 @@ LRESULT CALLBACK WndProc(HWND windowHandle, UINT message, WPARAM wParam, LPARAM 
 		break;
 	}
 	case WM_DESTROY:
-		SaveSetting();
 		PostQuitMessage(0);
 		break;
 	case WM_ACTIVATE:
@@ -314,8 +264,8 @@ void InitializeWindow(HINSTANCE instance, int cmd_show, int width, int height, L
 	InitializeCreateDIBSection(windowHandle);
 	ShowWindow(windowHandle, cmd_show);
 	UpdateWindow(windowHandle);
-	CheckMenuItem(GetMenu(windowHandle), ID_WINDOWSIZEx1 + setting.screenScale - 1, MF_BYCOMMAND | MF_CHECKED);
-	CheckMenuItem(GetMenu(windowHandle), ID_SPEEDx1 + GetSpeedId(setting.execSpeed) - 1, MF_BYCOMMAND | MF_CHECKED);
+	CheckMenuItem(GetMenu(windowHandle), ID_WINDOWSIZEx1, MF_BYCOMMAND | MF_CHECKED);
+	CheckMenuItem(GetMenu(windowHandle), ID_SPEEDx1, MF_BYCOMMAND | MF_CHECKED);
 }
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
@@ -323,8 +273,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 	(void)CoInitialize(NULL);
-	LoadSetting();
-	InitializeWindow(hInstance, nCmdShow, DISPLAY_WIDTH * setting.screenScale, DISPLAY_HEIGHT * setting.screenScale, WINDOW_TITLE, WINDOW_TITLE);
+	InitializeWindow(hInstance, nCmdShow, DISPLAY_WIDTH * screenScale, DISPLAY_HEIGHT * screenScale, WINDOW_TITLE, WINDOW_TITLE);
 	// タイマ精度設定
 	timeGetDevCaps(&timeCaps, sizeof(TIMECAPS));
 	timeBeginPeriod(timeCaps.wPeriodMin);
@@ -365,7 +314,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 					}
 					MainLoop_Loop();
 					++ execCount;
-					if(execCount >= setting.execSpeed)
+					if(execCount >= execSpeed)
 					{
 						break;
 					}
