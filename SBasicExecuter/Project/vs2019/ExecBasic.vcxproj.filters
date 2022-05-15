@@ -75,6 +75,9 @@
     <ClCompile Include="..\..\source\BeepMusic.cpp">
       <Filter>ソース ファイル\source</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\Json.cpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\Data.hpp">
@@ -159,6 +162,9 @@
       <Filter>ソース ファイル\source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Array.hpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Json.hpp">
       <Filter>ソース ファイル\source</Filter>
     </ClInclude>
   </ItemGroup>
