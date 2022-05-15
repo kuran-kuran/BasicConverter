@@ -150,6 +150,7 @@
     <ClCompile Include="..\..\source\Executer.cpp" />
     <ClCompile Include="..\..\source\FileData.cpp" />
     <ClCompile Include="..\..\source\Format.cpp" />
+    <ClCompile Include="..\..\source\Json.cpp" />
     <ClCompile Include="..\..\source\Line.cpp" />
     <ClCompile Include="..\..\source\Png.cpp" />
     <ClCompile Include="..\..\source\Screen.cpp" />
@@ -178,6 +179,7 @@
     <ClInclude Include="..\..\source\Executer.hpp" />
     <ClInclude Include="..\..\source\FileData.hpp" />
     <ClInclude Include="..\..\source\Format.hpp" />
+    <ClInclude Include="..\..\source\Json.hpp" />
     <ClInclude Include="..\..\source\Line.hpp" />
     <ClInclude Include="..\..\source\Png.hpp" />
     <ClInclude Include="..\..\source\Screen.hpp" />
