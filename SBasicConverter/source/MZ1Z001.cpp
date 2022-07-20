@@ -78,7 +78,7 @@ bool MZ1Z001::GetLine(std::vector<char>& receiveBuffer, int& number)
 }
 
 // コンバート
-bool MZ1Z001::Convert(const std::string filepath, const std::string outputFilepath)
+bool MZ1Z001::ConvertFile(const std::string filepath, const std::string outputFilepath)
 {
 	this->space = 4;
 	this->variableList.clear();
@@ -103,7 +103,7 @@ bool MZ1Z001::Convert(const std::string filepath, const std::string outputFilepa
 	{
 		int lineNumber = iter->first;
 		std::vector<char> lineBuffer = iter->second;
-		ConvertLine(lineBuffer, lineNumber);
+		Convert(lineBuffer, lineNumber, LINE_END);
 	}
 	// 使用変数一覧
 	for(size_t i = 0; i < this->variableList.size(); ++i)
@@ -802,12 +802,14 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 	return result;
 }
 
-void MZ1Z001::ConvertLine(const std::vector<char>& buffer, int number)
+// conditions
+// LINE_END: 行が終わるまで
+// SQUARE_BRACKETS_END: ]が検出されるまで
+bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int conditions)
 {
 	this->space = 4;
 	std::string debugLine = "";
 	Lexical lexical = { "NOP", "" };
-	size_t i;
 	int phase = 1;	// 0=direct, 1=code, 2=code80, 3=codeB2
 	int subNumber = 1;
 	debugLine = Format("%5u ", number);
@@ -821,8 +823,9 @@ void MZ1Z001::ConvertLine(const std::vector<char>& buffer, int number)
 	}
 	bool encodeAfter = false;
 	bool remFlag = false;
-	for(i = 0; i < buffer.size(); ++ i)
+	while(this->convertIndex < buffer.size())
 	{
+		size_t i = this->convertIndex;
 		unsigned char byte;
 		byte = static_cast<unsigned char>(buffer[i]);
 		bool last = false;
@@ -846,6 +849,7 @@ void MZ1Z001::ConvertLine(const std::vector<char>& buffer, int number)
 			this->defKeyFlag = false;
 			this->patternFlag = false;
 			this->patternSeparatorCount = 0;
+			++ this->convertIndex;
 			continue;
 		}
 		if((phase == 1) && (byte == ';') && (this->printFlag == true) && (last == false))
@@ -961,8 +965,10 @@ void MZ1Z001::ConvertLine(const std::vector<char>& buffer, int number)
 				break;
 			}
 		}
+		++ this->convertIndex;
 	}
 	DebugLog(Format("%s\n", debugLine.c_str()).c_str());
+	return true;
 }
 
 void MZ1Z001::AnalyzeCommand(Lexical& lexical, int number, int& subNumber, bool delimiter)

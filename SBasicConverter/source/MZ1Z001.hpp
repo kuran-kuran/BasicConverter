@@ -15,9 +15,14 @@ public:
 	};
 	MZ1Z001(void);
 	~MZ1Z001(void);
-	bool Convert(const std::string filepath, const std::string outputFilepath = "");
+	bool ConvertFile(const std::string filepath, const std::string outputFilepath = "");
 	void Load(char* buffer);
 private:
+	enum
+	{
+		LINE_END = 0,
+		SQUARE_BRACKETS_END
+	};
 	bool GetLine(std::vector<char>& buffer, int& number);
 	bool IsExistVariable(std::string command);
 	bool IsVariableNameChar(unsigned char, bool first);
@@ -29,7 +34,7 @@ private:
 	bool PopBrackets(void);
 	bool IsBrackets(void);
 	std::vector<char> PreConvertLine(const std::vector<char>& buffer, int number);
-	void ConvertLine(const std::vector<char>& buffer, int number);
+	bool Convert(const std::vector<char>& buffer, int number, int conditions);
 	void AnalyzeCommand(Lexical& lexical, int number, int& subNumber, bool delimiter);
 	std::string Nop(const Lexical& lexical, bool delimiter);
 	std::string Rem(const Lexical& lexical, bool delimiter);
@@ -158,6 +163,7 @@ private:
 	int linePointer;
 	std::map<int, std::vector<char>> programBuffer;
 	std::vector<int> bracketsCountList;
+	size_t convertIndex;
 };
 
 #endif

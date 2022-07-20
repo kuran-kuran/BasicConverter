@@ -11,7 +11,7 @@ static const unsigned int OPTION_HELP   = 0x00000001;
 int main(int argc, char* argv[])
 {
 	unsigned int option = 0;
-	std::string path1;// = "KORO.mzt";
+	std::string path1 = "3D-COLOR-GRAPHIC.mzt";
 	std::string path2;
 	int i;
 	// オプション取得
@@ -73,6 +73,6 @@ int main(int argc, char* argv[])
 	// コンバートする
 	std::cout << "Converte " << path1 << " to " << path2 << std::endl;
 	MZ1Z001 converter;
-	converter.Convert(path1.c_str(), path2.c_str());
+	converter.ConvertFile(path1.c_str(), path2.c_str());
 	std::cout << "Complete" << std::endl;
 }
