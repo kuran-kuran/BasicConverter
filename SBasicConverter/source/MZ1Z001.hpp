@@ -36,6 +36,7 @@ private:
 	std::vector<char> PreConvertLine(const std::vector<char>& buffer, int number);
 	bool Convert(const std::vector<char>& buffer, int number, int conditions);
 	void AnalyzeCommand(Lexical& lexical, int number, int& subNumber, bool delimiter);
+	void Delimiter(int number, int& subNumber);
 	std::string Nop(const Lexical& lexical, bool delimiter);
 	std::string Rem(const Lexical& lexical, bool delimiter);
 	std::string Data(const Lexical& lexical, bool delimiter, int number);

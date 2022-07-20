@@ -103,6 +103,7 @@ bool MZ1Z001::ConvertFile(const std::string filepath, const std::string outputFi
 	{
 		int lineNumber = iter->first;
 		std::vector<char> lineBuffer = iter->second;
+		this->convertIndex = 0;
 		Convert(lineBuffer, lineNumber, LINE_END);
 	}
 	// g—p•Ï”ˆê——
@@ -836,6 +837,7 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 		if(byte == 0x0D)
 		{
 			AnalyzeCommand(lexical, number, subNumber, true);
+			Delimiter(number, subNumber);
 			lexical = {"NOP", ""};
 			this->defKeyFlag = false;
 			break;
@@ -843,6 +845,7 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 		if(((phase == 1) || (this->defKeyFlag == true)) && (byte == ':'))
 		{
 			AnalyzeCommand(lexical, number, subNumber, true);
+			Delimiter(number, subNumber);
 			lexical = {"NOP", ""};
 			debugLine += Format("%c", byte);
 			remFlag = false;
@@ -1277,35 +1280,36 @@ void MZ1Z001::AnalyzeCommand(Lexical& lexical, int number, int& subNumber, bool 
 		this->result += " */";
 	}
 #endif
-	if(delimiter == true)
+}
+
+void MZ1Z001::Delimiter(int number, int& subNumber)
+{
+	if(this->closeBracesFlag == true)
 	{
-		if(this->closeBracesFlag == true)
-		{
-			this->result += "}";
-			this->closeBracesFlag = false;
-		}
-		if(this->printFlag == true)
-		{
-			EndPrint(number, subNumber);
-		}
-		else if(this->forPhase > 0)
-		{
-			EndFor(number, subNumber);
-		}
-		else if(this->defFnFlag == true)
-		{
-			EndDefFn(number, subNumber);
-		}
-		else if(this->closeBracketFlag == true)
-		{
-			CloseBracket(number, subNumber);
-		}
-		else
-		{
-			this->program[Number(number, subNumber)] = this->result + ";";
-			this->result = "";
-			++ subNumber;
-		}
+		this->result += "}";
+		this->closeBracesFlag = false;
+	}
+	if(this->printFlag == true)
+	{
+		EndPrint(number, subNumber);
+	}
+	else if(this->forPhase > 0)
+	{
+		EndFor(number, subNumber);
+	}
+	else if(this->defFnFlag == true)
+	{
+		EndDefFn(number, subNumber);
+	}
+	else if(this->closeBracketFlag == true)
+	{
+		CloseBracket(number, subNumber);
+	}
+	else
+	{
+		this->program[Number(number, subNumber)] = this->result + ";";
+		this->result = "";
+		++ subNumber;
 	}
 }
 
