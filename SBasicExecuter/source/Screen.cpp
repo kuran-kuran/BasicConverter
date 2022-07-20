@@ -41,6 +41,7 @@ Screen::Screen(void)
 ,scrollLeft(0)
 ,scrollRight(79)
 ,scrollBottom(24)
+,greenDisplay(false)
 {
 }
 
@@ -621,6 +622,7 @@ void Screen::FlipGraphic(unsigned int colorMask)
 			int sourceX = x / this->stretchWidth;
 			int sourceAddress = sourceY * this->screenWidth + sourceX;
 			unsigned int writeColor = this->screenBuffer[sourceAddress] & colorMask; //colorMask == 0xFFFFFFFF ? this->screenBuffer[sourceAddress] : (this->frameBuffer[frameBufferAddress + x] & ~colorMask) | (this->screenBuffer[sourceAddress] & colorMask);
+			writeColor = this->greenDisplay == true ? writeColor == 0 ? 0 : 0xFF00FF00 : writeColor;
 			this->frameBuffer[frameBufferAddress + x] = writeColor;
 		}
 	}
@@ -639,6 +641,7 @@ void Screen::FlipText(unsigned int colorMask)
 			if ((this->textScreenBuffer[sourceAddress] & 0xFFFFFF) != 0)
 			{
 				unsigned int writeColor = colorMask == 0xFFFFFFFF ? this->textScreenBuffer[sourceAddress] : (this->frameBuffer[frameBufferAddress + x] & ~colorMask) | (this->textScreenBuffer[sourceAddress] & colorMask);
+				writeColor = this->greenDisplay == true ? writeColor == 0 ? 0 : 0xFF00FF00 : writeColor;
 				this->frameBuffer[frameBufferAddress + x] = writeColor;
 			}
 		}
@@ -688,6 +691,7 @@ void Screen::DrawCursorFrameBuffer(int x, int y, int charcterNumber, unsigned in
 		{
 			int fontAddress = fontAddressBase + (offsetX / this->textStretchWidth);
 			unsigned int writeColor = colorMask == 0xFFFFFFFF ? fontBuffer[fontAddress] : (this->frameBuffer[frameBufferAddress + x + offsetX] & ~colorMask) | (fontBuffer[fontAddress] & colorMask);
+			writeColor = this->greenDisplay == true ? writeColor == 0 ? 0 : 0xFF00FF00 : writeColor;
 			this->frameBuffer[frameBufferAddress + x + offsetX] = writeColor;
 		}
 	}
@@ -701,6 +705,11 @@ void Screen::ShowCursor(void)
 void Screen::HideCursor(void)
 {
 	this->showCursor = false;
+}
+
+void Screen::SetGreenDisplay(bool green)
+{
+	this->greenDisplay = green;
 }
 
 bool Screen::ControlCode(int character)

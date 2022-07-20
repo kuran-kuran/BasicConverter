@@ -2,6 +2,7 @@
 #include <mmsystem.h>
 #include "resource.h"
 #include "KeyBoard.hpp"
+#include "WinMain.hpp"
 #include "../Format.hpp"
 #include "../FileData.hpp"
 #include "../Json.hpp"
@@ -31,8 +32,9 @@ struct Setting
 {
 	int screenScale;
 	int execSpeed;
+	int displayColor;
 };
-Setting setting = {1, 5};
+Setting setting = {1, 5, DISPLAY_COLOR};
 
 // DIBSectionとScreenバッファのサイズは同じ、ウインドウに転送するときに拡大して大きさを整える
 void InitializeCreateDIBSection(HWND windowHandle)

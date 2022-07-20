@@ -48,6 +48,7 @@ public:
 	void ReturnText(void);
 	void ShowCursor(void);
 	void HideCursor(void);
+	void SetGreenDisplay(bool green);
 private:
 	static const int cursorCountMax;
 	void DrawSpriteNoClip(unsigned int* distinationBuffer, const unsigned int* buffer, int x, int y, int width, int height, int source_width, bool enableColorKey, unsigned int colorKey, bool enableBackColor, unsigned int backColor);
@@ -92,6 +93,7 @@ private:
 	int scrollLeft;
 	int scrollBottom;
 	int scrollRight;
+	bool greenDisplay;
 };
 
 #endif
