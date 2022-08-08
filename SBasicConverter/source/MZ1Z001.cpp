@@ -557,7 +557,15 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 			searchVariable = true;
 			continue;
 		}
-		if((phase == 1) && (byte == 0x80))
+		if((phase == 1) && (byte == '['))
+		{
+			result.push_back('{');
+		}
+		else if((phase == 1) && (byte == ']'))
+		{
+			result.push_back('}');
+		}
+		else if((phase == 1) && (byte == 0x80))
 		{
 			if(SetVariableName(variable, result, false, number) == true)
 			{
@@ -854,6 +862,21 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 			this->patternSeparatorCount = 0;
 			++ this->convertIndex;
 			continue;
+		}
+		if((phase == 1) && (byte == '{'))
+		{
+			this->color = "";
+			++ this->convertIndex;
+			Convert(buffer, number, SQUARE_BRACKETS_END);
+			continue;
+		}
+		else if((conditions == SQUARE_BRACKETS_END) && (phase == 1) && (byte == '}'))
+		{
+			AnalyzeCommand(lexical, number, subNumber, false);
+			this->color = this->result;
+			this->result = "";
+			++ this->convertIndex;
+			break;
 		}
 		if((phase == 1) && (byte == ';') && (this->printFlag == true) && (last == false))
 		{
@@ -1912,6 +1935,7 @@ std::string MZ1Z001::Cursor(const Lexical& lexical, bool delimiter)
 std::string MZ1Z001::Set(const Lexical& lexical, bool delimiter)
 {
 	this->closeBracketFlag = true;
+	this->color = "";
 	std::string option = FixOptionNumber(lexical.option);
 	std::string result = "Set(" + option;
 	return result;
@@ -1920,6 +1944,7 @@ std::string MZ1Z001::Set(const Lexical& lexical, bool delimiter)
 std::string MZ1Z001::Reset(const Lexical& lexical, bool delimiter)
 {
 	this->closeBracketFlag = true;
+	this->color = "";
 	std::string option = FixOptionNumber(lexical.option);
 	std::string result = "Reset(" + option;
 	return result;
@@ -1929,6 +1954,7 @@ std::string MZ1Z001::Line(const Lexical& lexical, bool delimiter)
 {
 	this->closeBracketFlag = true;
 	this->closeBracesFlag = true;
+	this->color = "";
 	std::string option = FixOptionNumber(lexical.option);
 	std::string result = "Line({" + option;
 	return result;
@@ -1938,6 +1964,7 @@ std::string MZ1Z001::Bline(const Lexical& lexical, bool delimiter)
 {
 	this->closeBracketFlag = true;
 	this->closeBracesFlag = true;
+	this->color = "";
 	std::string option = FixOptionNumber(lexical.option);
 	std::string result = "Bline({" + option;
 	return result;
@@ -2139,6 +2166,7 @@ std::string MZ1Z001::Pattern(const Lexical& lexical, bool delimiter)
 	this->closeBracketFlag = true;
 	this->patternFlag = false;
 	this->patternSeparatorCount = 0;
+	this->color = "";
 	std::string option = FixOptionNumber(lexical.option);
 	std::string result = "Pattern(" + option;
 	return result;
@@ -2288,6 +2316,7 @@ std::string MZ1Z001::CColor(const Lexical& lexical, bool delimiter)
 std::string MZ1Z001::Circle(const Lexical& lexical, bool delimiter)
 {
 	this->closeBracketFlag = true;
+	this->color = "";
 	std::string option = FixOptionNumber(lexical.option);
 	std::string result = "Circle(" + option;
 	return result;
@@ -2296,6 +2325,7 @@ std::string MZ1Z001::Circle(const Lexical& lexical, bool delimiter)
 std::string MZ1Z001::Box(const Lexical& lexical, bool delimiter)
 {
 	this->closeBracketFlag = true;
+	this->color = "";
 	std::string option = FixOptionNumber(lexical.option);
 	std::string result = "Box(" + option;
 	return result;
@@ -2304,6 +2334,7 @@ std::string MZ1Z001::Box(const Lexical& lexical, bool delimiter)
 std::string MZ1Z001::Paint(const Lexical& lexical, bool delimiter)
 {
 	this->closeBracketFlag = true;
+	this->color = "";
 	std::string option = FixOptionNumber(lexical.option);
 	std::string result = "Paint(" + option;
 	return result;

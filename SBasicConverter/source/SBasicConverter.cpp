@@ -3,15 +3,15 @@
 #include <iostream>
 #include "MZ1Z001.hpp"
 
-static const char* const NAME = "MZTファイルをCPPファイルに変換するプログラム";
-static const char* const VERSION = "0.9.4";
+static const char* const NAME = "MZ-80B/2000/2200用のMZTファイルをCPPファイルに変換するプログラム";
+static const char* const VERSION = "0.9.5";
 static const char* const FILENAME = "SBasicConverter";
 static const unsigned int OPTION_HELP   = 0x00000001;
 
 int main(int argc, char* argv[])
 {
 	unsigned int option = 0;
-	std::string path1 = "3D-COLOR-GRAPHIC.mzt";
+	std::string path1 = "colortest.mzt";
 	std::string path2;
 	int i;
 	// オプション取得

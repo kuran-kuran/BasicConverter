@@ -147,6 +147,7 @@ private:
 	std::map<std::string, std::string> data;
 	std::vector<std::string> grobal;
 	std::string result;
+	std::string color;
 	int ifStackCount;
 	bool printFlag;
 	bool printSemicolonFlag;
