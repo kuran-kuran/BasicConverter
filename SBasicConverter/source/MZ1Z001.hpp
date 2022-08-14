@@ -21,7 +21,8 @@ private:
 	enum
 	{
 		LINE_END = 0,
-		SQUARE_BRACKETS_END
+		SQUARE_BRACKETS_END,
+		DELIMITER_END
 	};
 	bool GetLine(std::vector<char>& buffer, int& number);
 	bool IsExistVariable(std::string command);
@@ -37,6 +38,7 @@ private:
 	bool Convert(const std::vector<char>& buffer, int number, int conditions);
 	void AnalyzeCommand(Lexical& lexical, int number, int& subNumber, bool delimiter);
 	void Delimiter(int number, int& subNumber);
+	void AddColor(void);
 	std::string Nop(const Lexical& lexical, bool delimiter);
 	std::string Rem(const Lexical& lexical, bool delimiter);
 	std::string Data(const Lexical& lexical, bool delimiter, int number);
@@ -108,6 +110,9 @@ private:
 	std::string Circle(const Lexical& lexical, bool delimiter);
 	std::string Box(const Lexical& lexical, bool delimiter);
 	std::string Paint(const Lexical& lexical, bool delimiter);
+	std::vector<std::string> SpritText(std::string text, std::string separator);
+	std::string FixCcolorOption(std::string option);
+	std::string FixColorOption(std::string option, bool atMark);
 	bool CheckEncode(unsigned char byte);
 	bool CheckEncodeAfter(unsigned char byte);
 	std::string Encode(std::string text);
@@ -161,11 +166,13 @@ private:
 	int patternSeparatorCount;
 	bool closeBracesFlag;
 	bool closeBracketFlag;
+	bool addColorFlag;
 	char* buffer;
 	int linePointer;
 	std::map<int, std::vector<char>> programBuffer;
 	std::vector<int> bracketsCountList;
 	size_t convertIndex;
+	bool wMode;
 };
 
 #endif

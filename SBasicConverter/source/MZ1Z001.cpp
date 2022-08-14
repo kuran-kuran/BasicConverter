@@ -30,10 +30,13 @@ MZ1Z001::MZ1Z001(void)
 ,patternSeparatorCount(0)
 ,closeBracesFlag(false)
 ,closeBracketFlag(false)
+,addColorFlag(false)
 ,buffer(NULL)
 ,linePointer(128)
 ,programBuffer()
 ,bracketsCountList()
+,convertIndex(0)
+,wMode(1)
 {
 }
 
@@ -519,7 +522,7 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 	bool firstVariable = false;
 	bool defKey = false;
 	unsigned char* buf = (unsigned char*)&buffer[0];
-	if(number == 25)
+	if(number == 50)
 	{
 		int a = 0;
 	}
@@ -826,12 +829,13 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 	this->forPhase = 0;
 	this->defFnFlag = false;
 	this->closeBracketFlag = false;
-	if(number == 3510)
+	if(number == 50)
 	{
 		int a = 0;
 	}
 	bool encodeAfter = false;
 	bool remFlag = false;
+	bool processedDelimiter = false;
 	while(this->convertIndex < buffer.size())
 	{
 		size_t i = this->convertIndex;
@@ -845,7 +849,12 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 		if(byte == 0x0D)
 		{
 			AnalyzeCommand(lexical, number, subNumber, true);
+			if(conditions == DELIMITER_END)
+			{
+				break;
+			}
 			Delimiter(number, subNumber);
+			processedDelimiter = true;
 			lexical = {"NOP", ""};
 			this->defKeyFlag = false;
 			break;
@@ -854,6 +863,7 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 		{
 			AnalyzeCommand(lexical, number, subNumber, true);
 			Delimiter(number, subNumber);
+			processedDelimiter = true;
 			lexical = {"NOP", ""};
 			debugLine += Format("%c", byte);
 			remFlag = false;
@@ -861,10 +871,15 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 			this->patternFlag = false;
 			this->patternSeparatorCount = 0;
 			++ this->convertIndex;
+			if(conditions == DELIMITER_END)
+			{
+				break;
+			}
 			continue;
 		}
 		if((phase == 1) && (byte == '{'))
 		{
+			this->wMode = 0;
 			this->color = "";
 			++ this->convertIndex;
 			Convert(buffer, number, SQUARE_BRACKETS_END);
@@ -872,6 +887,7 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 		}
 		else if((conditions == SQUARE_BRACKETS_END) && (phase == 1) && (byte == '}'))
 		{
+			this->wMode = 0;
 			AnalyzeCommand(lexical, number, subNumber, false);
 			this->color = this->result;
 			this->result = "";
@@ -960,6 +976,33 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 					{
 						this->defKeyFlag = true;
 					}
+					if(code_80_xx[byte] == "COLOR")
+					{
+						++ this->convertIndex;
+						Convert(buffer, number, DELIMITER_END);
+						lexical = {code_80_xx[byte], this->result};
+						this->result = "";
+						AnalyzeCommand(lexical, number, subNumber, false);
+						break;
+					}
+					else if(code_80_xx[byte] == "CCOLOR")
+					{
+						++ this->convertIndex;
+						Convert(buffer, number, DELIMITER_END);
+						lexical = {code_80_xx[byte], this->result};
+						this->result = "";
+						AnalyzeCommand(lexical, number, subNumber, false);
+						break;
+					}
+					else if(code_80_xx[byte] == "GRAPH")
+					{
+						++ this->convertIndex;
+						Convert(buffer, number, DELIMITER_END);
+						lexical = {code_80_xx[byte], this->result};
+						this->result = "";
+						AnalyzeCommand(lexical, number, subNumber, false);
+						break;
+					}
 					AnalyzeCommand(lexical, number, subNumber, false);
 					lexical = {code_80_xx[byte], ""};
 					debugLine += Format("%s", code_80_xx[byte]);
@@ -992,6 +1035,10 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 			}
 		}
 		++ this->convertIndex;
+	}
+	if((conditions == LINE_END) && (processedDelimiter == false))
+	{
+		Delimiter(number, subNumber);
 	}
 	DebugLog(Format("%s\n", debugLine.c_str()).c_str());
 	return true;
@@ -1312,6 +1359,10 @@ void MZ1Z001::Delimiter(int number, int& subNumber)
 		this->result += "}";
 		this->closeBracesFlag = false;
 	}
+	if(this->addColorFlag == true)
+	{
+		AddColor();
+	}
 	if(this->printFlag == true)
 	{
 		EndPrint(number, subNumber);
@@ -1334,6 +1385,19 @@ void MZ1Z001::Delimiter(int number, int& subNumber)
 		this->result = "";
 		++ subNumber;
 	}
+}
+
+void MZ1Z001::AddColor(void)
+{
+	if(this->color.empty() == false)
+	{
+		this->result += ",";
+		// 重ね合わせからWを取る
+		std::string colorText = FixColorOption(this->color, false);
+		this->result += colorText;
+	}
+	this->color = "";
+	this->addColorFlag = false;
 }
 
 std::string MZ1Z001::Nop(const Lexical& lexical, bool delimiter)
@@ -1935,7 +1999,7 @@ std::string MZ1Z001::Cursor(const Lexical& lexical, bool delimiter)
 std::string MZ1Z001::Set(const Lexical& lexical, bool delimiter)
 {
 	this->closeBracketFlag = true;
-	this->color = "";
+	this->addColorFlag = true;
 	std::string option = FixOptionNumber(lexical.option);
 	std::string result = "Set(" + option;
 	return result;
@@ -1944,7 +2008,7 @@ std::string MZ1Z001::Set(const Lexical& lexical, bool delimiter)
 std::string MZ1Z001::Reset(const Lexical& lexical, bool delimiter)
 {
 	this->closeBracketFlag = true;
-	this->color = "";
+	this->addColorFlag = true;
 	std::string option = FixOptionNumber(lexical.option);
 	std::string result = "Reset(" + option;
 	return result;
@@ -1954,7 +2018,7 @@ std::string MZ1Z001::Line(const Lexical& lexical, bool delimiter)
 {
 	this->closeBracketFlag = true;
 	this->closeBracesFlag = true;
-	this->color = "";
+	this->addColorFlag = true;
 	std::string option = FixOptionNumber(lexical.option);
 	std::string result = "Line({" + option;
 	return result;
@@ -1964,7 +2028,7 @@ std::string MZ1Z001::Bline(const Lexical& lexical, bool delimiter)
 {
 	this->closeBracketFlag = true;
 	this->closeBracesFlag = true;
-	this->color = "";
+	this->addColorFlag = true;
 	std::string option = FixOptionNumber(lexical.option);
 	std::string result = "Bline({" + option;
 	return result;
@@ -2005,7 +2069,7 @@ void MZ1Z001::Console(const Lexical& lexical, bool delimiter, int number, int& s
 			if((isdigit(option[i]) == 0) || (last == true))
 			{
 				this->result = "ScrollYRange(" + value1 + "," + value2 + ");";
-				this->program[Number(number, subNumber)] = this->result;
+				this->program[Number(number, subNumber)] = FixOptionNumber(this->result);
 				++ subNumber;
 				value1.clear();
 				value2.clear();
@@ -2021,7 +2085,7 @@ void MZ1Z001::Console(const Lexical& lexical, bool delimiter, int number, int& s
 			if(value1 == "40")
 			{
 				this->result = "SetTextStretchWidth(2);";
-				this->program[Number(number, subNumber)] = this->result;
+				this->program[Number(number, subNumber)] = FixOptionNumber(this->result);
 				++ subNumber;
 				value1.clear();
 				value2.clear();
@@ -2030,7 +2094,7 @@ void MZ1Z001::Console(const Lexical& lexical, bool delimiter, int number, int& s
 			else if(value1 == "80")
 			{
 				this->result = "SetTextStretchWidth(1);";
-				this->program[Number(number, subNumber)] = this->result;
+				this->program[Number(number, subNumber)] = FixOptionNumber(this->result);
 				++ subNumber;
 				value1.clear();
 				value2.clear();
@@ -2047,6 +2111,48 @@ void MZ1Z001::Console(const Lexical& lexical, bool delimiter, int number, int& s
 			{
 				this->result = "SetStretchWidth(2);";
 			}
+			this->program[Number(number, subNumber)] = FixOptionNumber(this->result);
+			++ subNumber;
+			value1.clear();
+			value2.clear();
+			command.clear();
+		}
+		if(command == "R")
+		{
+			// グリーンディスプレイにグラフィックを表示しない
+			this->result = "SetReverse(true);";
+			this->program[Number(number, subNumber)] = this->result;
+			++ subNumber;
+			value1.clear();
+			value2.clear();
+			command.clear();
+		}
+		if(command == "N")
+		{
+			// グリーンディスプレイにグラフィックを表示する
+			this->result = "SetReverse(false);";
+			this->program[Number(number, subNumber)] = this->result;
+			++ subNumber;
+			value1.clear();
+			value2.clear();
+			command.clear();
+		}
+		if(command == "P")
+		{
+			this->wMode = 0;
+			// グリーンディスプレイにグラフィックを表示しない
+			this->result = "EnableGraphicsGreenDisplay(false);";
+			this->program[Number(number, subNumber)] = this->result;
+			++ subNumber;
+			value1.clear();
+			value2.clear();
+			command.clear();
+		}
+		if(command == "M")
+		{
+			this->wMode = 0;
+			// グリーンディスプレイにグラフィックを表示する
+			this->result = "EnableGraphicsGreenDisplay(true);";
 			this->program[Number(number, subNumber)] = this->result;
 			++ subNumber;
 			value1.clear();
@@ -2070,13 +2176,23 @@ void MZ1Z001::Console(const Lexical& lexical, bool delimiter, int number, int& s
 			}
 			else if(command == "R")
 			{
+				command = "R";
 			}
 			else if(command == "N")
 			{
+				command = "N";
 			}
 			else if(option[i] == 'G')
 			{
 				command = "G";
+			}
+			else if(option[i] == 'P')
+			{
+				command = "P"; // グリーンディスプレイにグラフィックを表示しない
+			}
+			else if(option[i] == 'M')
+			{
+				command = "M"; // グリーンディスプレイにグラフィックを表示する
 			}
 		}
 	}
@@ -2085,68 +2201,88 @@ void MZ1Z001::Console(const Lexical& lexical, bool delimiter, int number, int& s
 
 void MZ1Z001::Graph(const Lexical& lexical, bool delimiter, int number, int& subNumber)
 {
-	std::string option = Trim(lexical.option);
 	std::string command;
 	std::string page;
-	for(size_t i = 0; i < option.size(); ++ i)
+	std::vector<std::string> optionList = SpritText(lexical.option, ",");
+	for(size_t optionIndex = 0; optionIndex < optionList.size(); ++ optionIndex)
 	{
-		bool last = (i == option.size() - 1);
-		if(option[i] == ' ')
+		std::string option = optionList[optionIndex];
+		for(size_t i = 0; i < option.size(); ++ i)
 		{
-			continue;
-		}
-		if(command == "O")
-		{
-			if(isdigit(option[i]) != 0)
-			{
-				page += option[i];
-			}
-			if(isdigit(option[i]) == 0 || last == true)
-			{
-				this->result = "GraphOutput(O_" + page + ");";
-				this->program[Number(number, subNumber)] = this->result;
-				++ subNumber;
-				page.clear();
-				command.clear();
-			}
-		}
-		if(command == "I")
-		{
-			if(isdigit(option[i]) != 0)
-			{
-				page += option[i];
-				this->result = "GraphInput(" + page + ");";
-				this->program[Number(number, subNumber)] = this->result;
-				++ subNumber;
-				page.clear();
-				command.clear();
-			}
-		}
-		if(command.empty() == true)
-		{
-			if(option[i] == ',')
+			bool last = (i == option.size() - 1);
+			if(option[i] == ' ')
 			{
 				continue;
 			}
-			else if(option[i] == 'O')
+			if(command == "O")
 			{
-				command = "O";
+				if(isdigit(option[i]) != 0)
+				{
+					page += option[i];
+				}
+				if(isdigit(option[i]) == 0 || last == true)
+				{
+					this->result = "GraphOutput(O_" + page + ");";
+					this->program[Number(number, subNumber)] = this->result;
+					++ subNumber;
+					page.clear();
+					command.clear();
+				}
 			}
-			else if(option[i] == 'I')
+			if(command == "I")
 			{
-				command = "I";
+				if(isdigit(option[i]) != 0)
+				{
+					page += option[i];
+					this->result = "GraphInput(" + page + ");";
+					this->program[Number(number, subNumber)] = FixOptionNumber(this->result);
+					++ subNumber;
+					page.clear();
+					command.clear();
+				}
 			}
-			else if(option[i] == 'C')
+			if(command.empty() == true)
 			{
-				this->result = "ClearGraph();";
-				this->program[Number(number, subNumber)] = this->result;
-				++ subNumber;
-			}
-			else if(option[i] == 'F')
-			{
-				this->result = "FillGraph();";
-				this->program[Number(number, subNumber)] = this->result;
-				++ subNumber;
+				if(option[i] == ',')
+				{
+					continue;
+				}
+				else if(option[i] == 'O')
+				{
+					command = "O";
+				}
+				else if(option[i] == 'I')
+				{
+					command = "I";
+				}
+				else if(option[i] == 'C')
+				{
+					if((i == 0) && (option.size() > 1))
+					{
+						option.erase(0, 1);
+						this->result = "ClearGraph(" + option + ");";
+					}
+					else
+					{
+						this->result = "ClearGraph();";
+					}
+					this->program[Number(number, subNumber)] = FixOptionNumber(this->result);
+					++ subNumber;
+				}
+				else if(option[i] == 'F')
+				{
+					if((i == 0) && (option.size() > 1))
+					{
+						option.erase(0, 1);
+						this->result = "FillGraph(" + option + ");";
+					}
+					else
+					{
+						this->result = "FillGraph();";
+					}
+					this->program[Number(number, subNumber)] = FixOptionNumber(this->result);
+					++ subNumber;
+				}
 			}
 		}
 	}
@@ -2166,7 +2302,7 @@ std::string MZ1Z001::Pattern(const Lexical& lexical, bool delimiter)
 	this->closeBracketFlag = true;
 	this->patternFlag = false;
 	this->patternSeparatorCount = 0;
-	this->color = "";
+	this->addColorFlag = true;
 	std::string option = FixOptionNumber(lexical.option);
 	std::string result = "Pattern(" + option;
 	return result;
@@ -2299,24 +2435,28 @@ std::string MZ1Z001::Pos(const Lexical& lexical, bool delimiter)
 
 std::string MZ1Z001::Color(const Lexical& lexical, bool delimiter)
 {
+	this->wMode = 0;
 	this->closeBracketFlag = true;
-	std::string option = FixOptionNumber(lexical.option);
+	this->addColorFlag = true;
+	std::string option = FixColorOption(lexical.option, true);
 	std::string result = "Color(" + option;
 	return result;
 }
 
 std::string MZ1Z001::CColor(const Lexical& lexical, bool delimiter)
 {
+	this->wMode = 0;
 	this->closeBracketFlag = true;
-	std::string option = FixOptionNumber(lexical.option);
+	std::string option = FixCcolorOption(lexical.option);
 	std::string result = "CColor(" + option;
 	return result;
 }
 
 std::string MZ1Z001::Circle(const Lexical& lexical, bool delimiter)
 {
+	this->wMode = 0;
 	this->closeBracketFlag = true;
-	this->color = "";
+	this->addColorFlag = true;
 	std::string option = FixOptionNumber(lexical.option);
 	std::string result = "Circle(" + option;
 	return result;
@@ -2324,8 +2464,9 @@ std::string MZ1Z001::Circle(const Lexical& lexical, bool delimiter)
 
 std::string MZ1Z001::Box(const Lexical& lexical, bool delimiter)
 {
+	this->wMode = 0;
 	this->closeBracketFlag = true;
-	this->color = "";
+	this->addColorFlag = true;
 	std::string option = FixOptionNumber(lexical.option);
 	std::string result = "Box(" + option;
 	return result;
@@ -2333,11 +2474,185 @@ std::string MZ1Z001::Box(const Lexical& lexical, bool delimiter)
 
 std::string MZ1Z001::Paint(const Lexical& lexical, bool delimiter)
 {
+	this->wMode = 0;
 	this->closeBracketFlag = true;
-	this->color = "";
+	this->addColorFlag = true;
 	std::string option = FixOptionNumber(lexical.option);
 	std::string result = "Paint(" + option;
 	return result;
+}
+
+std::vector<std::string> MZ1Z001::SpritText(std::string text, std::string separator)
+{
+	int bracketsCount = 0;
+	bool quotation = false;
+	std::vector<std::string> spritTextList;
+	std::string spritText = "";
+	for(size_t i = 0; i < text.size(); ++ i)
+	{
+		unsigned char byte = text[i];
+		if(byte == '\"')
+		{
+			if(quotation == true)
+			{
+				quotation = false;
+			}
+			else
+			{
+				quotation = true;
+			}
+		}
+		if(quotation == false)
+		{
+			if(byte == '(')
+			{
+				++ bracketsCount;
+			}
+			else if(byte == ')')
+			{
+				-- bracketsCount;
+			}
+			if(bracketsCount == 0)
+			{
+				if(byte == separator[0])
+				{
+					spritTextList.push_back(spritText);
+					spritText = "";
+					continue;
+				}
+			}
+		}
+		spritText.push_back(byte);
+	}
+	if(spritText.empty() == false)
+	{
+		spritTextList.push_back(spritText);
+	}
+	return spritTextList;
+}
+
+std::string MZ1Z001::FixCcolorOption(std::string option)
+{
+	std::string fixOption = "";
+	std::vector<std::string> spritOptionList = SpritText(option, ",");
+	if(spritOptionList.size() > 0)
+	{
+		std::string fixText = EraseSpace(spritOptionList[0]);
+		if(fixText[0] == '@')
+		{
+			fixOption += "1";
+			fixText.erase(0, 1);
+		}
+		else
+		{
+			fixOption += "0";
+		}
+		if(spritOptionList.size() > 1)
+		{
+			if(fixText.empty() == true)
+			{
+				fixOption += ", -1";
+			}
+			else
+			{
+				fixOption += ", ";
+				fixOption += fixText;
+			}
+			fixOption += ", ";
+		}
+	}
+	if(spritOptionList.size() > 1)
+	{
+		std::string fixText = EraseSpace(spritOptionList[1]);
+		fixOption += fixText;
+	}
+	fixOption = FixOptionNumber(fixOption);
+	return fixOption;
+}
+
+// colorCommand true: Color文解析, false: []に囲まれた色指定
+std::string MZ1Z001::FixColorOption(std::string option, bool colorCommand)
+{
+	int bracketsCount = 0;
+	bool quotation = false;
+	size_t atMarkIndex = 256;
+	size_t oIndex = 256;
+	size_t wIndex = 256;
+	std::string fixOption = "";
+	std::vector<std::string> spritOptionList = SpritText(option, ",");
+	// @ and ColorNumber
+	size_t optionIndex = 0;
+	if(spritOptionList.size() > optionIndex)
+	{
+		std::string fixText = EraseSpace(spritOptionList[optionIndex]);
+		if(fixText[0] == '@')
+		{
+			fixOption += "1";
+			fixText.erase(0, 1);
+		}
+		else
+		{
+			fixOption += "0";
+		}
+		if(spritOptionList.size() > optionIndex + 1)
+		{
+			if(fixText.empty() == true)
+			{
+				fixOption += ", -1";
+			}
+			else
+			{
+				fixOption += ", ";
+				fixOption += fixText;
+			}
+			fixOption += ", ";
+		}
+	}
+	++ optionIndex;
+	if(colorCommand == true)
+	{
+		// O
+		if(spritOptionList.size() > optionIndex)
+		{
+			std::string fixText = EraseSpace(spritOptionList[optionIndex]);
+			if(fixText[0] == 'O')
+			{
+				fixText.erase(0, 1);
+			}
+			if(fixText.empty() == true)
+			{
+				fixOption += "-1";
+			}
+			else
+			{
+				fixOption += fixText;
+			}
+			if(spritOptionList.size() > optionIndex + 1)
+			{
+				fixOption += ", ";
+			}
+		}
+		++ optionIndex;
+	}
+	// W
+	if(spritOptionList.size() > optionIndex)
+	{
+		std::string fixText = EraseSpace(spritOptionList[optionIndex]);
+		if(fixText[0] == 'W')
+		{
+			fixText.erase(0, 1);
+		}
+		if(fixText.empty() == true)
+		{
+			fixOption += "-1";
+		}
+		else
+		{
+			fixOption += fixText;
+		}
+	}
+	fixOption = FixOptionNumber(fixOption);
+	return fixOption;
 }
 
 bool MZ1Z001::CheckEncode(unsigned char byte)
@@ -2672,8 +2987,27 @@ bool MZ1Z001::IsStringFixedVariableName(std::string variableName)
 // 文字列からスペースを削除する
 std::string MZ1Z001::EraseSpace(const std::string& text)
 {
-	std::string result = text;
-	result.erase(std::remove(result.begin(), result.end(), ' '), result.end());
+	std::string result = "";
+	bool quotation = false;
+	for(size_t i = 0; i < text.size(); ++ i)
+	{
+		unsigned char byte = text[i];
+		if(byte == '\"')
+		{
+			if(quotation == true)
+			{
+				quotation = false;
+			}
+			else
+			{
+				quotation = true;
+			}
+		}
+		if((quotation == true) || ((quotation == false) && (byte != ' ')))
+		{
+			result += byte;
+		}
+	}
 	return result;
 }
 
@@ -2992,13 +3326,16 @@ std::string MZ1Z001::FixOptionNumber(std::string sourceOption)
 						dollar = false;
 					}
 					result += number;
-					if(number.find(".") == std::string::npos)
+					if((byte != '_') && (nextByte != 'n'))
 					{
-						result += "_n";
-					}
-					else
-					{
-						result += "_f";
+						if(number.find(".") == std::string::npos)
+						{
+							result += "_n";
+						}
+						else
+						{
+							result += "_f";
+						}
 					}
 				}
 				number.clear();
