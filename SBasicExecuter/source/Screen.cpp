@@ -29,7 +29,6 @@ Screen::Screen(void)
 ,textY(0)
 ,graphicX(0)
 ,graphicY(0)
-,highPriorityText(true)
 ,stretchWidth(2)
 ,stretchHeight(1)
 ,textStretchWidth(2)
@@ -152,13 +151,17 @@ void Screen::Fill(unsigned int color, unsigned int colorMask)
 	DrawRectangle(0, 0, this->screenWidth, this->screenHeight, color, colorMask);
 }
 
-void Screen::DrawPoint(int x, int y, unsigned int color, unsigned int colorMask)
+void Screen::DrawPoint(int x, int y, unsigned int color, unsigned int colorMask, int overlap)
 {
-	int destinationAddress = this->screenWidth * y + x;
-	unsigned int writeColor = colorMask == 0xFFFFFFFF ? color : (this->screenBuffer[destinationAddress] & ~colorMask) | (color & colorMask);
-	this->screenBuffer[destinationAddress] = writeColor;
 	this->graphicX = x;
 	this->graphicY = y;
+	int destinationAddress = this->screenWidth * y + x;
+	if(overlap == 1 && this->screenBuffer[destinationAddress] != 0)
+	{
+		return;
+	}
+	unsigned int writeColor = colorMask == 0xFFFFFFFF ? color : (this->screenBuffer[destinationAddress] & ~colorMask) | (color & colorMask);
+	this->screenBuffer[destinationAddress] = writeColor;
 }
 
 unsigned int Screen::GetPoint(int x, int y)
@@ -166,13 +169,17 @@ unsigned int Screen::GetPoint(int x, int y)
 	return this->screenBuffer[this->screenWidth * y + x];
 }
 
-void Screen::DrawRectangle(int x, int y, int width, int height, unsigned int color, unsigned int colorMask)
+void Screen::DrawRectangle(int x, int y, int width, int height, unsigned int color, unsigned int colorMask, int overlap)
 {
 	int destinationAddress = this->screenWidth * y + x;
 	for (int scanY = 0; scanY < height; ++ scanY)
 	{
 		for (int scanX = 0; scanX < width; ++ scanX)
 		{
+			if(overlap == 1 && this->screenBuffer[destinationAddress + scanX] != 0)
+			{
+				continue;
+			}
 			unsigned int writeColor = colorMask == 0xFFFFFFFF ? color : (this->screenBuffer[destinationAddress + scanX] & ~colorMask) | (color & colorMask);
 			this->screenBuffer[destinationAddress + scanX] = writeColor;
 		}
@@ -180,7 +187,7 @@ void Screen::DrawRectangle(int x, int y, int width, int height, unsigned int col
 	}
 }
 
-void Screen::DrawBox(int x, int y, int width, int height, unsigned int color, unsigned int colorMask)
+void Screen::DrawBox(int x, int y, int width, int height, unsigned int color, unsigned int colorMask, int overlap)
 {
 	std::vector<int> positionList =
 	{
@@ -190,23 +197,23 @@ void Screen::DrawBox(int x, int y, int width, int height, unsigned int color, un
 		x, y + height,
 		x, y
 	};
-	DrawLine(positionList, color, colorMask);
+	DrawLine(positionList, color, colorMask, overlap);
 }
 
-void Screen::DrawLine(int x0, int y0, int x1, int y1, unsigned int color, unsigned int colorMask)
+void Screen::DrawLine(int x0, int y0, int x1, int y1, unsigned int color, unsigned int colorMask, int overlap)
 {
 	dms::Line line;
 	line.Set(x0, y0, x1, y1);
 	int x = x0;
 	int y = y0;
-	DrawPoint(x, y, color, colorMask);
+	DrawPoint(x, y, color, colorMask, overlap);
 	while(line.Get(x, y) == false)
 	{
-		DrawPoint(x, y, color, colorMask);
+		DrawPoint(x, y, color, colorMask, overlap);
 	}
 }
 
-void Screen::DrawLine(std::vector<int>& positionList, unsigned int color, unsigned int colorMask)
+void Screen::DrawLine(std::vector<int>& positionList, unsigned int color, unsigned int colorMask, int overlap)
 {
 	size_t positionCount = positionList.size() / 2;
 	if(positionCount < 2)
@@ -220,18 +227,18 @@ void Screen::DrawLine(std::vector<int>& positionList, unsigned int color, unsign
 		size_t index = i * 2;
 		int x1 = positionList[index];
 		int y1 = positionList[index + 1];
-		DrawLine(x0, y0, x1, y1, color, colorMask);
+		DrawLine(x0, y0, x1, y1, color, colorMask, overlap);
 		x0 = x1;
 		y0 = y1;
 	}
 }
 
-void Screen::DrawSprite(const unsigned int* buffer, int x, int y, int width, int height, bool enableColorKey, unsigned int colorKey)
+void Screen::DrawSprite(const unsigned int* buffer, int x, int y, int width, int height, unsigned int colorMask, bool enableColorKey, unsigned int colorKey)
 {
-	DrawSprite(buffer, x, y, width, height, 0, 0, width, enableColorKey, colorKey);
+	DrawSprite(buffer, x, y, width, height, 0, 0, width, colorMask, enableColorKey, colorKey);
 }
 
-void Screen::DrawSprite(const unsigned int* buffer, int x, int y, int width, int height, int sourceX, int sourceY, int sourceWidth, bool enableColorKey, unsigned int colorKey)
+void Screen::DrawSprite(const unsigned int* buffer, int x, int y, int width, int height, int sourceX, int sourceY, int sourceWidth, unsigned int colorMask, bool enableColorKey, unsigned int colorKey)
 {
 	if (x + width <= 0)
 	{
@@ -272,7 +279,7 @@ void Screen::DrawSprite(const unsigned int* buffer, int x, int y, int width, int
 		clip_height += y;
 		y = 0;
 	}
-	DrawSpriteNoClip(this->screenBuffer, clip_buffer, x, y, clip_width, clip_height, sourceWidth, enableColorKey, colorKey, false, 0);
+	DrawSpriteNoClip(this->screenBuffer, clip_buffer, x, y, clip_width, clip_height, sourceWidth, colorMask, enableColorKey, colorKey, false, 0);
 }
 
 void Screen::DrawFont(int x, int y, int charcterNumber, unsigned int color)
@@ -286,7 +293,7 @@ void Screen::DrawFont(int x, int y, int charcterNumber, unsigned int color)
 	int fontX = (charcterNumber / 16) * this->fontHeight;
 	int fontY = (charcterNumber % 16) * this->fontWidth;
 	unsigned int* fontBuffer = &(this->fontBuffer[fontY * this->fontBufferWidth + fontX]);
-	DrawSpriteNoClip(this->textScreenBuffer, fontBuffer, x * 8, y * 8, this->fontWidth, this->fontHeight, this->fontBufferWidth, true, 0, false, 0);
+	DrawSpriteNoClip(this->textScreenBuffer, fontBuffer, x * 8, y * 8, this->fontWidth, this->fontHeight, this->fontBufferWidth, color, true, 0, true, 0x00000000);
 }
 
 void Screen::DrawFont(int x, int y, int charcterNumber, unsigned int color, unsigned int backColor)
@@ -300,7 +307,7 @@ void Screen::DrawFont(int x, int y, int charcterNumber, unsigned int color, unsi
 	int fontX = (charcterNumber / 16) * this->fontHeight;
 	int fontY = (charcterNumber % 16) * this->fontWidth;
 	unsigned int* fontBuffer = &(this->fontBuffer[fontY * this->fontBufferWidth + fontX]);
-	DrawSpriteNoClip(this->textScreenBuffer, fontBuffer, x * 8, y * 8, this->fontWidth, this->fontHeight, this->fontBufferWidth, true, 0, true, backColor);
+	DrawSpriteNoClip(this->textScreenBuffer, fontBuffer, x * 8, y * 8, this->fontWidth, this->fontHeight, this->fontBufferWidth, true, 0, color, true, backColor);
 }
 
 void Screen::Print(dms::String text, bool newline)
@@ -325,13 +332,13 @@ void Screen::Print(dms::String text, bool newline)
 	}
 }
 
-void Screen::Paint(int x, int y, unsigned int color, std::vector<unsigned int>& borderColorList)
+void Screen::Paint(int x, int y, unsigned int color, std::vector<unsigned int>& borderColorList, int overlap)
 {
 	borderColorList.push_back(color);
-	PaintProc(x, y, color, borderColorList);
+	PaintProc(x, y, color, borderColorList, overlap);
 }
 
-void Screen::Pattern(int row, dms::String& pattern, unsigned int color, unsigned int colorMask)
+void Screen::Pattern(int row, dms::String& pattern, unsigned int color, unsigned int colorMask, int overlap)
 {
 	int vy = row < 0 ? 1 : -1;
 	int absRow = row < 0 ? -row : row;
@@ -340,7 +347,7 @@ void Screen::Pattern(int row, dms::String& pattern, unsigned int color, unsigned
 	int rowCount = 0;
 	for(int i = 0; i < static_cast<int>(pattern.size()); ++i)
 	{
-		DrawPattern(x, y, pattern[i], color, colorMask);
+		DrawPattern(x, y, pattern[i], color, colorMask, overlap);
 		y += vy;
 		++ rowCount;
 		if(rowCount >= absRow)
@@ -430,9 +437,10 @@ int Screen::GetTextHeight(void)
 	return this->textHeight;;
 }
 
-void Screen::Flip(unsigned int textColorMask, unsigned int graphicColorMask)
+void Screen::Flip(unsigned int textColorMask, unsigned int graphicColorMask, unsigned int backGroundColor, int priority)
 {
-	if(highPriorityText == true)
+	FillFrameBuffer(backGroundColor);
+	if(priority == 0)
 	{
 		FlipGraphic(graphicColorMask);
 		FlipText(textColorMask);
@@ -445,8 +453,7 @@ void Screen::Flip(unsigned int textColorMask, unsigned int graphicColorMask)
 		FlipGraphic(graphicColorMask);
 	}
 }
-
-void Screen::DrawSpriteNoClip(unsigned int* distinationBuffer, const unsigned int* buffer, int x, int y, int width, int height, int sourceWidth, bool enableColorKey, unsigned int colorKey, bool enableBackColor, unsigned int backColor)
+void Screen::DrawSpriteNoClip(unsigned int* distinationBuffer, const unsigned int* buffer, int x, int y, int width, int height, int sourceWidth, unsigned int colorMask, bool enableColorKey, unsigned int colorKey, bool enableBackColor, unsigned int backColor)
 {
 	int sourceAddress = 0;
 	int destinationAddress = this->screenWidth * y + x;
@@ -457,7 +464,7 @@ void Screen::DrawSpriteNoClip(unsigned int* distinationBuffer, const unsigned in
 			unsigned int color = buffer[sourceAddress + scan_x];
 			if(enableColorKey == false || ((enableColorKey == true) && (color != colorKey)))
 			{
-				distinationBuffer[destinationAddress + scan_x] = color;
+				distinationBuffer[destinationAddress + scan_x] = color & colorMask;
 			}
 			else if (enableBackColor == true)
 			{
@@ -500,24 +507,24 @@ bool Screen::CheckColor(unsigned int color, std::vector<unsigned int> checkColor
 	return false;
 }
 
-void Screen::PaintProc(int x, int y, unsigned int color, std::vector<unsigned int>& borderColorList)
+void Screen::PaintProc(int x, int y, unsigned int color, std::vector<unsigned int>& borderColorList, int overlap)
 {
-	DrawPoint(x, y, color);
+	DrawPoint(x, y, color, overlap);
 	if(x < (this->screenWidth - 1) && CheckColor(GetPoint(x + 1, y), borderColorList) == false)
 	{
-		PaintProc(x + 1, y, color, borderColorList);
+		PaintProc(x + 1, y, color, borderColorList, overlap);
 	}
 	if(x > 0 && CheckColor(GetPoint(x - 1, y), borderColorList) == false)
 	{
-		PaintProc(x - 1, y, color, borderColorList);
+		PaintProc(x - 1, y, color, borderColorList, overlap);
 	}
 	if(y < (this->screenHeight - 1) && CheckColor(GetPoint(x, y + 1), borderColorList) == false)
 	{
-		PaintProc(x, y + 1, color, borderColorList);
+		PaintProc(x, y + 1, color, borderColorList, overlap);
 	}
 	if(y > 0 && CheckColor(GetPoint(x, y - 1), borderColorList) == false)
 	{
-		PaintProc(x, y - 1, color, borderColorList);
+		PaintProc(x, y - 1, color, borderColorList, overlap);
 	}
 }
 
@@ -608,7 +615,7 @@ void Screen::ReDrawText(void)
 	}
 }
 
-void Screen::DrawPattern(int x, int y, unsigned char pattern, unsigned int color, unsigned int colorMask)
+void Screen::DrawPattern(int x, int y, unsigned char pattern, unsigned int color, unsigned int colorMask, int overlap)
 {
 	for(int i = 0; i < 8; ++i)
 	{
@@ -617,9 +624,28 @@ void Screen::DrawPattern(int x, int y, unsigned char pattern, unsigned int color
 		{
 			continue;
 		}
+		if(overlap == 1 && this->screenBuffer[destinationAddress] != 0)
+		{
+			continue;
+		}
 		unsigned int patternColor = color * ((pattern >> i) & 1);
 		unsigned int writeColor = colorMask == 0xFFFFFFFF ? patternColor : (this->screenBuffer[destinationAddress] & ~colorMask) | (patternColor & colorMask);
 		this->screenBuffer[destinationAddress] = writeColor;
+	}
+}
+
+void Screen::FillFrameBuffer(unsigned int color)
+{
+	for(int y = 0; y < SCREEN_HEIGHT; ++ y)
+	{
+		int sourceY = y / this->stretchHeight;
+		int frameBufferAddress = (SCREEN_HEIGHT - y - 1) * SCREEN_WIDTH;
+		for(int x = 0; x < SCREEN_WIDTH; ++ x)
+		{
+			int sourceX = x / this->stretchWidth;
+			int sourceAddress = sourceY * this->screenWidth + sourceX;
+			this->frameBuffer[frameBufferAddress + x] = color;
+		}
 	}
 }
 
@@ -633,7 +659,7 @@ void Screen::FlipGraphic(unsigned int colorMask)
 		{
 			int sourceX = x / this->stretchWidth;
 			int sourceAddress = sourceY * this->screenWidth + sourceX;
-			unsigned int writeColor = this->screenBuffer[sourceAddress] & colorMask; //colorMask == 0xFFFFFFFF ? this->screenBuffer[sourceAddress] : (this->frameBuffer[frameBufferAddress + x] & ~colorMask) | (this->screenBuffer[sourceAddress] & colorMask);
+			unsigned int writeColor = this->screenBuffer[sourceAddress] & colorMask;
 			this->frameBuffer[frameBufferAddress + x] = writeColor;
 		}
 	}
@@ -649,9 +675,10 @@ void Screen::FlipText(unsigned int colorMask)
 		{
 			int sourceX = x / this->textStretchWidth;
 			int sourceAddress = sourceY * this->screenWidth + sourceX;
-			if ((this->textScreenBuffer[sourceAddress] & 0xFFFFFF) != 0)
+			if (this->textScreenBuffer[sourceAddress] != 0)
 			{
-				unsigned int writeColor = colorMask == 0xFFFFFFFF ? this->textScreenBuffer[sourceAddress] : (this->frameBuffer[frameBufferAddress + x] & ~colorMask) | (this->textScreenBuffer[sourceAddress] & colorMask);
+//				unsigned int writeColor = colorMask == 0xFFFFFFFF ? this->textScreenBuffer[sourceAddress] : (this->frameBuffer[frameBufferAddress + x] & ~colorMask) | (this->textScreenBuffer[sourceAddress] & colorMask);
+				unsigned int writeColor = this->textScreenBuffer[sourceAddress] & colorMask;
 				this->frameBuffer[frameBufferAddress + x] = writeColor;
 			}
 		}

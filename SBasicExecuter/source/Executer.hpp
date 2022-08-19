@@ -35,12 +35,16 @@ public:
 	void OnGoto(dms::Variable number, std::vector<int> numberList);
 	void Cursor(dms::Variable x, dms::Variable y);
 	void Print(dms::String text, bool newline);
-	void Set(dms::Variable x, dms::Variable y);
-	void Reset(dms::Variable x, dms::Variable y);
-	void Line(dms::Variable x0, dms::Variable y0, dms::Variable x1, dms::Variable y1);
-	void Line(std::vector<dms::Variable> positionList);
-	void Bline(std::vector<dms::Variable> positionList);
-	void Paint(dms::Variable x, dms::Variable y, unsigned int color, std::vector<unsigned int> boarderColorList);
+	void Set(dms::Variable x, dms::Variable y, dms::Variable color = -1, dms::Variable overlap = -1);
+	void Reset(dms::Variable x, dms::Variable y, dms::Variable color = -1, dms::Variable overlap = -1);
+	void Line(dms::Variable x0, dms::Variable y0, dms::Variable x1, dms::Variable y1, dms::Variable color = -1, dms::Variable overlap = -1);
+	void Line(std::vector<dms::Variable> positionList, dms::Variable color = -1, dms::Variable overlap = -1);
+	void Bline(std::vector<dms::Variable> positionList, dms::Variable color = -1, dms::Variable overlap = -1);
+	void Paint(dms::Variable x, dms::Variable y, std::vector<dms::Variable> boarderColorList, dms::Variable color = -1, dms::Variable overlap = -1);
+	void Box(dms::Variable x1, dms::Variable y1, dms::Variable x2, dms::Variable y2, dms::Variable color = -1, dms::Variable overlap =-1);
+	void Circle(dms::Variable x, dms::Variable y, dms::Variable r, dms::Variable h, dms::Variable ks = -1, dms::Variable ke = -1, dms::Variable o = 0, dms::Variable color = -1, dms::Variable overlap = -1);
+	void Color(dms::Variable priority, dms::Variable color, dms::Variable output, dms::Variable overlap);
+	void CColor(dms::Variable priority, dms::Variable color, dms::Variable backGroundColor);
 	void SetData(int number, std::vector<Data> data);
 	dms::Variable ReadVariable(void);
 	dms::String ReadString(void);
@@ -51,12 +55,12 @@ public:
 	void GraphOutput(unsigned int output);
 	void ClearGraph(void);
 	void FillGraph(void);
-	void SetStretchWidth(int stretch);
-	void SetStretchHeight(int stretch);
-	void SetTextStretchWidth(int stretch);
-	void SetTextStretchHeight(int stretch);
-	void ScrollXRange(int left, int right);
-	void ScrollYRange(int top, int bottom);
+	void SetStretchWidth(dms::Variable stretch);
+	void SetStretchHeight(dms::Variable stretch);
+	void SetTextStretchWidth(dms::Variable stretch);
+	void SetTextStretchHeight(dms::Variable stretch);
+	void ScrollXRange(dms::Variable left, dms::Variable right);
+	void ScrollYRange(dms::Variable top, dms::Variable bottom);
 	void DefKey(dms::Variable index, dms::String defKeyText);
 	void SetTime(dms::String time);
 	dms::String Time(void);
@@ -105,10 +109,11 @@ public:
 	void DebugLog(dms::String text);
 	void Out(dms::Variable ioAddress, dms::Variable data);
 	void Run(void);
-	void Box(dms::Variable x1, dms::Variable y1, dms::Variable x2, dms::Variable y2, dms::Variable color);
 private:
 	Executer(void);
 	~Executer(void);
+	unsigned int GetColor(int colorCode);
+	unsigned int GetBColor(int colorCode);
 	static const size_t mainMemorySize;
 	static const size_t textMemorySize;
 	static const size_t graphicMemorySize;
@@ -127,6 +132,8 @@ private:
 	unsigned int colorMask;
 	unsigned int outputGraphicColorMask;
 	unsigned int outputTextColorMask;
+	unsigned int backGroundColor;
+	int priority;
 	clock_t startTime;
 	std::vector<unsigned char> mainMemory;
 	std::vector<unsigned char> textMemory;
@@ -140,5 +147,6 @@ private:
 	dms::Variable* storeNumber;
 	BeepMusic beepMusic;
 	bool isOutputLog;
+	int overlap;
 };
 #endif

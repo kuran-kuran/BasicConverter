@@ -31,6 +31,8 @@ Executer::Executer(void)
 ,colorMask(0x000000FF)
 ,outputGraphicColorMask(0x00000000)
 ,outputTextColorMask(0xFFFFFFFF)
+,backGroundColor(0x00000000)
+,priority(0)
 ,startTime(clock())
 ,mainMemory(mainMemorySize, 0)
 ,textMemory(textMemorySize, 0)
@@ -44,6 +46,7 @@ Executer::Executer(void)
 ,storeNumber(NULL)
 ,beepMusic()
 ,isOutputLog(false)
+,overlap(0)
 {
 }
 
@@ -160,7 +163,7 @@ void Executer::Flip(void)
 	{
 		DebugLog("Flip\n");
 	}
-	this->screen.Flip(this->outputTextColorMask, this->outputGraphicColorMask);
+	this->screen.Flip(this->outputTextColorMask, this->outputGraphicColorMask, this->backGroundColor, this->priority);
 }
 
 void Executer::Clear(void)
@@ -309,44 +312,187 @@ void Executer::Print(dms::String text, bool newline)
 	this->screen.Print(text, newline);
 }
 
-void Executer::Set(dms::Variable x, dms::Variable y)
+void Executer::Set(dms::Variable x, dms::Variable y, dms::Variable color, dms::Variable overlap)
 {
-	this->screen.DrawPoint(x.GetInt(), y.GetInt(), 0xFFFFFFFF, this->colorMask);
+	int overlapFlag = overlap == -1 ? this->overlap : overlap.GetInt();
+	if(overlapFlag == 1)
+	{
+		unsigned int drawMask = this->colorMask;
+		this->screen.DrawPoint(x.GetInt(), y.GetInt(), 0xFFFFFFFF, drawMask);
+	}
+	else
+	{
+		unsigned int drawColor = GetColor(color.GetInt());
+		this->screen.DrawPoint(x.GetInt(), y.GetInt(), drawColor, 0xFFFFFFFF);
+	}
 }
 
-void Executer::Reset(dms::Variable x, dms::Variable y)
+void Executer::Reset(dms::Variable x, dms::Variable y, dms::Variable color, dms::Variable overlap)
 {
-	this->screen.DrawPoint(x.GetInt(), y.GetInt(), 0, this->colorMask);
+	int overlapFlag = overlap == -1 ? this->overlap : overlap.GetInt();
+	if(overlapFlag == 1)
+	{
+		unsigned int drawColor = GetBColor(color.GetInt());
+		this->screen.DrawPoint(x.GetInt(), y.GetInt(), drawColor, 0xFFFFFFFF);
+	}
+	else
+	{
+		unsigned int drawMask = this->colorMask;
+		this->screen.DrawPoint(x.GetInt(), y.GetInt(), 0, drawMask);
+	}
 }
 
-void Executer::Line(dms::Variable x0, dms::Variable y0, dms::Variable x1, dms::Variable y1)
+void Executer::Line(dms::Variable x0, dms::Variable y0, dms::Variable x1, dms::Variable y1, dms::Variable color, dms::Variable overlap)
 {
-	this->screen.DrawLine(x0.GetInt(), y0.GetInt(), x1.GetInt(), y1.GetInt(), 0xFFFFFFFF, this->colorMask);
+	int overlapFlag = overlap == -1 ? this->overlap : overlap.GetInt();
+	if(overlapFlag == 1)
+	{
+		unsigned int drawMask = this->colorMask;
+		this->screen.DrawLine(x0.GetInt(), y0.GetInt(), x1.GetInt(), y1.GetInt(), 0xFFFFFFFF, drawMask);
+	}
+	else
+	{
+		unsigned int drawColor = GetColor(color.GetInt());
+		this->screen.DrawLine(x0.GetInt(), y0.GetInt(), x1.GetInt(), y1.GetInt(), drawColor, 0xFFFFFFFF);
+	}
 }
 
-void Executer::Line(std::vector<dms::Variable> positionList)
+void Executer::Line(std::vector<dms::Variable> positionList, dms::Variable color, dms::Variable overlap)
 {
 	std::vector<int> linePositionList;
 	for(size_t i = 0; i < positionList.size(); ++ i)
 	{
 		linePositionList.push_back(positionList[i].GetInt());
 	}
-	this->screen.DrawLine(linePositionList, 0xFFFFFFFF, this->colorMask);
+	int overlapFlag = overlap == -1 ? this->overlap : overlap.GetInt();
+	if(overlapFlag == 1)
+	{
+		unsigned int drawMask = this->colorMask;
+		this->screen.DrawLine(linePositionList, 0xFFFFFFFF, drawMask);
+	}
+	else
+	{
+		unsigned int drawColor = GetColor(color.GetInt());
+		this->screen.DrawLine(linePositionList, drawColor, 0xFFFFFFFF);
+	}
 }
 
-void Executer::Bline(std::vector<dms::Variable> positionList)
+void Executer::Bline(std::vector<dms::Variable> positionList, dms::Variable color, dms::Variable overlap)
 {
 	std::vector<int> linePositionList;
 	for (size_t i = 0; i < positionList.size(); ++i)
 	{
 		linePositionList.push_back(positionList[i].GetInt());
 	}
-	this->screen.DrawLine(linePositionList, 0, this->colorMask);
+	int overlapFlag = overlap == -1 ? this->overlap : overlap.GetInt();
+	if(overlapFlag == 1)
+	{
+		unsigned int drawMask = this->colorMask;
+		this->screen.DrawLine(linePositionList, 0, drawMask);
+	}
+	else
+	{
+		unsigned int drawColor = GetBColor(color.GetInt());
+		this->screen.DrawLine(linePositionList, drawColor, 0xFFFFFFFF);
+	}
 }
 
-void Executer::Paint(dms::Variable x, dms::Variable y, unsigned int color, std::vector<unsigned int> boarderColorList)
+void Executer::Paint(dms::Variable x, dms::Variable y, std::vector<dms::Variable> boarderColorList, dms::Variable color, dms::Variable overlap)
 {
-	this->screen.Paint(x.GetInt(), y.GetInt(), color, boarderColorList);
+	std::vector<unsigned int> boarderColor;
+	for (size_t i = 0; i < boarderColorList.size(); ++i)
+	{
+		boarderColor.push_back(GetColor(boarderColorList[i].GetInt()));
+	}
+	int overlapFlag = overlap == -1 ? this->overlap : overlap.GetInt();
+	if(overlapFlag == 1)
+	{
+		unsigned int drawColor = this->colorMask;
+		this->screen.Paint(x.GetInt(), y.GetInt(), drawColor, boarderColor);
+	}
+	else
+	{
+		unsigned int drawColor = GetColor(color.GetInt());
+		this->screen.Paint(x.GetInt(), y.GetInt(), drawColor, boarderColor);
+	}
+}
+
+void Executer::Box(dms::Variable x1,dms::Variable y1,dms::Variable x2,dms::Variable y2, dms::Variable color, dms::Variable overlap)
+{
+	if(x1 > x2)
+	{
+		dms::Variable temp = x1;
+		x1 = x2;
+		x2 = temp;
+	}
+	if(y1 > y2)
+	{
+		dms::Variable temp = y1;
+		y1 = y2;
+		y2 = temp;
+	}
+	int width = x2.GetInt() - x1.GetInt();
+	int height = y2.GetInt() - y1.GetInt();
+	int overlapFlag = overlap == -1 ? this->overlap : overlap.GetInt();
+	if(overlapFlag == 1)
+	{
+		unsigned int drawMask = this->colorMask;
+		this->screen.DrawBox(x1.GetInt(), y1.GetInt(), width, height, 0xFFFFFFFF, drawMask);
+	}
+	else
+	{
+		unsigned int drawColor = GetColor(color.GetInt());
+		this->screen.DrawBox(x1.GetInt(), y1.GetInt(), width, height, drawColor, 0xFFFFFFFF);
+	}
+}
+
+void Executer::Circle(dms::Variable x, dms::Variable y, dms::Variable r, dms::Variable h, dms::Variable ks, dms::Variable ke, dms::Variable o, dms::Variable color, dms::Variable overlap)
+{
+	int overlapFlag = overlap == -1 ? this->overlap : overlap.GetInt();
+	if(overlapFlag == 1)
+	{
+		unsigned int drawMask = this->colorMask;
+	}
+	else
+	{
+		unsigned int drawColor = GetColor(color.GetInt());
+	}
+}
+
+void Executer::Color(dms::Variable priority, dms::Variable color, dms::Variable output, dms::Variable overlap)
+{
+	if(priority == 1)
+	{
+		priority = 1;
+	}
+	if(color != -1)
+	{
+		this->colorMask = GetColor(color.GetInt());
+	}
+	if(output != -1)
+	{
+		GraphOutput(static_cast<unsigned int>(output.GetInt()));
+	}
+	if(overlap != -1)
+	{
+		this->overlap = overlap.GetInt();
+	}
+}
+
+void Executer::CColor(dms::Variable priority, dms::Variable color, dms::Variable backGroundColor)
+{
+	if(priority == 1)
+	{
+		priority = 0;
+	}
+	if(color != -1)
+	{
+		this->outputTextColorMask = GetColor(color.GetInt());
+	}
+	if(color != -1)
+	{
+		this->backGroundColor = GetColor(backGroundColor.GetInt());
+	}
 }
 
 void Executer::SetData(int number, std::vector<Data> data)
@@ -386,13 +532,13 @@ void Executer::GraphInput(int input)
 	switch (input)
 	{
 	case 1:
-		this->colorMask = 0x000000FF;
+		this->colorMask = 0xFF0000FF;
 		break;
 	case 2:
-		this->colorMask = 0x00FF0000;
+		this->colorMask = 0xFFFF0000;
 		break;
 	case 3:
-		this->colorMask = 0x0000FF00;
+		this->colorMask = 0xFF00FF00;
 		break;
 	}
 }
@@ -403,15 +549,15 @@ void Executer::GraphOutput(unsigned int output)
 	this->outputGraphicColorMask = 0x0;
 	if (output & 0b001)
 	{
-		this->outputGraphicColorMask |= 0x000000FF;
+		this->outputGraphicColorMask |= 0xFF0000FF;
 	}
 	if (output & 0b010)
 	{
-		this->outputGraphicColorMask |= 0x00FF0000;
+		this->outputGraphicColorMask |= 0xFFFF0000;
 	}
 	if (output & 0b100)
 	{
-		this->outputGraphicColorMask |= 0x0000FF00;
+		this->outputGraphicColorMask |= 0xFF00FF00;
 	}
 }
 
@@ -425,9 +571,9 @@ void Executer::FillGraph(void)
 	this->screen.Fill(0xFFFFFFFF, this->colorMask);
 }
 
-void Executer::SetStretchWidth(int stretch)
+void Executer::SetStretchWidth(dms::Variable stretch)
 {
-	this->screen.SetStretchWidth(stretch);
+	this->screen.SetStretchWidth(stretch.GetInt());
 	GraphOutput(0b000);
 	GraphInput(1);
 	ClearGraph();
@@ -439,9 +585,9 @@ void Executer::SetStretchWidth(int stretch)
 	this->screen.SetGraphicY(0);
 }
 
-void Executer::SetStretchHeight(int stretch)
+void Executer::SetStretchHeight(dms::Variable stretch)
 {
-	this->screen.SetStretchHeight(stretch);
+	this->screen.SetStretchHeight(stretch.GetInt());
 	GraphOutput(0b000);
 	GraphInput(1);
 	ClearGraph();
@@ -453,29 +599,29 @@ void Executer::SetStretchHeight(int stretch)
 	this->screen.SetGraphicY(0);
 }
 
-void Executer::SetTextStretchWidth(int stretch)
+void Executer::SetTextStretchWidth(dms::Variable stretch)
 {
-	this->screen.SetTextStretchWidth(stretch);
+	this->screen.SetTextStretchWidth(stretch.GetInt());
 	GraphOutput(0b000);
 	Cls();
 }
 
-void Executer::SetTextStretchHeight(int stretch)
+void Executer::SetTextStretchHeight(dms::Variable stretch)
 {
-	this->screen.SetTextStretchHeight(stretch);
+	this->screen.SetTextStretchHeight(stretch.GetInt());
 	GraphOutput(0b000);
 	Cls();
 }
 
-void Executer::ScrollXRange(int left, int right)
+void Executer::ScrollXRange(dms::Variable left, dms::Variable right)
 {
-	this->screen.ScrollXRange(left, right);
+	this->screen.ScrollXRange(left.GetInt(), right.GetInt());
 	Cls();
 }
 
-void Executer::ScrollYRange(int top, int bottom)
+void Executer::ScrollYRange(dms::Variable top, dms::Variable bottom)
 {
-	this->screen.ScrollYRange(top, bottom);
+	this->screen.ScrollYRange(top.GetInt(), bottom.GetInt());
 	Cls();
 }
 
@@ -913,21 +1059,34 @@ void Executer::Run(void)
 	Restore(-1);
 }
 
-void Executer::Box(dms::Variable x1,dms::Variable y1,dms::Variable x2,dms::Variable y2)
+unsigned int Executer::GetColor(int colorCode)
 {
-	if(x1 > x2)
+	static unsigned int colorTable[] =
 	{
-		dms::Variable temp = x1;
-		x1 = x2;
-		x2 = temp;
-	}
-	if(y1 > y2)
+		0xFF000000,
+		0xFF0000FF,
+		0xFFFF0000,
+		0xFFFF00FF,
+		0xFF00FF00,
+		0xFF00FFFF,
+		0xFFFFFF00,
+		0xFFFFFFFF
+	};
+	return colorTable[colorCode];
+}
+
+unsigned int Executer::GetBColor(int colorCode)
+{
+	static unsigned int colorTable[] =
 	{
-		dms::Variable temp = y1;
-		y1 = y2;
-		y2 = temp;
-	}
-	int width = x2.GetInt() - x1.GetInt();
-	int height = y2.GetInt() - y1.GetInt();
-	this->screen.DrawBox(x1.GetInt(), y1.GetInt(), width, height, 0xFFFFFFFF, this->colorMask);
+		0xFFFFFFFF,
+		0xFFFFFF00,
+		0xFF00FFFF,
+		0xFF00FF00,
+		0xFFFF00FF,
+		0xFFFF0000,
+		0xFF0000FF,
+		0x00000000
+	};
+	return colorTable[colorCode];
 }
