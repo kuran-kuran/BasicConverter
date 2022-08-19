@@ -533,6 +533,13 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 		byte = static_cast<unsigned char>(buffer[i]);
 		if(byte == 0x0D)
 		{
+			if(phase == 0)
+			{
+				// 改行前に"が閉じられてないときは"を足す
+				result.push_back('\"');
+				result.push_back('_');
+				result.push_back('s');
+			}
 			SetVariableName(variable, result, false, number);
 			result.push_back(byte);
 			data = false;
@@ -563,10 +570,12 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 		}
 		if((phase == 1) && (byte == '['))
 		{
+			// 色指定は判別のために[]から{}に変えておく
 			result.push_back('{');
 		}
 		else if((phase == 1) && (byte == ']'))
 		{
+			// 色指定は判別のために[]から{}に変えておく
 			result.push_back('}');
 		}
 		else if((phase == 1) && (byte == 0x80))
@@ -833,7 +842,7 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 	this->forPhase = 0;
 	this->defFnFlag = false;
 	this->closeBracketFlag = false;
-	if(number == 50)
+	if(number == 150)
 	{
 		int a = 0;
 	}
@@ -992,6 +1001,8 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 						this->result = "";
 						AnalyzeCommand(lexical, number, subNumber, false);
 						Delimiter(number, subNumber);
+						processedDelimiter = true;
+						lexical = {"NOP", ""};
 						break;
 					}
 					else if(code_80_xx[byte] == "CCOLOR")
@@ -1003,6 +1014,8 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 						this->result = "";
 						AnalyzeCommand(lexical, number, subNumber, false);
 						Delimiter(number, subNumber);
+						processedDelimiter = true;
+						lexical = {"NOP", ""};
 						break;
 					}
 					else if(code_80_xx[byte] == "GRAPH")
@@ -1014,6 +1027,8 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 						this->result = "";
 						AnalyzeCommand(lexical, number, subNumber, false);
 						Delimiter(number, subNumber);
+						processedDelimiter = true;
+						lexical = {"NOP", ""};
 						break;
 					}
 					AnalyzeCommand(lexical, number, subNumber, false);
@@ -2564,17 +2579,17 @@ std::string MZ1Z001::FixCcolorOption(std::string option)
 		{
 			fixOption += "0";
 		}
+		if(fixText.empty() == true)
+		{
+			fixOption += ", -1";
+		}
+		else
+		{
+			fixOption += ", ";
+			fixOption += fixText;
+		}
 		if(spritOptionList.size() > 1)
 		{
-			if(fixText.empty() == true)
-			{
-				fixOption += ", -1";
-			}
-			else
-			{
-				fixOption += ", ";
-				fixOption += fixText;
-			}
 			fixOption += ", ";
 		}
 	}
@@ -2602,22 +2617,25 @@ std::string MZ1Z001::FixColorOption(std::string option, bool colorCommand)
 	if(spritOptionList.size() > optionIndex)
 	{
 		std::string fixText = EraseSpace(spritOptionList[optionIndex]);
-		if(fixText[0] == '@')
+		if(colorCommand == true)
 		{
-			fixOption += "1";
-			fixText.erase(0, 1);
-		}
-		else
-		{
-			fixOption += "0";
+			if(fixText[0] == '@')
+			{
+				fixOption += "1";
+				fixText.erase(0, 1);
+			}
+			else
+			{
+				fixOption += "0";
+			}
+			fixOption += ", ";
 		}
 		if(fixText.empty() == true)
 		{
-			fixOption += ", -1";
+			fixOption += "-1";
 		}
 		else
 		{
-			fixOption += ", ";
 			fixOption += fixText;
 		}
 		if(spritOptionList.size() > optionIndex + 1)
