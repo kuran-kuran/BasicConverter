@@ -37,6 +37,7 @@ MZ1Z001::MZ1Z001(void)
 ,bracketsCountList()
 ,convertIndex(0)
 ,wMode(1)
+,debugLine("")
 {
 }
 
@@ -817,14 +818,17 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 // conditions
 // LINE_END: 行が終わるまで
 // SQUARE_BRACKETS_END: ]が検出されるまで
+// DELIMITER_END: :か行の最後まで
 bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int conditions)
 {
 	this->space = 4;
-	std::string debugLine = "";
 	Lexical lexical = { "NOP", "" };
 	int phase = 1;	// 0=direct, 1=code, 2=code80, 3=codeB2
 	int subNumber = 1;
-	debugLine = Format("%5u ", number);
+	if(conditions == LINE_END)
+	{
+		this->debugLine = Format("%5u ", number);
+	}
 	this->printFlag = false;
 	this->forPhase = 0;
 	this->defFnFlag = false;
@@ -862,23 +866,25 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 		if(((phase == 1) || (this->defKeyFlag == true)) && (byte == ':'))
 		{
 			AnalyzeCommand(lexical, number, subNumber, true);
+			this->debugLine += Format("%c", byte);
+			if(conditions == DELIMITER_END)
+			{
+				++ this->convertIndex;
+				break;
+			}
 			Delimiter(number, subNumber);
 			processedDelimiter = true;
 			lexical = {"NOP", ""};
-			debugLine += Format("%c", byte);
 			remFlag = false;
 			this->defKeyFlag = false;
 			this->patternFlag = false;
 			this->patternSeparatorCount = 0;
 			++ this->convertIndex;
-			if(conditions == DELIMITER_END)
-			{
-				break;
-			}
 			continue;
 		}
 		if((phase == 1) && (byte == '{'))
 		{
+			this->debugLine += Format("%c", byte);
 			this->wMode = 0;
 			this->color = "";
 			++ this->convertIndex;
@@ -887,6 +893,7 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 		}
 		else if((conditions == SQUARE_BRACKETS_END) && (phase == 1) && (byte == '}'))
 		{
+			this->debugLine += Format("%c", byte);
 			this->wMode = 0;
 			AnalyzeCommand(lexical, number, subNumber, false);
 			this->color = this->result;
@@ -916,7 +923,7 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 			{
 				phase = 0;
 			}
-			debugLine += Format("%c", byte);
+			this->debugLine += Format("%c", byte);
 			lexical.option += Format("%c", byte);
 		}
 		else
@@ -931,7 +938,7 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 			case 0:
 				if(CheckEncode(byte) == true)
 				{
-					debugLine += Format("\\x%02X", byte);
+					this->debugLine += Format("\\x%02X", byte);
 					lexical.option += Format("\\x%02X", byte);
 					encodeAfter = true;
 				}
@@ -939,12 +946,12 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 				{
 					if((encodeAfter == true) && (CheckEncodeAfter(byte) == true))
 					{
-						debugLine += Format("\\x%02X", byte);
+						this->debugLine += Format("\\x%02X", byte);
 						lexical.option += Format("\\x%02X", byte);
 					}
 					else
 					{
-						debugLine += Format("%c", byte);
+						this->debugLine += Format("%c", byte);
 						lexical.option += Format("%c", byte);
 					}
 					encodeAfter = false;
@@ -955,12 +962,12 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 				{
 					AnalyzeCommand(lexical, number, subNumber, false);
 					lexical = {code_xx[byte], ""};
-					debugLine += Format("%s", code_xx[byte]);
+					this->debugLine += Format("%s", code_xx[byte]);
 					encodeAfter = false;
 				}
 				else
 				{
-					debugLine += Format("%c", byte);
+					this->debugLine += Format("%c", byte);
 					lexical.option += Format("%c", byte);
 					encodeAfter = false;
 				}
@@ -978,39 +985,45 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 					}
 					if(code_80_xx[byte] == "COLOR")
 					{
+						this->debugLine += Format("%s", code_80_xx[byte]);
 						++ this->convertIndex;
 						Convert(buffer, number, DELIMITER_END);
 						lexical = {code_80_xx[byte], this->result};
 						this->result = "";
 						AnalyzeCommand(lexical, number, subNumber, false);
+						Delimiter(number, subNumber);
 						break;
 					}
 					else if(code_80_xx[byte] == "CCOLOR")
 					{
+						this->debugLine += Format("%s", code_80_xx[byte]);
 						++ this->convertIndex;
 						Convert(buffer, number, DELIMITER_END);
 						lexical = {code_80_xx[byte], this->result};
 						this->result = "";
 						AnalyzeCommand(lexical, number, subNumber, false);
+						Delimiter(number, subNumber);
 						break;
 					}
 					else if(code_80_xx[byte] == "GRAPH")
 					{
+						this->debugLine += Format("%s", code_80_xx[byte]);
 						++ this->convertIndex;
 						Convert(buffer, number, DELIMITER_END);
 						lexical = {code_80_xx[byte], this->result};
 						this->result = "";
 						AnalyzeCommand(lexical, number, subNumber, false);
+						Delimiter(number, subNumber);
 						break;
 					}
 					AnalyzeCommand(lexical, number, subNumber, false);
 					lexical = {code_80_xx[byte], ""};
-					debugLine += Format("%s", code_80_xx[byte]);
+					this->debugLine += Format("%s", code_80_xx[byte]);
 					encodeAfter = false;
 				}
 				else
 				{
-					debugLine += Format("%c", byte);
+					this->debugLine += Format("%c", byte);
 					lexical.option += Format("%c", byte);
 					encodeAfter = false;
 				}
@@ -1021,12 +1034,12 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 				{
 					AnalyzeCommand(lexical, number, subNumber, false);
 					lexical = {code_B2_xx[byte], ""};
-					debugLine += Format("%s", code_B2_xx[byte]);
+					this->debugLine += Format("%s", code_B2_xx[byte]);
 					encodeAfter = false;
 				}
 				else
 				{
-					debugLine += Format("%c", byte);
+					this->debugLine += Format("%c", byte);
 					lexical.option += Format("%c", byte);
 					encodeAfter = false;
 				}
@@ -1040,7 +1053,11 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 	{
 		Delimiter(number, subNumber);
 	}
-	DebugLog(Format("%s\n", debugLine.c_str()).c_str());
+	if(conditions == LINE_END)
+	{
+		DebugLog(Format("%s\n", this->debugLine.c_str()).c_str());
+		this->debugLine = "";
+	}
 	return true;
 }
 
@@ -2594,17 +2611,17 @@ std::string MZ1Z001::FixColorOption(std::string option, bool colorCommand)
 		{
 			fixOption += "0";
 		}
+		if(fixText.empty() == true)
+		{
+			fixOption += ", -1";
+		}
+		else
+		{
+			fixOption += ", ";
+			fixOption += fixText;
+		}
 		if(spritOptionList.size() > optionIndex + 1)
 		{
-			if(fixText.empty() == true)
-			{
-				fixOption += ", -1";
-			}
-			else
-			{
-				fixOption += ", ";
-				fixOption += fixText;
-			}
 			fixOption += ", ";
 		}
 	}

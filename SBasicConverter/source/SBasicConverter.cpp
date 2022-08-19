@@ -11,7 +11,7 @@ static const unsigned int OPTION_HELP   = 0x00000001;
 int main(int argc, char* argv[])
 {
 	unsigned int option = 0;
-	std::string path1 = "colortest.mzt";
+	std::string path1 = "3D-COLOR-GRAPHIC.mzt";
 	std::string path2;
 	int i;
 	// オプション取得
