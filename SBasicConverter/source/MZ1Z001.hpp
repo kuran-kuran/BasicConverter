@@ -173,6 +173,7 @@ private:
 	std::vector<int> bracketsCountList;
 	size_t convertIndex;
 	bool wMode;
+	std::string debugLine;
 };
 
 #endif
