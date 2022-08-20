@@ -151,15 +151,11 @@ void Screen::Fill(unsigned int color, unsigned int colorMask)
 	DrawRectangle(0, 0, this->screenWidth, this->screenHeight, color, colorMask);
 }
 
-void Screen::DrawPoint(int x, int y, unsigned int color, unsigned int colorMask, int overlap)
+void Screen::DrawPoint(int x, int y, unsigned int color, unsigned int colorMask)
 {
 	this->graphicX = x;
 	this->graphicY = y;
 	int destinationAddress = this->screenWidth * y + x;
-	if(overlap == 1 && this->screenBuffer[destinationAddress] != 0)
-	{
-		return;
-	}
 	unsigned int writeColor = colorMask == 0xFFFFFFFF ? color : (this->screenBuffer[destinationAddress] & ~colorMask) | (color & colorMask);
 	this->screenBuffer[destinationAddress] = writeColor;
 }
@@ -169,17 +165,13 @@ unsigned int Screen::GetPoint(int x, int y)
 	return this->screenBuffer[this->screenWidth * y + x];
 }
 
-void Screen::DrawRectangle(int x, int y, int width, int height, unsigned int color, unsigned int colorMask, int overlap)
+void Screen::DrawRectangle(int x, int y, int width, int height, unsigned int color, unsigned int colorMask)
 {
 	int destinationAddress = this->screenWidth * y + x;
 	for (int scanY = 0; scanY < height; ++ scanY)
 	{
 		for (int scanX = 0; scanX < width; ++ scanX)
 		{
-			if(overlap == 1 && this->screenBuffer[destinationAddress + scanX] != 0)
-			{
-				continue;
-			}
 			unsigned int writeColor = colorMask == 0xFFFFFFFF ? color : (this->screenBuffer[destinationAddress + scanX] & ~colorMask) | (color & colorMask);
 			this->screenBuffer[destinationAddress + scanX] = writeColor;
 		}
@@ -187,7 +179,7 @@ void Screen::DrawRectangle(int x, int y, int width, int height, unsigned int col
 	}
 }
 
-void Screen::DrawBox(int x, int y, int width, int height, unsigned int color, unsigned int colorMask, int overlap)
+void Screen::DrawBox(int x, int y, int width, int height, unsigned int color, unsigned int colorMask)
 {
 	std::vector<int> positionList =
 	{
@@ -197,23 +189,23 @@ void Screen::DrawBox(int x, int y, int width, int height, unsigned int color, un
 		x, y + height,
 		x, y
 	};
-	DrawLine(positionList, color, colorMask, overlap);
+	DrawLine(positionList, color, colorMask);
 }
 
-void Screen::DrawLine(int x0, int y0, int x1, int y1, unsigned int color, unsigned int colorMask, int overlap)
+void Screen::DrawLine(int x0, int y0, int x1, int y1, unsigned int color, unsigned int colorMask)
 {
 	dms::Line line;
 	line.Set(x0, y0, x1, y1);
 	int x = x0;
 	int y = y0;
-	DrawPoint(x, y, color, colorMask, overlap);
+	DrawPoint(x, y, color, colorMask);
 	while(line.Get(x, y) == false)
 	{
-		DrawPoint(x, y, color, colorMask, overlap);
+		DrawPoint(x, y, color, colorMask);
 	}
 }
 
-void Screen::DrawLine(std::vector<int>& positionList, unsigned int color, unsigned int colorMask, int overlap)
+void Screen::DrawLine(std::vector<int>& positionList, unsigned int color, unsigned int colorMask)
 {
 	size_t positionCount = positionList.size() / 2;
 	if(positionCount < 2)
@@ -227,7 +219,7 @@ void Screen::DrawLine(std::vector<int>& positionList, unsigned int color, unsign
 		size_t index = i * 2;
 		int x1 = positionList[index];
 		int y1 = positionList[index + 1];
-		DrawLine(x0, y0, x1, y1, color, colorMask, overlap);
+		DrawLine(x0, y0, x1, y1, color, colorMask);
 		x0 = x1;
 		y0 = y1;
 	}
@@ -332,13 +324,13 @@ void Screen::Print(dms::String text, bool newline)
 	}
 }
 
-void Screen::Paint(int x, int y, unsigned int color, std::vector<unsigned int>& borderColorList, int overlap)
+void Screen::Paint(int x, int y, unsigned int color, std::vector<unsigned int>& borderColorList)
 {
 	borderColorList.push_back(color);
-	PaintProc(x, y, color, borderColorList, overlap);
+	PaintProc(x, y, color, borderColorList);
 }
 
-void Screen::Pattern(int row, dms::String& pattern, unsigned int color, unsigned int colorMask, int overlap)
+void Screen::Pattern(int row, dms::String& pattern, unsigned int color, unsigned int colorMask)
 {
 	int vy = row < 0 ? 1 : -1;
 	int absRow = row < 0 ? -row : row;
@@ -347,7 +339,7 @@ void Screen::Pattern(int row, dms::String& pattern, unsigned int color, unsigned
 	int rowCount = 0;
 	for(int i = 0; i < static_cast<int>(pattern.size()); ++i)
 	{
-		DrawPattern(x, y, pattern[i], color, colorMask, overlap);
+		DrawPattern(x, y, pattern[i], color, colorMask);
 		y += vy;
 		++ rowCount;
 		if(rowCount >= absRow)
@@ -359,6 +351,54 @@ void Screen::Pattern(int row, dms::String& pattern, unsigned int color, unsigned
 	}
 	this->graphicX = x;
 	this->graphicY = y;
+}
+
+void Screen::DrawCircle(int x, int y, int r, double h, double ks, double ke, int o, unsigned int color, unsigned int colorMask)
+{
+	double start = ks;
+	double end = -ke;
+	double radius = static_cast<double>(r);
+	double xStart = cos(start) * radius;
+	double yStart = sin(start) * radius;
+	if(h < 1.0)
+	{
+		yStart *= h;
+	}
+	else if(h > 1.0)
+	{
+		xStart /= h;
+	}
+	xStart += static_cast<double>(x);
+	yStart += static_cast<double>(y);
+	double xBefore = xStart;
+	double yBefore = yStart;
+	double step = M_PI * 2.0 / 360.0;
+	start -= step;
+	color = 0xFFFF0000;
+	for(double i = start; i > end; i -= step)
+	{
+		double nextX = cos(i) * radius;
+		double nextY = sin(i) * radius;
+		if(h < 1.0)
+		{
+			nextY *= h;
+		}
+		else if(h > 1.0)
+		{
+			nextX /= h;
+		}
+		nextX += static_cast<double>(x);
+		nextY += static_cast<double>(y);
+		DrawLine(static_cast<int>(xBefore), static_cast<int>(yBefore), static_cast<int>(nextX), static_cast<int>(nextY), color, colorMask);
+		xBefore = nextX;
+		yBefore = nextY;
+		color = 0xFFFF00FF;
+	}
+	if(o != 0)
+	{
+		DrawLine(static_cast<int>(xStart), static_cast<int>(yStart), static_cast<int>(x), static_cast<int>(y), color, colorMask);
+		DrawLine(static_cast<int>(xBefore), static_cast<int>(yBefore), static_cast<int>(x), static_cast<int>(y), color, colorMask);
+	}
 }
 
 void Screen::ScrollXRange(int left, int right)
@@ -507,24 +547,24 @@ bool Screen::CheckColor(unsigned int color, std::vector<unsigned int> checkColor
 	return false;
 }
 
-void Screen::PaintProc(int x, int y, unsigned int color, std::vector<unsigned int>& borderColorList, int overlap)
+void Screen::PaintProc(int x, int y, unsigned int color, std::vector<unsigned int>& borderColorList)
 {
-	DrawPoint(x, y, color, overlap);
+	DrawPoint(x, y, color);
 	if(x < (this->screenWidth - 1) && CheckColor(GetPoint(x + 1, y), borderColorList) == false)
 	{
-		PaintProc(x + 1, y, color, borderColorList, overlap);
+		PaintProc(x + 1, y, color, borderColorList);
 	}
 	if(x > 0 && CheckColor(GetPoint(x - 1, y), borderColorList) == false)
 	{
-		PaintProc(x - 1, y, color, borderColorList, overlap);
+		PaintProc(x - 1, y, color, borderColorList);
 	}
 	if(y < (this->screenHeight - 1) && CheckColor(GetPoint(x, y + 1), borderColorList) == false)
 	{
-		PaintProc(x, y + 1, color, borderColorList, overlap);
+		PaintProc(x, y + 1, color, borderColorList);
 	}
 	if(y > 0 && CheckColor(GetPoint(x, y - 1), borderColorList) == false)
 	{
-		PaintProc(x, y - 1, color, borderColorList, overlap);
+		PaintProc(x, y - 1, color, borderColorList);
 	}
 }
 
@@ -615,16 +655,12 @@ void Screen::ReDrawText(void)
 	}
 }
 
-void Screen::DrawPattern(int x, int y, unsigned char pattern, unsigned int color, unsigned int colorMask, int overlap)
+void Screen::DrawPattern(int x, int y, unsigned char pattern, unsigned int color, unsigned int colorMask)
 {
 	for(int i = 0; i < 8; ++i)
 	{
 		int destinationAddress = this->screenWidth * y + x + 7 - i;
 		if((destinationAddress < 0) || (destinationAddress >= this->screenBufferSize))
-		{
-			continue;
-		}
-		if(overlap == 1 && this->screenBuffer[destinationAddress] != 0)
 		{
 			continue;
 		}

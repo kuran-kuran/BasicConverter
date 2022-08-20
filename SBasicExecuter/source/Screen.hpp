@@ -2,6 +2,8 @@
 #define SCREEN_HPP
 
 #include <vector>
+#define _USE_MATH_DEFINES
+#include <math.h>
 #include "String.hpp"
 
 class Screen
@@ -18,19 +20,20 @@ public:
 	void Clear(unsigned int colorMask = 0xFFFFFFFF);
 	void ClearText(void);
 	void Fill(unsigned int color, unsigned int colorMask = 0xFFFFFFFF);
-	void DrawPoint(int x, int y, unsigned int color, unsigned int colorMask = 0xFFFFFFFF, int overlap = 0);
+	void DrawPoint(int x, int y, unsigned int color, unsigned int colorMask = 0xFFFFFFFF);
 	unsigned int GetPoint(int x, int y);
-	void DrawRectangle(int x, int y, int width, int height, unsigned int color, unsigned int colorMask = 0xFFFFFFFF, int overlap = 0);
-	void DrawBox(int x, int y, int width, int height, unsigned int color, unsigned int colorMask = 0xFFFFFFFF, int overlap = 0);
-	void DrawLine(int x1, int y1, int x2, int y2, unsigned int color, unsigned int colorMask = 0xFFFFFFFF, int overlap = 0);
-	void DrawLine(std::vector<int>& positionList, unsigned int color, unsigned int colorMask = 0xFFFFFFFF, int overlap = 0);
+	void DrawRectangle(int x, int y, int width, int height, unsigned int color, unsigned int colorMask = 0xFFFFFFFF);
+	void DrawBox(int x, int y, int width, int height, unsigned int color, unsigned int colorMask = 0xFFFFFFFF);
+	void DrawLine(int x1, int y1, int x2, int y2, unsigned int color, unsigned int colorMask = 0xFFFFFFFF);
+	void DrawLine(std::vector<int>& positionList, unsigned int color, unsigned int colorMask = 0xFFFFFFFF);
 	void DrawSprite(const unsigned int* buffer, int x, int y, int width, int height, unsigned int colorMask, bool enableColorKey, unsigned int colorKey);
 	void DrawSprite(const unsigned int* buffer, int x, int y, int width, int height, int sourceX, int sourceY, int sourceWidth, unsigned int colorMask, bool enableColorKey, unsigned int colorKey);
 	void DrawFont(int x, int y, int charcterNumber, unsigned int color);
 	void DrawFont(int x, int y, int charcterNumber, unsigned int color, unsigned int backColor);
 	void Print(dms::String text, bool newline);
-	void Paint(int x, int y, unsigned int color, std::vector<unsigned int>& borderColorList, int overlap = 0);
-	void Pattern(int row, dms::String& pattern, unsigned int color, unsigned int colorMask = 0xFFFFFFFF, int overlap = 0);
+	void Paint(int x, int y, unsigned int color, std::vector<unsigned int>& borderColorList);
+	void Pattern(int row, dms::String& pattern, unsigned int color, unsigned int colorMask = 0xFFFFFFFF);
+	void DrawCircle(int x, int y, int r, double h = 0.5, double ks = 0.0, double ke = M_PI * 2.0, int o = 0, unsigned int color = 0xFFFFFFFF, unsigned int colorMask = 0xFFFFFFFF);
 	void ScrollXRange(int left, int right);
 	void ScrollYRange(int top, int bottom);
 	void SetTextX(int x);
@@ -53,10 +56,10 @@ private:
 	static const int cursorCountMax;
 	void DrawSpriteNoClip(unsigned int* distinationBuffer, const unsigned int* buffer, int x, int y, int width, int height, int sourceWidth, unsigned int colorMask, bool enableColorKey, unsigned int colorKey, bool enableBackColor, unsigned int backColor);
 	bool CheckColor(unsigned int color, std::vector<unsigned int> checkColor);
-	void PaintProc(int x, int y, unsigned int color, std::vector<unsigned int>& borderColorList, int overlap);
+	void PaintProc(int x, int y, unsigned int color, std::vector<unsigned int>& borderColorList);
 	void ScrollText(int x, int y, int width, int height, int dir);
 	void ReDrawText(void);
-	void DrawPattern(int x, int y, unsigned char pattern, unsigned int color, unsigned int colorMask = 0xFFFFFFFF, int overlap = 0);
+	void DrawPattern(int x, int y, unsigned char pattern, unsigned int color, unsigned int colorMask = 0xFFFFFFFF);
 	void FillFrameBuffer(unsigned int color);
 	void FlipGraphic(unsigned int colorMask);
 	void FlipText(unsigned int colorMask);

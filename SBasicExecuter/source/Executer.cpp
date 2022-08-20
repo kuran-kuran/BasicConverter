@@ -449,13 +449,30 @@ void Executer::Box(dms::Variable x1,dms::Variable y1,dms::Variable x2,dms::Varia
 void Executer::Circle(dms::Variable x, dms::Variable y, dms::Variable r, dms::Variable h, dms::Variable ks, dms::Variable ke, dms::Variable o, dms::Variable color, dms::Variable overlap)
 {
 	int overlapFlag = overlap == -1 ? this->overlap : overlap.GetInt();
+	double rate = 1.0;
+	double start = 0.0;
+	double end = M_PI * 2.0;
+	if(h != -1)
+	{
+		rate = h.GetDouble();
+	}
+	if(ks != -1)
+	{
+		start = ks.GetDouble();
+	}
+	if(ke != -1)
+	{
+		end = ke.GetDouble();
+	}
 	if(overlapFlag == 1)
 	{
 		unsigned int drawMask = this->colorMask;
+		this->screen.DrawCircle(x.GetInt(), y.GetInt(), r.GetInt(), rate, start, end, o.GetInt(), 0xFFFFFFFF, drawMask);
 	}
 	else
 	{
 		unsigned int drawColor = GetColor(color.GetInt());
+		this->screen.DrawCircle(x.GetInt(), y.GetInt(), r.GetInt(), rate, start, end, o.GetInt(), drawColor, 0xFFFFFFFF);
 	}
 }
 

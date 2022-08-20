@@ -5,6 +5,8 @@
 #include <time.h>
 #include <vector>
 #include <random>
+#define _USE_MATH_DEFINES
+#include <math.h>
 #include "Stack.hpp"
 #include "Variable.hpp"
 #include "Screen.hpp"
@@ -42,7 +44,7 @@ public:
 	void Bline(std::vector<dms::Variable> positionList, dms::Variable color = -1, dms::Variable overlap = -1);
 	void Paint(dms::Variable x, dms::Variable y, std::vector<dms::Variable> boarderColorList, dms::Variable color = -1, dms::Variable overlap = -1);
 	void Box(dms::Variable x1, dms::Variable y1, dms::Variable x2, dms::Variable y2, dms::Variable color = -1, dms::Variable overlap =-1);
-	void Circle(dms::Variable x, dms::Variable y, dms::Variable r, dms::Variable h, dms::Variable ks = -1, dms::Variable ke = -1, dms::Variable o = 0, dms::Variable color = -1, dms::Variable overlap = -1);
+	void Circle(dms::Variable x, dms::Variable y, dms::Variable r, dms::Variable h = -1, dms::Variable ks = -1, dms::Variable ke = -1, dms::Variable o = 0, dms::Variable color = -1, dms::Variable overlap = -1);
 	void Color(dms::Variable priority, dms::Variable color, dms::Variable output, dms::Variable overlap);
 	void CColor(dms::Variable priority, dms::Variable color, dms::Variable backGroundColor);
 	void SetData(int number, std::vector<Data> data);
