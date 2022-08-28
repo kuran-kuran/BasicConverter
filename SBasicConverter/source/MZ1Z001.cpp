@@ -1013,43 +1013,24 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 					}
 					else if(code_80_xx[byte] == "CCOLOR")
 					{
-						this->debugLine += Format("%s", code_80_xx[byte]);
-						++ this->convertIndex;
-						Convert(buffer, number, DELIMITER_END);
-						lexical = {code_80_xx[byte], this->result};
-						this->result = "";
-						AnalyzeCommand(lexical, number, subNumber, false);
-						Delimiter(number, subNumber);
-						processedDelimiter = true;
-						lexical = {"NOP", ""};
+						ConvertSub(buffer, lexical, byte, processedDelimiter, number, subNumber);
 						break;
 					}
 					else if(code_80_xx[byte] == "GRAPH")
 					{
-						this->debugLine += Format("%s", code_80_xx[byte]);
-						++ this->convertIndex;
-						Convert(buffer, number, DELIMITER_END);
-						lexical = {code_80_xx[byte], this->result};
-						this->result = "";
-						AnalyzeCommand(lexical, number, subNumber, false);
-						Delimiter(number, subNumber);
-						processedDelimiter = true;
-						lexical = {"NOP", ""};
+						ConvertSub(buffer, lexical, byte, processedDelimiter, number, subNumber);
 						break;
 					}
 					else if(code_80_xx[byte] == "CIRCLE")
 					{
-						this->debugLine += Format("%s", code_80_xx[byte]);
-						++ this->convertIndex;
 						this->circleFlag = true;
-						Convert(buffer, number, DELIMITER_END);
-						lexical = {code_80_xx[byte], this->result};
-						this->result = "";
-						AnalyzeCommand(lexical, number, subNumber, false);
-						Delimiter(number, subNumber);
-						processedDelimiter = true;
-						lexical = {"NOP", ""};
+						ConvertSub(buffer, lexical, byte, processedDelimiter, number, subNumber);
 						this->circleFlag = false;
+						break;
+					}
+					else if(code_80_xx[byte] == "PAINT")
+					{
+						ConvertSub(buffer, lexical, byte, processedDelimiter, number, subNumber);
 						break;
 					}
 					AnalyzeCommand(lexical, number, subNumber, false);
@@ -1095,6 +1076,19 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 		this->debugLine = "";
 	}
 	return true;
+}
+
+void MZ1Z001::ConvertSub(const std::vector<char>& buffer, Lexical& lexical, unsigned char byte, bool processedDelimiter, int number, int subNumber)
+{
+	this->debugLine += Format("%s", code_80_xx[byte]);
+	++ this->convertIndex;
+	Convert(buffer, number, DELIMITER_END);
+	lexical = {code_80_xx[byte], this->result};
+	this->result = "";
+	AnalyzeCommand(lexical, number, subNumber, false);
+	Delimiter(number, subNumber);
+	processedDelimiter = true;
+	lexical = {"NOP", ""};
 }
 
 void MZ1Z001::AnalyzeCommand(Lexical& lexical, int number, int& subNumber, bool delimiter)
@@ -1533,7 +1527,7 @@ std::string MZ1Z001::Read(const Lexical& lexical, bool delimiter)
 		}
 		if(i < variableList.size() - 1)
 		{
-			result += "\n";
+			result += "; ";
 		}
 	}
 	return result;
@@ -2532,7 +2526,26 @@ std::string MZ1Z001::Paint(const Lexical& lexical, bool delimiter)
 	this->closeBracketFlag = true;
 	this->addColorFlag = true;
 	std::string option = FixOptionNumber(lexical.option);
-	std::string result = "Paint(" + option;
+	std::vector<std::string> parameters = SpritText(option, ",");
+	std::string paintOption = parameters[0] + "," + parameters[1];
+	if(parameters.size() > 2)
+	{
+		paintOption += ",{";
+		for(size_t i = 2; i < parameters.size(); ++ i)
+		{
+			paintOption += parameters[i];
+			if(i < parameters.size() - 1)
+			{
+				paintOption += ",";
+			}
+		}
+		paintOption += "}";
+	}
+	else
+	{
+		paintOption += ",{}";
+	}
+	std::string result = "Paint(" + paintOption;
 	return result;
 }
 
