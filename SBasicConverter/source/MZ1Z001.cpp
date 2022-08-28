@@ -1384,7 +1384,7 @@ void MZ1Z001::AnalyzeCommand(Lexical& lexical, int number, int& subNumber, bool 
 	{
 		this->result += Box(lexical, delimiter);
 	}
-	else if(lexical.command == "Paint")
+	else if(lexical.command == "PAINT")
 	{
 		this->result += Paint(lexical, delimiter);
 	}
