@@ -179,8 +179,18 @@ void Screen::DrawRectangle(int x, int y, int width, int height, unsigned int col
 	}
 }
 
-void Screen::DrawBox(int x, int y, int width, int height, unsigned int color, unsigned int colorMask)
+void Screen::DrawBox(int x, int y, int width, int height, unsigned int color, unsigned int colorMask, bool fill, unsigned int fillColor, unsigned int fillColorMask)
 {
+	if(fill == true)
+	{
+		for(int yy = 0; yy < height; ++ yy)
+		{
+			for(int xx = 0; xx < width; ++ xx)
+			{
+				DrawPoint(x + xx, y + yy, fillColor, fillColorMask);
+			}
+		}
+	}
 	std::vector<int> positionList =
 	{
 		x, y,

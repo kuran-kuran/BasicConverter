@@ -43,7 +43,7 @@ public:
 	void Line(std::vector<dms::Variable> positionList, dms::Variable color = -1, dms::Variable overlap = -1);
 	void Bline(std::vector<dms::Variable> positionList, dms::Variable color = -1, dms::Variable overlap = -1);
 	void Paint(dms::Variable x, dms::Variable y, std::vector<dms::Variable> boarderColorList, dms::Variable color = -1, dms::Variable overlap = -1);
-	void Box(dms::Variable x1, dms::Variable y1, dms::Variable x2, dms::Variable y2, dms::Variable color = -1, dms::Variable overlap =-1);
+	void Box(dms::Variable x1, dms::Variable y1, dms::Variable x2, dms::Variable y2, dms::Variable f = -1, dms::Variable color = -1, dms::Variable overlap =-1);
 	void Circle(dms::Variable x, dms::Variable y, dms::Variable r, dms::Variable h = -1, dms::Variable ks = -1, dms::Variable ke = -1, dms::Variable o = 0, dms::Variable color = -1, dms::Variable overlap = -1);
 	void Color(dms::Variable priority, dms::Variable color, dms::Variable output, dms::Variable overlap);
 	void CColor(dms::Variable priority, dms::Variable color, dms::Variable backGroundColor);
@@ -52,11 +52,11 @@ public:
 	dms::String ReadString(void);
 	void Restore(int number);
 	void Position(dms::Variable x, dms::Variable y);
-	void Pattern(dms::Variable row, dms::String pattern);
+	void Pattern(dms::Variable row, dms::String pattern, dms::Variable color = -1, dms::Variable overlap = -1);
 	void GraphInput(int input);
 	void GraphOutput(unsigned int output);
-	void ClearGraph(void);
-	void FillGraph(void);
+	void ClearGraph(dms::Variable color = -1);
+	void FillGraph(dms::Variable color = -1);
 	void SetStretchWidth(dms::Variable stretch);
 	void SetStretchHeight(dms::Variable stretch);
 	void SetTextStretchWidth(dms::Variable stretch);

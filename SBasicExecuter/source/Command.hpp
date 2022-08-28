@@ -113,7 +113,7 @@ inline void Paint(dms::Variable x, dms::Variable y, std::vector<dms::Variable> b
 	Executer::GetInstance()->Paint(x, y, boarderColorList, color, overlap);
 }
 
-inline void Box(dms::Variable x1, dms::Variable y1, dms::Variable x2, dms::Variable y2, dms::Variable color = -1, dms::Variable overlap = -1)
+inline void Box(dms::Variable x1, dms::Variable y1, dms::Variable x2, dms::Variable y2, dms::Variable f = -1, dms::Variable color = -1, dms::Variable overlap = -1)
 {
 	Executer::GetInstance()->Box(x1, y1, x2, y2, color, overlap);
 }
@@ -157,9 +157,9 @@ inline void Position(dms::Variable x, dms::Variable y)
 	Executer::GetInstance()->Position(x, y);
 }
 
-inline void Pattern(dms::Variable row, dms::String pattern)
+inline void Pattern(dms::Variable row, dms::String pattern, dms::Variable color = -1, dms::Variable overlap = -1)
 {
-	Executer::GetInstance()->Pattern(row, pattern);
+	Executer::GetInstance()->Pattern(row, pattern, color, overlap);
 }
 
 inline void GraphInput(int input)
@@ -172,14 +172,14 @@ inline void GraphOutput(unsigned int output)
 	Executer::GetInstance()->GraphOutput(output);
 }
 
-inline void ClearGraph(void)
+inline void ClearGraph(dms::Variable color = -1)
 {
-	return Executer::GetInstance()->ClearGraph();
+	return Executer::GetInstance()->ClearGraph(color);
 }
 
-inline void FillGraph(void)
+inline void FillGraph(dms::Variable color = -1)
 {
-	return Executer::GetInstance()->FillGraph();
+	return Executer::GetInstance()->FillGraph(color);
 }
 
 inline void SetStretchWidth(dms::Variable stretch)
