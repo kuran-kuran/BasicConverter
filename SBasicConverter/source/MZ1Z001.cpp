@@ -842,7 +842,7 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 	this->forPhase = 0;
 	this->defFnFlag = false;
 	this->closeBracketFlag = false;
-	if(number == 150)
+	if(number == 11800)
 	{
 		int a = 0;
 	}
@@ -1014,11 +1014,13 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 					else if(code_80_xx[byte] == "CCOLOR")
 					{
 						ConvertSub(buffer, lexical, byte, processedDelimiter, number, subNumber);
+						phase = 1;
 						break;
 					}
 					else if(code_80_xx[byte] == "GRAPH")
 					{
 						ConvertSub(buffer, lexical, byte, processedDelimiter, number, subNumber);
+						phase = 1;
 						break;
 					}
 					else if(code_80_xx[byte] == "CIRCLE")
@@ -1026,11 +1028,19 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 						this->circleFlag = true;
 						ConvertSub(buffer, lexical, byte, processedDelimiter, number, subNumber);
 						this->circleFlag = false;
+						phase = 1;
 						break;
 					}
 					else if(code_80_xx[byte] == "PAINT")
 					{
 						ConvertSub(buffer, lexical, byte, processedDelimiter, number, subNumber);
+						phase = 1;
+						break;
+					}
+					else if(code_80_xx[byte] == "BOX")
+					{
+						ConvertSub(buffer, lexical, byte, processedDelimiter, number, subNumber);
+						phase = 1;
 						break;
 					}
 					AnalyzeCommand(lexical, number, subNumber, false);
@@ -1078,7 +1088,7 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 	return true;
 }
 
-void MZ1Z001::ConvertSub(const std::vector<char>& buffer, Lexical& lexical, unsigned char byte, bool processedDelimiter, int number, int subNumber)
+void MZ1Z001::ConvertSub(const std::vector<char>& buffer, Lexical& lexical, unsigned char byte, bool processedDelimiter, int number, int& subNumber)
 {
 	this->debugLine += Format("%s", code_80_xx[byte]);
 	++ this->convertIndex;
@@ -1089,6 +1099,7 @@ void MZ1Z001::ConvertSub(const std::vector<char>& buffer, Lexical& lexical, unsi
 	Delimiter(number, subNumber);
 	processedDelimiter = true;
 	lexical = {"NOP", ""};
+	-- this->convertIndex;
 }
 
 void MZ1Z001::AnalyzeCommand(Lexical& lexical, int number, int& subNumber, bool delimiter)
@@ -2516,7 +2527,30 @@ std::string MZ1Z001::Box(const Lexical& lexical, bool delimiter)
 	this->closeBracketFlag = true;
 	this->addColorFlag = true;
 	std::string option = FixOptionNumber(lexical.option);
-	std::string result = "Box(" + option;
+	std::vector<std::string> parameters = SpritText(option, ",");
+	std::string boxOption = parameters[0] + "," + parameters[1] + "," + parameters[2] + "," + parameters[3];
+	if(parameters.size() > 4)
+	{
+		std::string fill = EraseSpace(parameters[4]);
+		if(fill[0] == 'F')
+		{
+			fill.erase(0, 1);
+			if(fill.size() == 0)
+			{
+				boxOption += ",0_n"; // ìhÇËÇ¬Ç‘ÇµÇÕògÇ∆ìØÇ∂êF
+			}
+			else
+			{
+				boxOption += fill; // ìhÇËÇ¬Ç‘ÇµêFéwíË
+				boxOption += "_n";
+			}
+		}
+	}
+	else
+	{
+		boxOption += ",-1_n"; // ìhÇËÇ¬Ç‘ÇµÇÕÇµÇ»Ç¢ògÇÃÇ›
+	}
+	std::string result = "Box(" + boxOption;
 	return result;
 }
 
@@ -2720,6 +2754,10 @@ std::string MZ1Z001::FixColorOption(std::string option, bool colorCommand)
 		{
 			fixOption += fixText;
 		}
+	}
+	else
+	{
+		fixOption += ",0";
 	}
 	fixOption = FixOptionNumber(fixOption);
 	return fixOption;

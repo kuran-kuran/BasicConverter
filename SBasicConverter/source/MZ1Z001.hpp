@@ -36,7 +36,7 @@ private:
 	bool IsBrackets(void);
 	std::vector<char> PreConvertLine(const std::vector<char>& buffer, int number);
 	bool Convert(const std::vector<char>& buffer, int number, int conditions);
-	void ConvertSub(const std::vector<char>& buffer, Lexical& lexical, unsigned char byte, bool processedDelimiter, int number, int subNumber);
+	void ConvertSub(const std::vector<char>& buffer, Lexical& lexical, unsigned char byte, bool processedDelimiter, int number, int& subNumber);
 	void AnalyzeCommand(Lexical& lexical, int number, int& subNumber, bool delimiter);
 	void Delimiter(int number, int& subNumber);
 	void AddColor(void);
