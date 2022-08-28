@@ -849,6 +849,7 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 	bool encodeAfter = false;
 	bool remFlag = false;
 	bool processedDelimiter = false;
+	bool dataFlag = false;
 	while(this->convertIndex < buffer.size())
 	{
 		size_t i = this->convertIndex;
@@ -885,6 +886,7 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 			processedDelimiter = true;
 			lexical = {"NOP", ""};
 			remFlag = false;
+			dataFlag = false;
 			this->defKeyFlag = false;
 			this->patternFlag = false;
 			this->patternSeparatorCount = 0;
@@ -914,11 +916,11 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 		{
 			byte = '+';
 		}
-		if((phase == 1) && (byte == 0x80) && (remFlag == false))
+		if((phase == 1) && (byte == 0x80) && (remFlag == false) && (dataFlag == false))
 		{
 			phase = 2;
 		}
-		else if((phase == 1) && (byte == 0xB2) && (remFlag == false))
+		else if((phase == 1) && (byte == 0xB2) && (remFlag == false) && (dataFlag == false))
 		{
 			phase = 3;
 		}
@@ -967,7 +969,7 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 				}
 				break;
 			case 1:
-				if((code_xx[byte] != 0) && (remFlag == false))
+				if((code_xx[byte] != 0) && (remFlag == false) && (dataFlag == false))
 				{
 					AnalyzeCommand(lexical, number, subNumber, false);
 					lexical = {code_xx[byte], ""};
@@ -991,6 +993,10 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 					if(code_80_xx[byte] == "DEF KEY(")
 					{
 						this->defKeyFlag = true;
+					}
+					if(code_80_xx[byte] == "DATA")
+					{
+						dataFlag = true;
 					}
 					if(code_80_xx[byte] == "COLOR")
 					{
@@ -1029,6 +1035,21 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 						Delimiter(number, subNumber);
 						processedDelimiter = true;
 						lexical = {"NOP", ""};
+						break;
+					}
+					else if(code_80_xx[byte] == "CIRCLE")
+					{
+						this->debugLine += Format("%s", code_80_xx[byte]);
+						++ this->convertIndex;
+						this->circleFlag = true;
+						Convert(buffer, number, DELIMITER_END);
+						lexical = {code_80_xx[byte], this->result};
+						this->result = "";
+						AnalyzeCommand(lexical, number, subNumber, false);
+						Delimiter(number, subNumber);
+						processedDelimiter = true;
+						lexical = {"NOP", ""};
+						this->circleFlag = false;
 						break;
 					}
 					AnalyzeCommand(lexical, number, subNumber, false);
@@ -2489,10 +2510,11 @@ std::string MZ1Z001::Circle(const Lexical& lexical, bool delimiter)
 	this->wMode = 0;
 	this->closeBracketFlag = true;
 	this->addColorFlag = true;
-	std::string option = FixOptionNumber(lexical.option);
+	std::string option = FixCircleOption(lexical.option);
 	std::string result = "Circle(" + option;
 	return result;
 }
+
 
 std::string MZ1Z001::Box(const Lexical& lexical, bool delimiter)
 {
@@ -3277,6 +3299,33 @@ std::string MZ1Z001::FixPrintOption(std::string sourceOption, bool delimiter, bo
 		if(byte > 0)
 		{
 			result += Format("%c", byte);
+		}
+	}
+	return result;
+}
+
+std::string MZ1Z001::FixCircleOption(std::string sourceOption)
+{
+	std::string result;
+	std::string option = FixOptionNumber(sourceOption);
+	std::vector<std::string> spritText = SpritText(option, ",");
+	for(size_t i = 0; i < 7; ++ i)
+	{
+		if(i < spritText.size())
+		{
+			result += spritText[i];
+		}
+		else if(i == 6)
+		{
+			result += "0_n";
+		}
+		else
+		{
+			result += "-1_n";
+		}
+		if(i < 6)
+		{
+			result += ",";
 		}
 	}
 	return result;

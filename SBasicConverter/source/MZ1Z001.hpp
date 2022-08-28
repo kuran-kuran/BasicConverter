@@ -142,6 +142,7 @@ private:
 	bool FindDefFnFuncList(std::string variableName);
 	std::string FixOption(std::string sourceCommand, std::string sourceOption, bool delimiter);
 	std::string FixPrintOption(std::string sourceOption, bool delimiter, bool commaToPlus);
+	std::string FixCircleOption(std::string sourceOption);
 	std::string FixOptionNumber(std::string sourceOption);
 	void DebugLog(std::string text);
 	int space;
@@ -167,6 +168,7 @@ private:
 	bool closeBracesFlag;
 	bool closeBracketFlag;
 	bool addColorFlag;
+	bool circleFlag;
 	char* buffer;
 	int linePointer;
 	std::map<int, std::vector<char>> programBuffer;

@@ -118,7 +118,7 @@ inline void Box(dms::Variable x1, dms::Variable y1, dms::Variable x2, dms::Varia
 	Executer::GetInstance()->Box(x1, y1, x2, y2, color, overlap);
 }
 
-inline void Circle(dms::Variable x, dms::Variable y, dms::Variable r, dms::Variable h = 0.5, dms::Variable ks = 0.0, dms::Variable ke = M_PI * 2.0, dms::Variable o = 0, dms::Variable color = -1, dms::Variable overlap = -1)
+inline void Circle(dms::Variable x, dms::Variable y, dms::Variable r, dms::Variable h = -1, dms::Variable ks = -1, dms::Variable ke = -1, dms::Variable o = 0, dms::Variable color = -1, dms::Variable overlap = -1)
 {
 	Executer::GetInstance()->Circle(x, y, r, h, ks, ke, o, color, overlap);
 }
