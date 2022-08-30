@@ -789,7 +789,7 @@ void Screen::HideCursor(void)
 
 bool Screen::ControlCode(int character)
 {
-
+	KeyBoard& keyBoard = KeyBoard::GetInstance();
 	bool controll = false;
 	switch(character)
 	{
@@ -842,6 +842,27 @@ bool Screen::ControlCode(int character)
 		break;
 	case 6:
 		ClearText();
+		controll = true;
+		break;
+	case 9:
+		// GRPHモード
+		keyBoard.SetGrph(true);
+		controll = true;
+		break;
+	case 12:
+		// かなモード
+		keyBoard.SetKana(true);
+		controll = true;
+		break;
+	case 14:
+		// かな、GRPHモード解除
+		keyBoard.SetKana(false);
+		keyBoard.SetGrph(false);
+		controll = true;
+		break;
+	case 15:
+		// かな解除
+		keyBoard.SetKana(false);
 		controll = true;
 		break;
 	}
