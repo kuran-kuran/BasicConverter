@@ -512,8 +512,9 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 	bool searchVariable = true;
 	int phase = 1;	// 0=direct, 1=code, 2=code80, 3=codeB2
 	bool defFn = false;
-	bool data = false;
 	bool pattern = false;
+	bool remFlag = false;
+	bool dataFlag = false;
 	int patternSeparatorCount = 0;
 	int patternBracketsCount = 0;
 	this->bracketsCountList.clear();
@@ -523,7 +524,7 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 	bool firstVariable = false;
 	bool defKey = false;
 	unsigned char* buf = (unsigned char*)&buffer[0];
-	if(number == 50)
+	if(number == 9140)
 	{
 		int a = 0;
 	}
@@ -537,12 +538,16 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 			{
 				// 改行前に"が閉じられてないときは"を足す
 				result.push_back('\"');
-				result.push_back('_');
-				result.push_back('s');
+				if(dataFlag == false)
+				{
+					result.push_back('_');
+					result.push_back('s');
+				}
 			}
 			SetVariableName(variable, result, false, number);
 			result.push_back(byte);
-			data = false;
+			dataFlag = false;
+			remFlag = false;
 			defKey = false;
 			break;
 		}
@@ -578,7 +583,7 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 			// 色指定は判別のために[]から{}に変えておく
 			result.push_back('}');
 		}
-		else if((phase == 1) && (byte == 0x80))
+		else if((phase == 1) && (byte == 0x80) && (remFlag == false) && (dataFlag == false))
 		{
 			if(SetVariableName(variable, result, false, number) == true)
 			{
@@ -588,7 +593,7 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 			result.push_back(byte);
 			phase = 2;
 		}
-		else if((phase == 1) && (byte == 0xB2))
+		else if((phase == 1) && (byte == 0xB2) && (remFlag == false) && (dataFlag == false))
 		{
 			if(SetVariableName(variable, result, false, number) == true)
 			{
@@ -608,7 +613,7 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 					first = false;
 				}
 				result.push_back(byte);
-				if(data == false)
+				if(dataFlag == false)
 				{
 					result.push_back('_');
 					result.push_back('s');
@@ -639,7 +644,7 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 				result.push_back(byte);
 				break;
 			case 1:
-				if(code_xx[byte] != 0)
+				if((code_xx[byte] != 0) && (remFlag == false) && (dataFlag == false))
 				{
 					if(SetVariableName(variable, result, false, number) == true)
 					{
@@ -729,13 +734,17 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 			case 2:
 				if(code_80_xx[byte] != 0)
 				{
+					if(code_80_xx[byte] == "REM")
+					{
+						remFlag = true;
+					}
 					if(code_80_xx[byte] == "DEF FN")
 					{
 						defFn = true;
 					}
 					if(code_80_xx[byte] == "DATA")
 					{
-						data = true;
+						dataFlag = true;
 					}
 					if(code_80_xx[byte] == "PATTERN")
 					{
@@ -842,7 +851,7 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 	this->forPhase = 0;
 	this->defFnFlag = false;
 	this->closeBracketFlag = false;
-	if(number == 11800)
+	if(number == 9140)
 	{
 		int a = 0;
 	}
@@ -869,6 +878,7 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 			}
 			Delimiter(number, subNumber);
 			processedDelimiter = true;
+			remFlag = false;
 			lexical = {"NOP", ""};
 			this->defKeyFlag = false;
 			break;
@@ -885,8 +895,6 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 			Delimiter(number, subNumber);
 			processedDelimiter = true;
 			lexical = {"NOP", ""};
-			remFlag = false;
-			dataFlag = false;
 			this->defKeyFlag = false;
 			this->patternFlag = false;
 			this->patternSeparatorCount = 0;
@@ -1000,15 +1008,8 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 					}
 					if(code_80_xx[byte] == "COLOR")
 					{
-						this->debugLine += Format("%s", code_80_xx[byte]);
-						++ this->convertIndex;
-						Convert(buffer, number, DELIMITER_END);
-						lexical = {code_80_xx[byte], this->result};
-						this->result = "";
-						AnalyzeCommand(lexical, number, subNumber, false);
-						Delimiter(number, subNumber);
-						processedDelimiter = true;
-						lexical = {"NOP", ""};
+						ConvertSub(buffer, lexical, byte, processedDelimiter, number, subNumber);
+						phase = 1;
 						break;
 					}
 					else if(code_80_xx[byte] == "CCOLOR")
@@ -3005,7 +3006,7 @@ std::string MZ1Z001::ParseData(const std::string& data)
 			}
 			if(byte == ',')
 			{
-				result += "\",\"";
+				result += "\"_s,\"";
 				continue;
 			}
 			if(CheckEncode(byte) == true)
@@ -3027,7 +3028,7 @@ std::string MZ1Z001::ParseData(const std::string& data)
 			}
 		}
 	}
-	result += "\"}";
+	result += "\"_s}";
 	return result;
 }
 
