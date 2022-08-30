@@ -434,32 +434,36 @@ void Executer::Box(dms::Variable x1,dms::Variable y1,dms::Variable x2,dms::Varia
 	int width = x2.GetInt() - x1.GetInt();
 	int height = y2.GetInt() - y1.GetInt();
 	int overlapFlag = overlap == -1 ? this->overlap : overlap.GetInt();
-	bool fill = false;
-	unsigned int fillColor = 0xFFFFFFFF;
-	unsigned int fillMask = 0xFFFFFFFF;
 	if(f.GetInt() >= 0)
 	{
 		// “h‚è‚Â‚Ô‚·
-		fill = true;
-		if(f.GetInt() == 0)
-		{
-			// ˜g‚Æ“¯‚¶F‚Å“h‚è‚Â‚Ô‚·
-			fillColor = color;
-		}
-		else
-		{
-			// “h‚è‚Â‚Ô‚·FŽw’è
-			fillColor = GetColor(f.GetInt());
-		}
 		if(overlapFlag == 1)
 		{
+			// W1
 			unsigned int drawMask = this->colorMask;
-			this->screen.DrawBox(x1.GetInt(), y1.GetInt(), width, height, 0xFFFFFFFF, drawMask, true, 0xFFFFFFFF, fillColor);
+			if(f.GetInt() == 0)
+			{
+				this->screen.DrawBox(x1.GetInt(), y1.GetInt(), width, height, 0xFFFFFFFF, drawMask, true, 0xFFFFFFFF, drawMask);
+			}
+			else
+			{
+				unsigned int fillMask = GetColor(f.GetInt());
+				this->screen.DrawBox(x1.GetInt(), y1.GetInt(), width, height, 0xFFFFFFFF, drawMask, true, 0xFFFFFFFF, fillMask);
+			}
 		}
 		else
 		{
+			// W0
 			unsigned int drawColor = GetColor(color.GetInt());
-			this->screen.DrawBox(x1.GetInt(), y1.GetInt(), width, height, drawColor, 0xFFFFFFFF, true, fillColor, 0xFFFFFFFF);
+			if(f.GetInt() == 0)
+			{
+				this->screen.DrawBox(x1.GetInt(), y1.GetInt(), width, height, drawColor, 0xFFFFFFFF, true, drawColor, 0xFFFFFFFF);
+			}
+			else
+			{
+				unsigned int fillColor = GetColor(f.GetInt());
+				this->screen.DrawBox(x1.GetInt(), y1.GetInt(), width, height, drawColor, 0xFFFFFFFF, true, fillColor, 0xFFFFFFFF);
+			}
 		}
 	}
 	else
@@ -1138,6 +1142,7 @@ unsigned int Executer::GetColor(int colorCode)
 {
 	static unsigned int colorTable[] =
 	{
+	//    AARRGGBB
 		0xFF000000,
 		0xFF0000FF,
 		0xFFFF0000,

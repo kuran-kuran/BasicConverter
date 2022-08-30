@@ -115,7 +115,7 @@ inline void Paint(dms::Variable x, dms::Variable y, std::vector<dms::Variable> b
 
 inline void Box(dms::Variable x1, dms::Variable y1, dms::Variable x2, dms::Variable y2, dms::Variable f = -1, dms::Variable color = -1, dms::Variable overlap = -1)
 {
-	Executer::GetInstance()->Box(x1, y1, x2, y2, color, overlap);
+	Executer::GetInstance()->Box(x1, y1, x2, y2, f, color, overlap);
 }
 
 inline void Circle(dms::Variable x, dms::Variable y, dms::Variable r, dms::Variable h = -1, dms::Variable ks = -1, dms::Variable ke = -1, dms::Variable o = 0, dms::Variable color = -1, dms::Variable overlap = -1)

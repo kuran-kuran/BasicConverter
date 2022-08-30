@@ -384,7 +384,6 @@ void Screen::DrawCircle(int x, int y, int r, double h, double ks, double ke, int
 	double yBefore = yStart;
 	double step = M_PI * 2.0 / 360.0;
 	start -= step;
-	color = 0xFFFF0000;
 	for(double i = start; i > end; i -= step)
 	{
 		double nextX = cos(i) * radius;
@@ -402,7 +401,6 @@ void Screen::DrawCircle(int x, int y, int r, double h, double ks, double ke, int
 		DrawLine(static_cast<int>(xBefore), static_cast<int>(yBefore), static_cast<int>(nextX), static_cast<int>(nextY), color, colorMask);
 		xBefore = nextX;
 		yBefore = nextY;
-		color = 0xFFFF00FF;
 	}
 	if(o != 0)
 	{
