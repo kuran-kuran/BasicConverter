@@ -93,8 +93,12 @@ public:
 	dms::Variable Sqr(dms::Variable number);
 	dms::Variable Csrh(void);
 	dms::Variable Csrv(void);
+	void SetCsrh(dms::Variable h);
+	void SetCsrv(dms::Variable v);
 	dms::Variable Posh(void);
 	dms::Variable Posv(void);
+
+
 	dms::String Character(dms::Variable x, dms::Variable y);
 	void Input(dms::String* inputText, bool showQuestion);
 	void Input(dms::Variable* inputNumber, bool showQuestion);

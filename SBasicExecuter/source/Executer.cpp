@@ -105,6 +105,9 @@ void Executer::Initialize(std::vector<void (*)(void)> lineList, unsigned int* fr
 	this->mainMemory[0x11CD] = 65;
 	this->mainMemory[0x11CE] = 70;
 	this->mainMemory[0x11CF] = 75;
+	// カーソル位置
+	this->mainMemory[0x11D1] = 0;
+	this->mainMemory[0x11D2] = 0;
 	// 乱数初期化
 	std::random_device randomDevice;
 	unsigned int seedValue = randomDevice();
@@ -131,7 +134,12 @@ bool Executer::ExecuteLoop(void)
 		return this->end;
 	}
 	DebugLog(dms::Format("Execute line: %d\n", this->executeLine));
+
+	this->screen.SetTextX(this->mainMemory[0x11D1]);
+	this->screen.SetTextY(this->mainMemory[0x11D2]);
 	this->lineList[this->executeLine]();
+	this->mainMemory[0x11D1] = this->screen.GetTextX();
+	this->mainMemory[0x11D2] = this->screen.GetTextY();
 	if(this->jumpLine == -1)
 	{
 		++ this->executeLine;
@@ -768,7 +776,20 @@ dms::String Executer::Right(dms::String text, dms::Variable n)
 
 dms::String Executer::Mid(dms::String text, dms::Variable m, dms::Variable n)
 {
-	return text.substr(static_cast<size_t>(m.GetInt()) - 1, n.GetInt());
+	int index = m.GetInt() - 1; // 3
+	// 第2引数が文字列長を超過している場合は空文字列
+	if(index >= text.size())
+	{
+		return "";
+	}
+	// 第3引数が文字列長を超過
+	int restLength = static_cast<int>(text.size()) - index; // 9 - 3 = 6
+	int length = n.GetInt(); // 7
+	if(restLength < length)
+	{
+		length = restLength;
+	}
+	return text.substr(static_cast<size_t>(m.GetInt()) - 1, length);
 }
 
 dms::Variable Executer::Len(dms::String text)
@@ -922,6 +943,16 @@ dms::Variable Executer::Csrh(void)
 dms::Variable Executer::Csrv(void)
 {
 	return this->screen.GetTextY();
+}
+
+void Executer::SetCsrh(dms::Variable h)
+{
+	this->screen.SetTextX(h.GetInt());
+}
+
+void Executer::SetCsrv(dms::Variable v)
+{
+	this->screen.SetTextX(v.GetInt());
 }
 
 dms::Variable Executer::Posh(void)
@@ -1099,6 +1130,8 @@ void Executer::Poke(dms::Variable address, dms::Variable data)
 	{
 		keyBoard.SetRepeat(false);
 	}
+	this->screen.SetTextX(this->mainMemory[0x11D1]);
+	this->screen.SetTextY(this->mainMemory[0x11D2]);
 }
 
 void Executer::Usr(dms::Variable address, dms::String option)
