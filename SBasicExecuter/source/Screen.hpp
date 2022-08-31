@@ -46,12 +46,15 @@ public:
 	int GetGraphicY(void);
 	int GetTextWidth(void);
 	int GetTextHeight(void);
+	int GetGraphicWidth(void);
+	int GetGraphicHeight(void);
 	unsigned char GetScreenText(int x, int y);
 	unsigned int* GetScreenBuffer(void);
 	void Flip(unsigned int textColorMask, unsigned int graphicColorMask, unsigned int backGroundColor, int priority);
 	void ReturnText(void);
 	void ShowCursor(void);
 	void HideCursor(void);
+	void DrawPattern(int x, int y, unsigned char pattern, unsigned int color, unsigned int colorMask = 0xFFFFFFFF);
 private:
 	static const int cursorCountMax;
 	void DrawSpriteNoClip(unsigned int* distinationBuffer, const unsigned int* buffer, int x, int y, int width, int height, int sourceWidth, unsigned int colorMask, bool enableColorKey, unsigned int colorKey, bool enableBackColor, unsigned int backColor);
@@ -59,7 +62,6 @@ private:
 	void PaintProc(int x, int y, unsigned int color, std::vector<unsigned int>& borderColorList);
 	void ScrollText(int x, int y, int width, int height, int dir);
 	void ReDrawText(void);
-	void DrawPattern(int x, int y, unsigned char pattern, unsigned int color, unsigned int colorMask = 0xFFFFFFFF);
 	void FillFrameBuffer(unsigned int color);
 	void FlipGraphic(unsigned int colorMask);
 	void FlipText(unsigned int colorMask);

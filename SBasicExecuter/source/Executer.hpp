@@ -97,8 +97,6 @@ public:
 	void SetCsrv(dms::Variable v);
 	dms::Variable Posh(void);
 	dms::Variable Posv(void);
-
-
 	dms::String Character(dms::Variable x, dms::Variable y);
 	void Input(dms::String* inputText, bool showQuestion);
 	void Input(dms::Variable* inputNumber, bool showQuestion);
@@ -115,6 +113,8 @@ public:
 	void DebugLog(dms::String text);
 	void Out(dms::Variable ioAddress, dms::Variable data);
 	void Run(void);
+	Screen& GetScreen(void);
+	void UsrPatch(dms::Variable address, void (*callback)(dms::String*));
 private:
 	Executer(void);
 	~Executer(void);
@@ -154,5 +154,6 @@ private:
 	BeepMusic beepMusic;
 	bool isOutputLog;
 	int overlap;
+	std::map<int, void (*)(dms::String*)> usrPatchList;
 };
 #endif

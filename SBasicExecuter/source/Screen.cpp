@@ -482,7 +482,17 @@ int Screen::GetTextWidth(void)
 
 int Screen::GetTextHeight(void)
 {
-	return this->textHeight;;
+	return this->textHeight;
+}
+
+int Screen::GetGraphicWidth(void)
+{
+	return this->screenWidth;
+}
+
+int Screen::GetGraphicHeight(void)
+{
+	return this->screenHeight;
 }
 
 void Screen::Flip(unsigned int textColorMask, unsigned int graphicColorMask, unsigned int backGroundColor, int priority)

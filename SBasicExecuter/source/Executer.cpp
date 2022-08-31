@@ -1142,6 +1142,10 @@ void Executer::Usr(dms::Variable address, dms::String option)
 		dms::Variable tone = Peek(0x0F1A);
 		this->beepMusic.Beep(tone.GetInt());
 	}
+	if(this->usrPatchList.count(address.GetInt()))
+	{
+		this->usrPatchList[address.GetInt()](&option);
+	}
 }
 
 void Executer::Limit(dms::Variable address)
@@ -1169,6 +1173,16 @@ void Executer::Run(void)
 	this->jumpLine = -1;
 	this->end = false;
 	Restore(-1);
+}
+
+Screen& Executer::GetScreen(void)
+{
+	return this->screen;
+}
+
+void Executer::UsrPatch(dms::Variable address, void (*callback)(dms::String*))
+{
+	this->usrPatchList[address.GetInt()] = callback;
 }
 
 unsigned int Executer::GetColor(int colorCode)
