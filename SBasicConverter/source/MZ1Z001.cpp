@@ -115,36 +115,20 @@ bool MZ1Z001::ConvertFile(const std::string filepath, const std::string outputFi
 	{
 		DebugLog(Format("%s\n", this->variableList[i].c_str()).c_str());
 	}
-	// プログラム出力
-	std::string writePath = filepath;
-	writePath.erase(writePath.size() - 4, 4);
-	writePath += ".cpp";
+	// ヘッダファイル出力
+	std::string writeHeaderPath = filepath;
+	writeHeaderPath.erase(writeHeaderPath.size() - 4, 4);
+	writeHeaderPath += ".hpp";
 	if(outputFilepath.empty() != true)
 	{
-		writePath = outputFilepath;
+		writeHeaderPath = outputFilepath;
+		writeHeaderPath.erase(writeHeaderPath.size() - 4, 4);
+		writeHeaderPath += ".hpp";
 	}
-	// include
-	std::string writeData;
-	writeData += "#include \"Command.hpp\"\n";
-	writeData += "\n";
-	// ユーザー定義リテラル
-	writeData += "// User defined literals\n";
-	writeData += "dms::String operator \"\" _s(const char* str, std::size_t length)\n";
-	writeData += "{\n";
-	writeData += "\treturn dms::String(str);\n";
-	writeData += "}\n";
-	writeData += "\n";
-	writeData += "dms::Variable operator \"\" _n(unsigned long long x)\n";
-	writeData += "{\n";
-	writeData += "\treturn static_cast<int>(x);\n";
-	writeData += "}\n";
-	writeData += "\n";
-	writeData += "dms::Variable operator \"\" _f( long double value )\n";
-	writeData += "{\n";
-	writeData += "\treturn static_cast<double>(value);\n";
-	writeData += "}\n";
-	writeData += "\n";
 	// Define
+	std::string writeData;
+	writeData += "#ifndef BASIC_HPP\n";
+	writeData += "#define BASIC_HPP\n\n";
 	writeData += "// Program line define\n";
 	int number = 0;
 	for(auto iter = this->program.begin(); iter != this->program.end(); ++ iter)
@@ -168,6 +152,42 @@ bool MZ1Z001::ConvertFile(const std::string filepath, const std::string outputFi
 		writeData += "\n";
 		++ number;
 	}
+	writeData += "\n";
+	writeData += "#endif\n";
+	// ファイル書き込み
+	FileData writeHeaderFileData;
+	writeHeaderFileData.SetBuffer(&writeData[0], writeData.size());
+	writeHeaderFileData.Save(writeHeaderPath);
+
+	// プログラム出力
+	std::string writeProgramPath = filepath;
+	writeProgramPath.erase(writeProgramPath.size() - 4, 4);
+	writeProgramPath += ".cpp";
+	if(outputFilepath.empty() != true)
+	{
+		writeProgramPath = outputFilepath;
+	}
+	// include
+	writeData.clear();
+	writeData += "#include \"Command.hpp\"\n";
+	writeData += "#include \"" + writeHeaderPath + "\"\n";
+	writeData += "\n";
+	// ユーザー定義リテラル
+	writeData += "// User defined literals\n";
+	writeData += "dms::String operator \"\" _s(const char* str, std::size_t length)\n";
+	writeData += "{\n";
+	writeData += "\treturn dms::String(str);\n";
+	writeData += "}\n";
+	writeData += "\n";
+	writeData += "dms::Variable operator \"\" _n(unsigned long long x)\n";
+	writeData += "{\n";
+	writeData += "\treturn static_cast<int>(x);\n";
+	writeData += "}\n";
+	writeData += "\n";
+	writeData += "dms::Variable operator \"\" _f( long double value )\n";
+	writeData += "{\n";
+	writeData += "\treturn static_cast<double>(value);\n";
+	writeData += "}\n";
 	writeData += "\n";
 	// グローバル
 	writeData += "// Grobal\n";
@@ -236,12 +256,23 @@ bool MZ1Z001::ConvertFile(const std::string filepath, const std::string outputFi
 	writeData += "\n";
 	// 関数配列
 	writeData += "std::vector<void (*)(void)> lineList =\n{\n";
+	int writeCount = 0;
 	for(auto iter = this->program.begin(); iter != this->program.end(); ++ iter)
 	{
 		std::string numberText = "\tl";
 		numberText += iter->first.c_str();
 		writeData += numberText;
-		writeData += ",\n";
+		writeData += ",";
+		++ writeCount;
+		if(writeCount == 16)
+		{
+			writeData += "\n";
+			writeCount = 0;
+		}
+	}
+	if(writeCount != 0)
+	{
+		writeData += "\n";
 	}
 	writeData += "};\n";
 	writeData += "\n";
@@ -285,9 +316,9 @@ bool MZ1Z001::ConvertFile(const std::string filepath, const std::string outputFi
 	writeData += "\texecuter->Flip();\n";
 	writeData += "}\n";
 	// ファイル書き込み
-	FileData writeFileData;
-	writeFileData.SetBuffer(&writeData[0], writeData.size());
-	writeFileData.Save(writePath);
+	FileData writeProgramFileData;
+	writeProgramFileData.SetBuffer(&writeData[0], writeData.size());
+	writeProgramFileData.Save(writeProgramPath);
 	return true;
 }
 
