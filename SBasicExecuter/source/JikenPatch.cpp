@@ -31,6 +31,72 @@ void DrawArrow(dms::String* parameter)
 	Executer::GetInstance()->Poke(dms::Variable(0xF47D), data);
 }
 
+void Scenario(dms::String* parameter)
+{
+	int type = static_cast<unsigned char>((*parameter)[0]) * 256 + (*parameter)[1];
+	dms::String input = (*parameter).substr(5);
+	int k = 0;
+	int l = 0;
+	switch(type)
+	{
+	case 0xFD1A:
+		if(input.find("ｱﾎ", 0) != -1)
+		{
+			k = 1;
+		}
+		if(input.find("ﾊﾞｶ", 0) != -1)
+		{
+			k = 1;
+		}
+		break;
+	case 0xFFDC:
+		if(input.find("ｲｸ", 0) != -1)
+		{
+			if(input.find("ﾐｷﾞ", 0) != -1)
+			{
+				k = 1;
+			}
+			else if(input.find("ﾋﾀﾞﾘ", 0) != -1)
+			{
+				k = 2;
+			}
+			else if(input.find("ﾏｴ", 0) != -1)
+			{
+				k = 3;
+			}
+		}
+		break;
+	case 0xFF7A:
+		{
+			dms::Variable doorFlag = Executer::GetInstance()->Peek(0xFFF0); // ドアが開いているか
+			if(input.find("ｱｹ", 0) != -1)
+			{
+				if(input.find("ﾄﾞｱ", 0) != -1)
+				{
+					if(doorFlag == 0)
+					{
+						k = 1;
+					}
+					else
+					{
+						k = 2;
+					}
+				}
+			}
+			if((doorFlag == 1) && (input.find("ｲｸ", 0) != -1))
+			{
+				if(input.find("ﾋﾀﾞﾘ", 0) != -1)
+				{
+					k = 3;
+				}
+			}
+		}
+		break;
+	}
+	Executer::GetInstance()->Poke(dms::Variable(0xFFFD), k);
+	Executer::GetInstance()->Poke(dms::Variable(0xFFFC), l);
+}
+
 // 元は640x200だが画面モードが320x200なのでそちらに最適化
 void DrawRect(dms::String* parameter)
 {
@@ -116,5 +182,6 @@ void JikenPatch(void)
 		Executer::GetInstance()->Poke(dms::Variable(0xF480) + dms::Variable(i), memoryF480[i]);
 	}
 	Executer::GetInstance()->UsrPatch(0xF3B0, DrawArrow);
+	Executer::GetInstance()->UsrPatch(0xFD00, Scenario);
 	Executer::GetInstance()->UsrPatch(0xFEF0, DrawRect);
 }
