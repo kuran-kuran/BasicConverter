@@ -18,7 +18,7 @@ public:
 	void SetTextStretchWidth(int stretch);
 	void SetTextStretchHeight(int stretch);
 	void Clear(unsigned int colorMask = 0xFFFFFFFF);
-	void ClearText(void);
+	void ClearText(bool all = false);
 	void Fill(unsigned int color, unsigned int colorMask = 0xFFFFFFFF);
 	void DrawPoint(int x, int y, unsigned int color, unsigned int colorMask = 0xFFFFFFFF);
 	unsigned int GetPoint(int x, int y);

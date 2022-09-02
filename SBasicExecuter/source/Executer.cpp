@@ -181,7 +181,7 @@ void Executer::Clear(void)
 
 void Executer::Cls(void)
 {
-	this->screen.ClearText();
+	this->screen.ClearText(false);
 }
 
 void Executer::Gosub(int jumpLine)
@@ -690,26 +690,26 @@ void Executer::SetTextStretchWidth(dms::Variable stretch)
 {
 	this->screen.SetTextStretchWidth(stretch.GetInt());
 	GraphOutput(0b000);
-	Cls();
+	this->screen.ClearText(true);
 }
 
 void Executer::SetTextStretchHeight(dms::Variable stretch)
 {
 	this->screen.SetTextStretchHeight(stretch.GetInt());
 	GraphOutput(0b000);
-	Cls();
+	this->screen.ClearText(true);
 }
 
 void Executer::ScrollXRange(dms::Variable left, dms::Variable right)
 {
 	this->screen.ScrollXRange(left.GetInt(), right.GetInt());
-	Cls();
+	this->screen.ClearText(true);
 }
 
 void Executer::ScrollYRange(dms::Variable top, dms::Variable bottom)
 {
 	this->screen.ScrollYRange(top.GetInt(), bottom.GetInt());
-	Cls();
+	this->screen.ClearText(true);
 }
 
 void Executer::DefKey(dms::Variable index, dms::String defKeyText)

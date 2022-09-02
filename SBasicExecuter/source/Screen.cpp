@@ -128,16 +128,32 @@ void Screen::Clear(unsigned int colorMask)
 	DrawRectangle(0, 0, this->screenWidth, this->screenHeight, 0, colorMask);
 }
 
-void Screen::ClearText(void)
+void Screen::ClearText(bool all)
 {
 	memset(this->textScreenBuffer, 0, sizeof(unsigned int) * screenWidth * screenHeight);
-	int width = this->scrollRight - this->scrollLeft;
-	int height = this->scrollBottom - this->scrollTop;
+	int width;
+	int height;
+	int top;
+	int left;
+	if(all == true)
+	{
+		width = this->textWidth;
+		height = this->textHeight;
+		top = 0;
+		left = 0;
+	}
+	else
+	{
+		width = this->scrollRight - this->scrollLeft;
+		height = this->scrollBottom - this->scrollTop;
+		top = this->scrollTop;
+		left = this->scrollLeft;
+	}
 	for(int y = 0; y <= height; ++ y)
 	{
 		for(int x = 0; x <= width; ++ x)
 		{
-			int address = (this->scrollTop + y) * textWidth + this->scrollLeft + x;
+			int address = (top + y) * textWidth + left + x;
 			this->textBuffer[address] = 0;
 		}
 	}
