@@ -5,6 +5,7 @@
 #include "Basic.hpp"
 
 // 0xFFF0 ドアが開いているか
+// 0xFFF1 0:社長と1度も喋っていない, 1:一度喋った, 2:エレベータを教えてもらった
 // 0xFFFE カーソルX座標保存
 // 0xFFFF カーソルY座標保存
 
@@ -37,6 +38,7 @@ void DrawArrow(dms::String* parameter)
 	Executer::GetInstance()->Poke(dms::Variable(0xF47D), data);
 }
 
+// 205 アホバカ判別
 void ScenarioFD1A(dms::String& input, int type, int& k, int& l)
 {
 	if(input.find("ｱﾎ", 0) != -1)
@@ -49,6 +51,7 @@ void ScenarioFD1A(dms::String& input, int type, int& k, int& l)
 	}
 }
 
+// 320 行けない方向判別
 void ScenarioFFDC(dms::String& input, int type, int& k, int& l)
 {
 	if(input.find("ｲｸ", 0) != -1)
@@ -65,9 +68,14 @@ void ScenarioFFDC(dms::String& input, int type, int& k, int& l)
 		{
 			k = 3;
 		}
+		else if(input.find("ｳｼﾛ", 0) != -1)
+		{
+			k = 4;
+		}
 	}
 }
 
+// 1150 初期位置
 void ScenarioFF7A(dms::String& input, int type, int& k, int& l)
 {
 	dms::Variable doorFlag = Executer::GetInstance()->Peek(0xFFF0); // ドアが開いているか
@@ -85,11 +93,19 @@ void ScenarioFF7A(dms::String& input, int type, int& k, int& l)
 			}
 		}
 	}
-	if((doorFlag == 1) && (input.find("ｲｸ", 0) != -1))
+	if(input.find("ｲｸ", 0) != -1)
 	{
-		if(input.find("ﾋﾀﾞﾘ", 0) != -1)
+		if((doorFlag == 1) && (input.find("ﾋﾀﾞﾘ", 0) != -1))
 		{
 			k = 3;
+		}
+		if(input.find("ｳｼﾛ", 0) != -1)
+		{
+			k = 4;
+		}
+		if(input.find("ﾏｴ", 0) != -1)
+		{
+			k = 5;
 		}
 	}
 }
@@ -100,7 +116,10 @@ void Scenario(dms::String* parameter)
 	{
 		return;
 	}
-	int type = static_cast<unsigned char>((*parameter)[0]) * 256 + (*parameter)[1];
+	int a = (*parameter)[0];
+	unsigned char parameter0 = static_cast<unsigned char>((*parameter)[0]);
+	unsigned char parameter1 = static_cast<unsigned char>((*parameter)[1]);
+	int type = static_cast<int>(parameter0) * 256 + parameter1;
 	dms::String input = (*parameter).substr(5);
 	int k = 0;
 	int l = 0;
