@@ -15,6 +15,11 @@
 #include "BeepMusic.hpp"
 #include "Format.hpp"
 
+// User defined literals
+dms::String operator "" _s(const char* str, std::size_t length);
+dms::Variable operator "" _n(unsigned long long x);
+dms::Variable operator "" _f( long double value );
+
 class Executer
 {
 public:
@@ -115,6 +120,7 @@ public:
 	void Run(void);
 	Screen& GetScreen(void);
 	void UsrPatch(dms::Variable address, void (*callback)(dms::String*));
+	void ProgramPatch(int line, void (*func)(void));
 private:
 	Executer(void);
 	~Executer(void);

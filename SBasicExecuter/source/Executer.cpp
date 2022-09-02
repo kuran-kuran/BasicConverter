@@ -1185,6 +1185,11 @@ void Executer::UsrPatch(dms::Variable address, void (*callback)(dms::String*))
 	this->usrPatchList[address.GetInt()] = callback;
 }
 
+void Executer::ProgramPatch(int line, void (*func)(void))
+{
+	this->lineList[line] = func;
+}
+
 unsigned int Executer::GetColor(int colorCode)
 {
 	static unsigned int colorTable[] =

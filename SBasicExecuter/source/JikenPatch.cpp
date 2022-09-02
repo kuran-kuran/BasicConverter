@@ -1,6 +1,12 @@
 // ソフトハウス殺人事件用のパッチ
 // Basic.cppのMainLoop_Setup()でJikenPatch()を実行してください
+#include "Command.hpp"
 #include "Executer.hpp"
+#include "Basic.hpp"
+
+// 0xFFF0 ドアが開いているか
+// 0xFFFE カーソルX座標保存
+// 0xFFFF カーソルY座標保存
 
 // 矢印表示
 void DrawArrow(dms::String* parameter)
@@ -31,8 +37,69 @@ void DrawArrow(dms::String* parameter)
 	Executer::GetInstance()->Poke(dms::Variable(0xF47D), data);
 }
 
+void ScenarioFD1A(dms::String& input, int type, int& k, int& l)
+{
+	if(input.find("ｱﾎ", 0) != -1)
+	{
+		k = 1;
+	}
+	if(input.find("ﾊﾞｶ", 0) != -1)
+	{
+		k = 1;
+	}
+}
+
+void ScenarioFFDC(dms::String& input, int type, int& k, int& l)
+{
+	if(input.find("ｲｸ", 0) != -1)
+	{
+		if(input.find("ﾐｷﾞ", 0) != -1)
+		{
+			k = 1;
+		}
+		else if(input.find("ﾋﾀﾞﾘ", 0) != -1)
+		{
+			k = 2;
+		}
+		else if(input.find("ﾏｴ", 0) != -1)
+		{
+			k = 3;
+		}
+	}
+}
+
+void ScenarioFF7A(dms::String& input, int type, int& k, int& l)
+{
+	dms::Variable doorFlag = Executer::GetInstance()->Peek(0xFFF0); // ドアが開いているか
+	if(input.find("ｱｹ", 0) != -1)
+	{
+		if(input.find("ﾄﾞｱ", 0) != -1)
+		{
+			if(doorFlag == 0)
+			{
+				k = 1;
+			}
+			else
+			{
+				k = 2;
+			}
+		}
+	}
+	if((doorFlag == 1) && (input.find("ｲｸ", 0) != -1))
+	{
+		if(input.find("ﾋﾀﾞﾘ", 0) != -1)
+		{
+			k = 3;
+		}
+	}
+}
+
 void Scenario(dms::String* parameter)
 {
+	if((*parameter).size() <= 5)
+	{
+		return;
+	}
 	int type = static_cast<unsigned char>((*parameter)[0]) * 256 + (*parameter)[1];
 	dms::String input = (*parameter).substr(5);
 	int k = 0;
@@ -40,57 +107,13 @@ void Scenario(dms::String* parameter)
 	switch(type)
 	{
 	case 0xFD1A:
-		if(input.find("ｱﾎ", 0) != -1)
-		{
-			k = 1;
-		}
-		if(input.find("ﾊﾞｶ", 0) != -1)
-		{
-			k = 1;
-		}
+		ScenarioFD1A(input,type, k, l);
 		break;
 	case 0xFFDC:
-		if(input.find("ｲｸ", 0) != -1)
-		{
-			if(input.find("ﾐｷﾞ", 0) != -1)
-			{
-				k = 1;
-			}
-			else if(input.find("ﾋﾀﾞﾘ", 0) != -1)
-			{
-				k = 2;
-			}
-			else if(input.find("ﾏｴ", 0) != -1)
-			{
-				k = 3;
-			}
-		}
+		ScenarioFFDC(input,type, k, l);
 		break;
 	case 0xFF7A:
-		{
-			dms::Variable doorFlag = Executer::GetInstance()->Peek(0xFFF0); // ドアが開いているか
-			if(input.find("ｱｹ", 0) != -1)
-			{
-				if(input.find("ﾄﾞｱ", 0) != -1)
-				{
-					if(doorFlag == 0)
-					{
-						k = 1;
-					}
-					else
-					{
-						k = 2;
-					}
-				}
-			}
-			if((doorFlag == 1) && (input.find("ｲｸ", 0) != -1))
-			{
-				if(input.find("ﾋﾀﾞﾘ", 0) != -1)
-				{
-					k = 3;
-				}
-			}
-		}
+		ScenarioFF7A(input,type, k, l);
 		break;
 	}
 	Executer::GetInstance()->Poke(dms::Variable(0xFFFD), k);
@@ -122,20 +145,32 @@ void DrawRect(dms::String* parameter)
 				switch(i)
 				{
 				case 0:
-					drawPattern = b.GetInt() & 0xF0;
+					drawPattern = b.GetInt();
 					break;
 				case 1:
-					drawPattern = r.GetInt() & 0xF0;
+					drawPattern = r.GetInt();
 					break;
 				case 2:
-					drawPattern = g.GetInt() & 0xF0;
+					drawPattern = g.GetInt();
 					break;
 				}
-				screen.DrawPattern(drawX, drawY, drawPattern, 0xFFFFFFFF, maskTable[i]);
+				for(int j = 0; j < 4; ++ j)
+				{
+					unsigned int dot = (drawPattern >> j) & 1;
+					screen.DrawPoint(drawX + j, drawY, 0, maskTable[i]);
+					if(dot > 0)
+					{
+						screen.DrawPoint(drawX + j, drawY, 0xFFFFFFFF, maskTable[i]);
+					}
+				}
 			}
 		}
 	}
 }
+
+// プログラムパッチ
+void l11410_06_patch() { Paint(36_n,76_n,{0_n},4_n,0_n); }
+void l11430_01_patch() {}
 
 void JikenPatch(void)
 {
@@ -184,4 +219,6 @@ void JikenPatch(void)
 	Executer::GetInstance()->UsrPatch(0xF3B0, DrawArrow);
 	Executer::GetInstance()->UsrPatch(0xFD00, Scenario);
 	Executer::GetInstance()->UsrPatch(0xFEF0, DrawRect);
+	Executer::GetInstance()->ProgramPatch(L11410_06, l11410_06_patch);
+	Executer::GetInstance()->ProgramPatch(L11430_01, l11430_01_patch);
 }

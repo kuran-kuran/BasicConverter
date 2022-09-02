@@ -58,7 +58,7 @@ inline void Next(dms::Variable* index)
 	Executer::GetInstance()->Next(index);
 }
 
-void If(bool conditions, int matchJumpLine, int mismatchJumpLine)
+inline void If(bool conditions, int matchJumpLine, int mismatchJumpLine)
 {
 	return Executer::GetInstance()->If(conditions, matchJumpLine, mismatchJumpLine);
 }
