@@ -4,7 +4,7 @@
 #include "Executer.hpp"
 #include "Basic.hpp"
 
-// 0xFFF0 ドアが開いているか
+// 0xFFF0 ドアまたはカベが開いているか
 // 0xFFF1 0:社長と1度も喋っていない, 1:一度喋った, 2:エレベータを教えてもらった
 // 0xFFF2 0: リンゴについて知らない, 1: マサにリンゴについて聞いた
 // 0xFFF3 1: 1階, 2: 2階
@@ -182,6 +182,39 @@ void Scenario1420(dms::String& input, int type, int& k, int& l)
 	}
 }
 
+// 2715 壁
+void Scenario2715(dms::String& input, int type, int& k, int& l)
+{
+	dms::Variable holeFlag = Executer::GetInstance()->Peek(0xFFF0); // ドアが開いているか
+	if(input.find("ｲｸ", 0) != -1)
+	{
+		if(input.find("ﾐｷﾞ", 0) != -1)
+		{
+			k = 2;
+		}
+		else if(input.find("ｳｼﾛ", 0) != -1)
+		{
+			k = 3;
+		}
+		else if(input.find("ﾋﾀﾞﾘ", 0) != -1)
+		{
+			k = 4;
+		}
+		else if(input.find("ﾏｴ", 0) != -1)
+		{
+			if(holeFlag == 1)
+			{
+				k = 5;
+			}
+		}
+	}
+	else if((input.find("ｶﾍﾞ", 0) != -1) || (input.find("ｵｽ", 0) != -1))
+	{
+		Executer::GetInstance()->Poke(dms::Variable(0xFFF0), 1);
+		k = 1;
+	}
+}
+
 // シナリオ制御
 void Scenario(dms::String* parameter)
 {
@@ -211,6 +244,9 @@ void Scenario(dms::String* parameter)
 		break;
 	case 0xF670FC69:
 		Scenario1420(input,type, k, l);
+		break;
+	case 0xF93CF955:
+		Scenario2715(input,type, k, l);
 		break;
 	}
 	Executer::GetInstance()->Poke(dms::Variable(0xFFFD), k);
