@@ -6,6 +6,10 @@
 
 // 0xFFF0 ドアが開いているか
 // 0xFFF1 0:社長と1度も喋っていない, 1:一度喋った, 2:エレベータを教えてもらった
+// 0xFFF2 0: リンゴについて知らない, 1: マサにリンゴについて聞いた
+// 0xFFF3 1: 1階, 2: 2階
+// 0xFFFC L 聞いた人物など ｼｬﾁｮｳ,ﾏｻ,ﾁﾊﾞ,ｷﾐｶﾞｷ,ｺｳ,ﾐﾄ,ｶﾜﾀﾞ,ﾅﾏｴ,ｷﾉｳ,ｼﾞｹﾝ
+// 0xFFFD K
 // 0xFFFE カーソルX座標保存
 // 0xFFFF カーソルY座標保存
 
@@ -38,8 +42,23 @@ void DrawArrow(dms::String* parameter)
 	Executer::GetInstance()->Poke(dms::Variable(0xF47D), data);
 }
 
+// 人物判定
+int Actor(dms::String& input)
+{
+	std::vector<dms::String> actors =  {"","ｼｬﾁｮｳ","ﾏｻ","ﾁﾊﾞ","ｷﾐｶﾞｷ","ｺｳ","ﾐﾄ","ｶﾜﾀﾞ","ﾅﾏｴ","ｷﾉｳ","ｼﾞｹﾝ"};
+	for(int i = 1; i < static_cast<int>(actors.size()); ++ i)
+	{
+		if(input.find(&actors[i][0], 0) != dms::String::npos)
+		{
+			// 見つけた
+			return i;
+		}
+	}
+	return 0;
+}
+
 // 205 アホバカ判別
-void ScenarioFD1A(dms::String& input, int type, int& k, int& l)
+void Scenario205(dms::String& input, int type, int& k, int& l)
 {
 	if(input.find("ｱﾎ", 0) != -1)
 	{
@@ -52,7 +71,7 @@ void ScenarioFD1A(dms::String& input, int type, int& k, int& l)
 }
 
 // 320 行けない方向判別
-void ScenarioFFDC(dms::String& input, int type, int& k, int& l)
+void Scenario320(dms::String& input, int type, int& k, int& l)
 {
 	if(input.find("ｲｸ", 0) != -1)
 	{
@@ -76,7 +95,7 @@ void ScenarioFFDC(dms::String& input, int type, int& k, int& l)
 }
 
 // 1150 初期位置
-void ScenarioFF7A(dms::String& input, int type, int& k, int& l)
+void Scenario1150(dms::String& input, int type, int& k, int& l)
 {
 	dms::Variable doorFlag = Executer::GetInstance()->Peek(0xFFF0); // ドアが開いているか
 	if(input.find("ｱｹ", 0) != -1)
@@ -110,6 +129,60 @@ void ScenarioFF7A(dms::String& input, int type, int& k, int& l)
 	}
 }
 
+// 1420 社長
+void Scenario1420(dms::String& input, int type, int& k, int& l)
+{
+	dms::Variable elevatorFlag = Executer::GetInstance()->Peek(0xFFF1); // 0:社長と1度も喋っていない, 1:一度喋った, 2:エレベータを教えてもらった
+	dms::Variable appleFlag = Executer::GetInstance()->Peek(0xFFF2); // 0: マサにリンゴについて聞いてない 1: 聞いた
+	if(input.find("ｹﾞﾝﾊﾞ", 0) != -1)
+	{
+		k = 1;
+	}
+	else if(input.find("ｼﾞｹﾝ", 0) != -1)
+	{
+		k = 2;
+	}
+	else if((input.find("ｷｸ", 0) != -1) || (input.find("ｼｯﾃ", 0) != -1))
+	{
+		if((appleFlag == 1) && (input.find("ﾘﾝｺﾞ", 0) != -1))
+		{
+			k = 3;
+		}
+		else if(input.find("ｸﾘｽﾀﾙ", 0) != -1)
+		{
+			k = 4;
+		}
+		else
+		{
+			k = 5;
+			l = Actor(input);
+		}
+	}
+	else if(input.find("ｲｸ", 0) != -1)
+	{
+		if(input.find("ﾐｷﾞ", 0) != -1)
+		{
+			if(elevatorFlag == 2)
+			{
+				k = 6;
+			}
+			else
+			{
+				k = 7;
+			}
+		}
+		else if(input.find("ｳｼﾛ", 0) != -1)
+		{
+			k = 8;
+		}
+	}
+	else if((input.find("ｼｬﾁｮｳ", 0) != -1) || (input.find("ｼﾗﾍﾞ", 0) != -1))
+	{
+		k = 9;
+	}
+}
+
+// シナリオ制御
 void Scenario(dms::String* parameter)
 {
 	if((*parameter).size() <= 5)
@@ -119,26 +192,32 @@ void Scenario(dms::String* parameter)
 	int a = (*parameter)[0];
 	unsigned char parameter0 = static_cast<unsigned char>((*parameter)[0]);
 	unsigned char parameter1 = static_cast<unsigned char>((*parameter)[1]);
-	int type = static_cast<int>(parameter0) * 256 + parameter1;
+	unsigned char parameter3 = static_cast<unsigned char>((*parameter)[3]);
+	unsigned char parameter4 = static_cast<unsigned char>((*parameter)[4]);
+	int type = static_cast<int>(parameter0) * 256 * 256 * 256 + parameter1 * 256 * 256 + parameter3 * 256 + parameter4;
 	dms::String input = (*parameter).substr(5);
 	int k = 0;
 	int l = 0;
 	switch(type)
 	{
-	case 0xFD1A:
-		ScenarioFD1A(input,type, k, l);
+	case 0xFD1AFDC0:
+		Scenario205(input,type, k, l);
 		break;
-	case 0xFFDC:
-		ScenarioFFDC(input,type, k, l);
+	case 0xFFDCFDD1:
+		Scenario320(input,type, k, l);
 		break;
-	case 0xFF7A:
-		ScenarioFF7A(input,type, k, l);
+	case 0xFF7AFCCB:
+		Scenario1150(input,type, k, l);
+		break;
+	case 0xF670FC69:
+		Scenario1420(input,type, k, l);
 		break;
 	}
 	Executer::GetInstance()->Poke(dms::Variable(0xFFFD), k);
 	Executer::GetInstance()->Poke(dms::Variable(0xFFFC), l);
 }
 
+// 矩形表示
 // 元は640x200だが画面モードが320x200なのでそちらに最適化
 void DrawRect(dms::String* parameter)
 {
