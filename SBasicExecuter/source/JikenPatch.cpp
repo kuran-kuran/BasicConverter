@@ -8,6 +8,8 @@
 // 0xFFF1 0:社長と1度も喋っていない, 1:一度喋った, 2:エレベータを教えてもらった
 // 0xFFF2 0: リンゴについて知らない, 1: マサにリンゴについて聞いた
 // 0xFFF3 1: 1階, 2: 2階
+// 0xFFF8 1:, 2:, 3:, 4:
+// 0xFFF9 
 // 0xFFFC L 聞いた人物など ｼｬﾁｮｳ,ﾏｻ,ﾁﾊﾞ,ｷﾐｶﾞｷ,ｺｳ,ﾐﾄ,ｶﾜﾀﾞ,ﾅﾏｴ,ｷﾉｳ,ｼﾞｹﾝ
 // 0xFFFD K
 // 0xFFFE カーソルX座標保存
@@ -215,6 +217,86 @@ void Scenario2715(dms::String& input, int type, int& k, int& l)
 	}
 }
 
+// 3150 キミガキ
+void Scenario3150(dms::String& input, int type, int& k, int& l)
+{
+	dms::Variable doorFlag = Executer::GetInstance()->Peek(0xFFF0); // ドアが開いているか
+	if(input.find("ｲｸ", 0) != -1)
+	{
+		if(input.find("ｳｼﾛ", 0) != -1)
+		{
+			k = 1;
+		}
+		else if(input.find("ﾋﾀﾞﾘ", 0) != -1)
+		{
+			k = 2;
+		}
+	}
+	else if((input.find("ｼｯﾃ", 0) != -1) || (input.find("ｷｸ", 0) != -1))
+	{
+		l = Actor(input);
+		// ミトについて聞いた場合はフラグ操作する
+		if(l == 6)
+		{
+			dms::Variable flag = Executer::GetInstance()->Peek(0xFFF8);
+			if(flag == 4)
+			{
+				// フラグが立っていたら正直に話す
+				Executer::GetInstance()->Poke(dms::Variable(0xFFF9), 1);
+			}
+			else
+			{
+				// フラグが立っていなかったらしらばっくれる
+				l = 1;
+			}
+		}
+		k = 4;
+	}
+	else if((input.find("ｷﾐｶﾞｷ", 0) != -1) || (input.find("ｼﾗﾍﾞ", 0) != -1))
+	{
+		k = 3;
+	}
+}
+
+// 3705 マイコンショップ
+void Scenario3705(dms::String& input, int type, int& k, int& l)
+{
+	dms::Variable doorFlag = Executer::GetInstance()->Peek(0xFFF0); // ドアが開いているか
+	if(input.find("ｱｹ", 0) != -1)
+	{
+		if(input.find("ﾄﾞｱ", 0) != -1)
+		{
+			if(doorFlag == 0)
+			{
+				k = 4;
+				Executer::GetInstance()->Poke(dms::Variable(0xFFF0), 1);
+			}
+			else
+			{
+				k = 5;
+			}
+		}
+	}
+	else if(input.find("ｲｸ", 0) != -1)
+	{
+		if(input.find("ﾐｷﾞ", 0) != -1)
+		{
+			k = 1;
+		}
+		else if(input.find("ﾋﾀﾞﾘ", 0) != -1)
+		{
+			k = 2;
+		}
+		else if(input.find("ﾏｴ", 0) != -1)
+		{
+			if(doorFlag == 1)
+			{
+				k = 3;
+			}
+		}
+	}
+}
+
 // シナリオ制御
 void Scenario(dms::String* parameter)
 {
@@ -247,6 +329,12 @@ void Scenario(dms::String* parameter)
 		break;
 	case 0xF93CF955:
 		Scenario2715(input,type, k, l);
+		break;
+	case 0xF855F87A:
+		Scenario3150(input,type, k, l);
+		break;
+	case 0xF805F81A:
+		Scenario3705(input,type, k, l);
 		break;
 	}
 	Executer::GetInstance()->Poke(dms::Variable(0xFFFD), k);
