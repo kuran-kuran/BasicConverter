@@ -4,14 +4,17 @@
 #include "Executer.hpp"
 #include "Basic.hpp"
 
-// 0xFFF0 ドアまたはカベが開いているか
-// 0xFFF1 0:社長と1度も喋っていない, 1:一度喋った, 2:エレベータを教えてもらった
+// 0xFFEE 0: 1: ナイフからシモンを取った
+// 0xFFF0 0: 閉じている 1: ドアまたはカベが開いている
+// 0xFFF1 0: 社長と1度も喋っていない, 1:一度喋った, 2:エレベータを教えてもらった
 // 0xFFF2 0: リンゴについて知らない, 1: マサにリンゴについて聞いた
 // 0xFFF3 1: 1階, 2: 2階
+// 0xFFF4 0: フロッピーディスクを持っていない, 1:フロッピーディスクを持っている
+// 0xFFF7 0: 1: チバにハンバイキが壊れていると聞く
 // 0xFFF8 1:, 2:, 3:, 4:
-// 0xFFF9 
-// 0xFFFC L 聞いた人物など ｼｬﾁｮｳ,ﾏｻ,ﾁﾊﾞ,ｷﾐｶﾞｷ,ｺｳ,ﾐﾄ,ｶﾜﾀﾞ,ﾅﾏｴ,ｷﾉｳ,ｼﾞｹﾝ
-// 0xFFFD K
+// 0xFFF9 0: キミガキがミトについて隠している 1: キミガキがミトについて正直に話す
+// 0xFFFC L: 聞いた人物など ｼｬﾁｮｳ,ﾏｻ,ﾁﾊﾞ,ｷﾐｶﾞｷ,ｺｳ,ﾐﾄ,ｶﾜﾀﾞ,ﾅﾏｴ,ｷﾉｳ,ｼﾞｹﾝ
+// 0xFFFD K: シナリオの結果
 // 0xFFFE カーソルX座標保存
 // 0xFFFF カーソルY座標保存
 
@@ -184,6 +187,93 @@ void Scenario1420(dms::String& input, int type, int& k, int& l)
 	}
 }
 
+// 1840 エレベーター前
+void Scenario1840(dms::String& input, int type, int& k, int& l)
+{
+	dms::Variable floor = Executer::GetInstance()->Peek(0xFFF3); // 何階にいるか
+	if(input.find("ｲｸ", 0) != -1)
+	{
+		if(floor == 1)
+		{
+			// 1階にいる
+			if(input.find("ﾐｷﾞ", 0) != -1)
+			{
+				k = 2;
+			}
+			else if(input.find("ﾋﾀﾞﾘ", 0) != -1)
+			{
+				k = 4;
+			}
+		}
+		else
+		{
+			// 2階にいる
+			if(input.find("ﾐｷﾞ", 0) != -1)
+			{
+				k = 3;
+			}
+			else if(input.find("ﾋﾀﾞﾘ", 0) != -1)
+			{
+				k = 5;
+			}
+			else if(input.find("ｳｼﾛ", 0) != -1)
+			{
+				k = 6;
+			}
+		}
+	}
+	else if(((input.find("ﾎﾞﾀﾝ", 0) != -1) || (input.find("ｽｲｯﾁ", 0) != -1)) && (input.find("ｵｽ", 0) != -1))
+	{
+		k = 1;
+	}
+}
+
+// 1965 現場
+void Scenario1965(dms::String& input, int type, int& k, int& l)
+{
+	if((input.find("ｼｯﾃ", 0) != -1) || (input.find("ｷｸ", 0) != -1))
+	{
+		k = 1;
+	}
+	else if(input.find("ｲｸ", 0) != -1)
+	{
+		if(input.find("ﾐｷﾞ", 0) != -1)
+		{
+			k = 2;
+		}
+		else if(input.find("ﾋﾀﾞﾘ", 0) != -1)
+		{
+			k = 3;
+		}
+		else if(input.find("ｳｼﾛ", 0) != -1)
+		{
+			k = 4;
+		}
+	}
+	else if(input.find("ﾄﾙ", 0) != -1)
+	{
+		if(input.find("ﾃﾞｨｽｸ", 0) != -1)
+		{
+			dms::Variable disk = Executer::GetInstance()->Peek(0xFFF4); // フロッピーディスクを持っているか
+			if(disk == 0)
+			{
+				k = 5;
+			}
+		}
+	}
+	else if(input.find("ｼﾗﾍﾞ", 0) != -1)
+	{
+		if(input.find("ｼｲﾝ", 0) != -1)
+		{
+			k = 6;
+		}
+		else if(input.find("ﾐﾄ", 0) != -1)
+		{
+			k = 7;
+		}
+	}
+}
+
 // 2715 壁
 void Scenario2715(dms::String& input, int type, int& k, int& l)
 {
@@ -214,6 +304,43 @@ void Scenario2715(dms::String& input, int type, int& k, int& l)
 	{
 		Executer::GetInstance()->Poke(dms::Variable(0xFFF0), 1);
 		k = 1;
+	}
+}
+
+// 2810 世捨て人のチバ
+void Scenario2810(dms::String& input, int type, int& k, int& l)
+{
+	if(input.find("ｲｸ", 0) != -1)
+	{
+		if(input.find("ｳｼﾛ", 0) != -1)
+		{
+			k = 1;
+		}
+	}
+	else if((input.find("ｷｸ", 0) != -1) || (input.find("ｼｯﾃ", 0) != -1))
+	{
+		dms::Variable flag = Executer::GetInstance()->Peek(0xFFEE); // ナイフからシモンを取ったか?
+		if(input.find("ﾊﾝﾊﾞｲｷ", 0) != -1)
+		{
+			// チバにハンバイキが壊れていると聞く
+			Executer::GetInstance()->Poke(dms::Variable(0xFFF7), 1);
+			k = 3;
+		}
+		else if((input.find("ﾅｲﾌ", 0) != -1) && (flag != 0))
+		{
+			// ナイフについて聞く
+			k = 4;
+		}
+		else
+		{
+			// 人物について聞く
+			k = 5;
+			l = Actor(input);
+		}
+	}
+	else if((input.find("ﾁﾊﾞ", 0) != -1) || (input.find("ｼﾗﾍﾞ", 0) != -1))
+	{
+		k = 2;
 	}
 }
 
@@ -326,6 +453,15 @@ void Scenario(dms::String* parameter)
 		break;
 	case 0xF670FC69:
 		Scenario1420(input,type, k, l);
+		break;
+	case 0xFFB9FC29:
+		Scenario1840(input,type, k, l);
+		break;
+	case 0xFBAEFBD8:
+		Scenario1965(input,type, k, l);
+		break;
+	case 0xF8C6F8E7:
+		Scenario2810(input,type, k, l);
 		break;
 	case 0xF93CF955:
 		Scenario2715(input,type, k, l);
