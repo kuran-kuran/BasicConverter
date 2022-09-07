@@ -5,21 +5,37 @@
 #include "Basic.hpp"
 
 // 0xF6A2 0: 5: マサに自販機が壊れていると聞いた, 6: さっき言ったとおりです
-// 0xFFEE 0: 1: ナイフからシモンを取った
+// 0xFFEE 0: 1: ナイフからチバのシモンを取った
+// 0xFFEF 0: 1: カワダからカギをキク, 2: カワダからカギを取る
 // 0xFFF0 0: 閉じている 1: ドアまたはカベが開いている
 // 0xFFF1 0: 社長と1度も喋っていない, 1:一度喋った, 2:エレベータを教えてもらった
 // 0xFFF2 0: リンゴについて知らない, 1: マサにリンゴについて聞いた
 // 0xFFF3 1: 1階, 2: 2階
 // 0xFFF4 0: フロッピーディスクを持っていない, 1:フロッピーディスクを持っている
-// 0xFFF5 0: 1:
-// 0xFFF6 0: 1:
-// 0xFFF7 0:チバにハンバイキが壊れていると聞いていない, 1: チバにハンバイキが壊れていると聞く
-// 0xFFF8 0:初期値 1:, 2: マサに自販機が壊れていると聞いた, 3:, 4:
+// 0xFFF5 0: パソコンを見てない 1: パソコンを見た
+// 0xFFF6 0: パソコンを見てない 1: パソコンを見た
+// 0xFFF7 0: チバにハンバイキが壊れていると聞いていない, 1: チバにハンバイキが壊れていると聞く
+// 0xFFF8 0: 初期値 1:マサにミトについて聞いた, 2: マサに自販機が壊れていると聞いた, 3: マサに横領に気が付いたミトについて聞く, 4: マサに横領について聞く
 // 0xFFF9 0: キミガキがミトについて隠している 1: キミガキがミトについて正直に話す
+// 0xFFFA 0: 1: カワダにケンカについて聞く
+// 0xFFFB 0: 1: コウにケンカについて聞く
 // 0xFFFC L: 聞いた人物など ｼｬﾁｮｳ,ﾏｻ,ﾁﾊﾞ,ｷﾐｶﾞｷ,ｺｳ,ﾐﾄ,ｶﾜﾀﾞ,ﾅﾏｴ,ｷﾉｳ,ｼﾞｹﾝ
 // 0xFFFD K: シナリオの結果
 // 0xFFFE カーソルX座標保存
 // 0xFFFF カーソルY座標保存
+
+//社長に話を聞く（一応）。
+//現場調査。ディスクを拾う。
+//パソコンを使う。
+//チバに販売機について聞く。
+//マサを問い詰める。
+//キミガキを問い詰める。
+//カワダにケンカについて聞く。
+//カワダにカギを聞き、取る。
+//金庫を開ける。
+//ナイフを調べる。
+//チバにナイフの事を聞く。
+//犯人を推理。
 
 // 矢印表示
 void DrawArrow(dms::String* parameter)
@@ -376,6 +392,102 @@ void Scenario2050(dms::String& input, int type, int& k, int& l)
 	}
 }
 
+// 2340 パソコン
+void Scenario2340(dms::String& input, int type, int& k, int& l)
+{
+	if(input.find("ｲｸ", 0) != -1)
+	{
+		if(input.find("ﾋﾀﾞﾘ", 0) != -1)
+		{
+			k = 1;
+		}
+		else if(input.find("ﾐｷﾞ", 0) != -1)
+		{
+			k = 2;
+		}
+		else if(input.find("ｳｼﾛ", 0) != -1)
+		{
+			k = 8;
+		}
+	}
+	else if(input.find("ﾍﾔ", 0) != -1)
+	{
+		if(input.find("ﾐﾙ", 0) != -1)
+		{
+			k = 3;
+		}
+	}
+	else if(input.find("LIST", 0) != -1)
+	{
+		k = 4;
+	}
+	else if(input.find("DIR", 0) != -1)
+	{
+		k = 5;
+	}
+	else if(input.find("MSG", 0) != -1)
+	{
+		k = 6;
+	}
+	else if(input.find("RUN", 0) != -1)
+	{
+		k = 7;
+	}
+}
+
+// 2510 コウ
+void Scenario2510(dms::String& input, int type, int& k, int& l)
+{
+	if(input.find("ｱｹ", 0) != -1)
+	{
+		if(input.find("ｷﾝｺ", 0) != -1)
+		{
+			dms::Variable keyFlag = Executer::GetInstance()->Peek(0xFFEF);
+			if(keyFlag == 2)
+			{
+				k = 2;
+			}
+			else
+			{
+				k = 1;
+			}
+		}
+	}
+	else if(input.find("ｲｸ", 0) != -1)
+	{
+		if(input.find("ﾐｷﾞ", 0) != -1)
+		{
+			k = 3;
+		}
+		else if(input.find("ﾋﾀﾞﾘ", 0) != -1)
+		{
+			k = 4;
+		}
+		else if(input.find("ｳｼﾛ", 0) != -1)
+		{
+			k = 8;
+		}
+	}
+	else if((input.find("ｼｯﾃ", 0) != -1) || (input.find("ｷｸ", 0) != -1))
+	{
+		dms::Variable flag10 = Executer::GetInstance()->Peek(0xFFFA);
+		if((input.find("ｹﾝｶﾞ", 0) != -1) && (flag10 != 0))
+		{
+			k = 6;
+			Executer::GetInstance()->Poke(dms::Variable(0xFFFB), 1);
+		}
+		else
+		{
+			k = 7;
+			l = Actor(input);
+		}
+	}
+	else if((input.find("ｺｳ", 0) != -1) || (input.find("ｼﾗﾍﾞ", 0) != -1))
+	{
+		k = 5;
+	}
+}
+
 // 2715 壁
 void Scenario2715(dms::String& input, int type, int& k, int& l)
 {
@@ -526,6 +638,153 @@ void Scenario3705(dms::String& input, int type, int& k, int& l)
 	}
 }
 
+// 3810 カワダ
+void Scenario3810(dms::String& input, int type, int& k, int& l)
+{
+	if((input.find("ｼｯﾃ", 0) != -1) || (input.find("ｷｸ", 0) != -1))
+	{
+		dms::Variable flag9 = Executer::GetInstance()->Peek(0xFFF9);
+		dms::Variable flag11 = Executer::GetInstance()->Peek(0xFFFB);
+		if((input.find("ｶｷﾞ", 0) != -1) && (flag11 == 1))
+		{
+			k = 1;
+			Executer::GetInstance()->Poke(dms::Variable(0xFFEF), 1);
+		}
+		else if((input.find("ｹﾝｶ", 0) != -1) && (flag9 == 1))
+		{
+			k = 2;
+			Executer::GetInstance()->Poke(dms::Variable(0xFFFA), 1);
+		}
+		else
+		{
+			// 人物について聞く
+			k = 3;
+			l = Actor(input);
+		}
+	}
+	else if((input.find("ｼﾗﾍﾞ", 0) != -1) || (input.find("ｶﾜﾀﾞ", 0) != -1))
+	{
+		k = 4;
+	}
+	else if((input.find("ｲｸ", 0) != -1) || (input.find("ｳｼﾛ", 0) != -1))
+	{
+		k = 5;
+	}
+	else if(input.find("ﾓｳｶﾘﾏｯｶ", 0) != -1)
+	{
+		k = 8;
+	}
+	else if(input.find("ﾄﾙ", 0) != -1)
+	{
+		dms::Variable flag11 = Executer::GetInstance()->Peek(0xFFFB);
+		if(flag11 != 0)
+		{
+			if(input.find("ｶｷﾞ", 0) != -1)
+			{
+				dms::Variable flagFFEF = Executer::GetInstance()->Peek(0xFFEF);
+				if(flagFFEF == 2)
+				{
+					k = 0;
+				}
+				else if(flagFFEF == 1)
+				{
+					Executer::GetInstance()->Poke(dms::Variable(0xFFEF), 2);
+					k = 7;
+				}
+				else
+				{
+					k = 6;
+				}
+			}
+		}
+	}
+}
+
+// 4160 ナイフ
+void Scenario4160(dms::String& input, int type, int& k, int& l)
+{
+	if(input.find("ｲｸ", 0) != -1)
+	{
+		if(input.find("ﾋﾀﾞﾘ", 0) != -1)
+		{
+			k = 4;
+		}
+		else if(input.find("ﾐｷﾞ", 0) != -1)
+		{
+			k = 5;
+		}
+		else if(input.find("ｳｼﾛ", 0) != -1)
+		{
+			k = 6;
+		}
+	}
+	else if(input.find("ｼﾗﾍﾞ", 0) != -1)
+	{
+		if(input.find("ｼﾓﾝ", 0) != -1)
+		{
+			Executer::GetInstance()->Poke(dms::Variable(0xFFEE), 2);
+			k = 1;
+		}
+		else if(input.find("ﾅｲﾌﾞ", 0) != -1)
+		{
+			k = 2;
+		}
+	}
+	else if((input.find("ﾍﾔ", 0) != -1) && (input.find("ﾐﾙ", 0) != -1))
+	{
+		k = 3;
+	}
+}
+
+// 4410 犯人
+void Scenario4410(dms::String& input, int type, int& k, int& l)
+{
+	if(input.find("ｸﾏﾀﾞ", 0) != -1)
+	{
+		k = 1;
+	}
+	else if(input.find("ｼｬﾁｮｳ", 0) != -1)
+	{
+		k = 2;
+	}
+	else if(input.find("ﾏｻ", 0) != -1)
+	{
+		k = 3;
+	}
+	else if(input.find("ﾁﾊﾞ", 0) != -1)
+	{
+		k = 4;
+	}
+	else if(input.find("ｷﾐｶﾞｷ", 0) != -1)
+	{
+		k = 5;
+	}
+	else if(input.find("ｺｳ", 0) != -1)
+	{
+		k = 6;
+	}
+	else if(input.find("ﾐﾄ", 0) != -1)
+	{
+		k = 7;
+	}
+	else if(input.find("ﾜﾀｼ", 0) != -1)
+	{
+		k = 8;
+	}
+	else if(input.find("ｶﾜﾀﾞ", 0) != -1)
+	{
+		k = 9;
+	}
+	else if(input.find("ｵﾏｴ", 0) != -1)
+	{
+		k = 10;
+	}
+	else if(input.find("ｱｲﾂ", 0) != -1)
+	{
+		k = 11;
+	}
+}
+
 // シナリオ制御
 void Scenario(dms::String* parameter)
 {
@@ -565,6 +824,12 @@ void Scenario(dms::String* parameter)
 	case 0xFAB2FAFB:
 		Scenario2050(input,type, k, l);
 		break;
+	case 0xFA4AFA70:
+		Scenario2340(input,type, k, l);
+		break;
+	case 0xF996F9BF:
+		Scenario2510(input,type, k, l);
+		break;
 	case 0xF8C6F8E7:
 		Scenario2810(input,type, k, l);
 		break;
@@ -576,6 +841,15 @@ void Scenario(dms::String* parameter)
 		break;
 	case 0xF805F81A:
 		Scenario3705(input,type, k, l);
+		break;
+	case 0xF74EF786:
+		Scenario3810(input,type, k, l);
+		break;
+	case 0xF6EAF70C:
+		Scenario4160(input,type, k, l);
+		break;
+	case 0xF6A3F6D1:
+		Scenario4410(input,type, k, l);
 		break;
 	}
 	Executer::GetInstance()->Poke(dms::Variable(0xFFFD), k);
