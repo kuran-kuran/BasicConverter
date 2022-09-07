@@ -4,14 +4,17 @@
 #include "Executer.hpp"
 #include "Basic.hpp"
 
+// 0xF6A2 0: 5: マサに自販機が壊れていると聞いた, 6: さっき言ったとおりです
 // 0xFFEE 0: 1: ナイフからシモンを取った
 // 0xFFF0 0: 閉じている 1: ドアまたはカベが開いている
 // 0xFFF1 0: 社長と1度も喋っていない, 1:一度喋った, 2:エレベータを教えてもらった
 // 0xFFF2 0: リンゴについて知らない, 1: マサにリンゴについて聞いた
 // 0xFFF3 1: 1階, 2: 2階
 // 0xFFF4 0: フロッピーディスクを持っていない, 1:フロッピーディスクを持っている
-// 0xFFF7 0: 1: チバにハンバイキが壊れていると聞く
-// 0xFFF8 1:, 2:, 3:, 4:
+// 0xFFF5 0: 1:
+// 0xFFF6 0: 1:
+// 0xFFF7 0:チバにハンバイキが壊れていると聞いていない, 1: チバにハンバイキが壊れていると聞く
+// 0xFFF8 0:初期値 1:, 2: マサに自販機が壊れていると聞いた, 3:, 4:
 // 0xFFF9 0: キミガキがミトについて隠している 1: キミガキがミトについて正直に話す
 // 0xFFFC L: 聞いた人物など ｼｬﾁｮｳ,ﾏｻ,ﾁﾊﾞ,ｷﾐｶﾞｷ,ｺｳ,ﾐﾄ,ｶﾜﾀﾞ,ﾅﾏｴ,ｷﾉｳ,ｼﾞｹﾝ
 // 0xFFFD K: シナリオの結果
@@ -254,8 +257,8 @@ void Scenario1965(dms::String& input, int type, int& k, int& l)
 	{
 		if(input.find("ﾃﾞｨｽｸ", 0) != -1)
 		{
-			dms::Variable disk = Executer::GetInstance()->Peek(0xFFF4); // フロッピーディスクを持っているか
-			if(disk == 0)
+			dms::Variable diskFlag = Executer::GetInstance()->Peek(0xFFF4); // フロッピーディスクを持っているか
+			if(diskFlag == 0)
 			{
 				k = 5;
 			}
@@ -270,6 +273,105 @@ void Scenario1965(dms::String& input, int type, int& k, int& l)
 		else if(input.find("ﾐﾄ", 0) != -1)
 		{
 			k = 7;
+		}
+	}
+}
+
+// 2050 マサ
+void Scenario2050(dms::String& input, int type, int& k, int& l)
+{
+	if(input.find("ｲｸ", 0) != -1)
+	{
+		if(input.find("ﾋﾀﾞﾘ", 0) != -1)
+		{
+			k = 1;
+		}
+		else if(input.find("ﾐｷﾞ", 0) != -1)
+		{
+			k = 2;
+		}
+	}
+	else if(input.find("ﾂｶ", 0) != -1)
+	{
+		if((input.find("ﾏｲｺﾝ", 0) != -1) || (input.find("ｺﾝﾋﾟｭｰﾀ", 0) != -1) || (input.find("ﾊﾟｿｺﾝ", 0) != -1))
+		{
+			dms::Variable diskFlag = Executer::GetInstance()->Peek(0xFFF4); // フロッピーディスクを持っているか
+			if(diskFlag == 1)
+			{
+				k = 3;
+			}
+			else
+			{
+				k = 4;
+			}
+		}
+	}
+	else if((input.find("ｼｯﾃ", 0) != -1) || (input.find("ｷｸ", 0) != -1))
+	{
+		k = -1;
+		if(input.find("ｵｳﾘｮｳ", 0) != -1)
+		{
+			dms::Variable flag = Executer::GetInstance()->Peek(0xFFF8);
+			if(flag >= 3)
+			{
+				k = 7;
+			}
+			else
+			{
+				k = 8;
+			}
+		}
+		else if(input.find("ﾊﾝﾊﾞｲｷ", 0) != -1)
+		{
+			dms::Variable vendingMachineFlag = Executer::GetInstance()->Peek(0xFFF7);
+			dms::Variable flag8 = Executer::GetInstance()->Peek(0xFFF8);
+			if((vendingMachineFlag == 1) && (flag8 == 1))
+			{
+				Executer::GetInstance()->Poke(dms::Variable(0xFFF0), 5);
+				k = 5;
+			}
+			else
+			{
+				dms::Variable flagF6A2 = Executer::GetInstance()->Peek(0xF6A2);
+				if(flagF6A2 == 1)
+				{
+					k = 10;
+				}
+				else
+				{
+					Executer::GetInstance()->Poke(dms::Variable(0xFFF0), 6);
+					k = 6;
+				}
+			}
+		}
+		if(k == -1)
+		{
+			dms::Variable flag6 = Executer::GetInstance()->Peek(0xFFF6);
+			dms::Variable flag8 = Executer::GetInstance()->Peek(0xFFF8);
+			l = Actor(input);
+			if((l == 4) && (flag8 == 4))
+			{
+				// キミガキ
+				k = 11;
+				l = 11;
+			}
+			else if(l == 6)
+			{
+				// ミト
+				if(flag8 >= 2)
+				{
+					l = 12;
+				}
+				else if(flag6 != 1)
+				{
+					l = 12;
+				}
+				k = 8;
+			}
+			else
+			{
+				k = 8;
+			}
 		}
 	}
 }
@@ -385,7 +487,7 @@ void Scenario3150(dms::String& input, int type, int& k, int& l)
 	}
 }
 
-// 3705 マイコンショップ
+// 3705 マイコンショップ前
 void Scenario3705(dms::String& input, int type, int& k, int& l)
 {
 	dms::Variable doorFlag = Executer::GetInstance()->Peek(0xFFF0); // ドアが開いているか
@@ -459,6 +561,9 @@ void Scenario(dms::String* parameter)
 		break;
 	case 0xFBAEFBD8:
 		Scenario1965(input,type, k, l);
+		break;
+	case 0xFAB2FAFB:
+		Scenario2050(input,type, k, l);
 		break;
 	case 0xF8C6F8E7:
 		Scenario2810(input,type, k, l);
