@@ -4,6 +4,13 @@
 #include "Executer.hpp"
 #include "Basic.hpp"
 
+#ifndef L11410_06
+#define L11410_06 0
+#endif
+#ifndef L11430_01
+#define L11430_01 0
+#endif
+
 // 0xF6A2 0: 5: マサに自販機が壊れていると聞いた, 6: さっき言ったとおりです
 // 0xFFEE 0: 1: ナイフからチバのシモンを取った
 // 0xFFEF 0: 1: カワダからカギをキク, 2: カワダからカギを取る
