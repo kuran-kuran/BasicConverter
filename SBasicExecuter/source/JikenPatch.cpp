@@ -306,6 +306,10 @@ void Scenario2050(dms::String& input, int type, int& k, int& l)
 		{
 			k = 2;
 		}
+		else if(input.find("³¼Û", 0) != -1)
+		{
+			k = 11;
+		}
 	}
 	else if(input.find("Â¶", 0) != -1)
 	{
@@ -374,7 +378,7 @@ void Scenario2050(dms::String& input, int type, int& k, int& l)
 			else if(l == 6)
 			{
 				// ƒ~ƒg
-				if(flag8 >= 2)
+				if(flag8 > 2)
 				{
 					l = 12;
 				}
@@ -389,6 +393,10 @@ void Scenario2050(dms::String& input, int type, int& k, int& l)
 				k = 8;
 			}
 		}
+	}
+	else if((input.find("Ï»", 0) != -1) || (input.find("¼×ÍÞ", 0) != -1))
+	{
+		k = 9;
 	}
 }
 
@@ -471,7 +479,7 @@ void Scenario2510(dms::String& input, int type, int& k, int& l)
 	else if((input.find("¼¯Ã", 0) != -1) || (input.find("·¸", 0) != -1))
 	{
 		dms::Variable flag10 = Executer::GetInstance()->Peek(0xFFFA);
-		if((input.find("¹Ý¶Þ", 0) != -1) && (flag10 != 0))
+		if((input.find("¹Ý¶", 0) != -1) && (flag10 != 0))
 		{
 			k = 6;
 			Executer::GetInstance()->Poke(dms::Variable(0xFFFB), 1);
@@ -722,10 +730,10 @@ void Scenario4160(dms::String& input, int type, int& k, int& l)
 	{
 		if(input.find("¼ÓÝ", 0) != -1)
 		{
-			Executer::GetInstance()->Poke(dms::Variable(0xFFEE), 2);
+			Executer::GetInstance()->Poke(dms::Variable(0xFFEE), 1);
 			k = 1;
 		}
-		else if(input.find("Å²ÌÞ", 0) != -1)
+		else if(input.find("Å²Ì", 0) != -1)
 		{
 			k = 2;
 		}
