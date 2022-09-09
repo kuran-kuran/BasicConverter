@@ -46,7 +46,7 @@ Executer::Executer(void)
 ,storeNumber(NULL)
 ,beepMusic()
 ,isOutputLog(false)
-,overlap(0)
+,overlap(1)
 {
 }
 
@@ -703,13 +703,13 @@ void Executer::SetTextStretchHeight(dms::Variable stretch)
 void Executer::ScrollXRange(dms::Variable left, dms::Variable right)
 {
 	this->screen.ScrollXRange(left.GetInt(), right.GetInt());
-	this->screen.ClearText(true);
+	this->screen.ClearText();
 }
 
 void Executer::ScrollYRange(dms::Variable top, dms::Variable bottom)
 {
 	this->screen.ScrollYRange(top.GetInt(), bottom.GetInt());
-	this->screen.ClearText(true);
+	this->screen.ClearText();
 }
 
 void Executer::DefKey(dms::Variable index, dms::String defKeyText)
