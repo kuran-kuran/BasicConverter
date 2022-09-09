@@ -538,7 +538,8 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 	bool firstVariable = false;
 	bool defKey = false;
 	unsigned char* buf = (unsigned char*)&buffer[0];
-	if(number == 9140)
+	std::vector<int> changeCountList;
+	if(number == 150)
 	{
 		int a = 0;
 	}
@@ -701,6 +702,7 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 								byte = '[';
 								PushBrackets();
 								++ bracketsCount;
+								changeCountList.push_back(bracketsCount);
 							}
 						}
 					}
@@ -710,14 +712,20 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 						{
 							byte = ']';
 						}
+						auto itEnd = std::remove(std::begin(changeCountList), std::end(changeCountList), bracketsCount);
+						changeCountList.erase(itEnd, std::cend(changeCountList));
 						-- bracketsCount;
 					}
 					// 配列アクセス[#,#]を[#][#]に変換する
 					if((IsBrackets() == true) && (byte == ','))
 					{
-						result.push_back(']');
-						result.push_back('[');
-						break;
+						auto itr = std::find(changeCountList.begin(), changeCountList.end(), bracketsCount);
+						if(itr != changeCountList.end())
+						{
+							result.push_back(']');
+							result.push_back('[');
+							break;
+						}
 					}
 					if((pattern == true) && (byte == ',') && (patternBracketsCount == bracketsCount))
 					{
@@ -865,7 +873,7 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 	this->forPhase = 0;
 	this->defFnFlag = false;
 	this->closeBracketFlag = false;
-	if(number == 9005)
+	if(number == 1860)
 	{
 		int a = 0;
 	}
@@ -3012,6 +3020,10 @@ std::string MZ1Z001::ParseData(const std::string& data)
 			if(byte == '\"')
 			{
 				doubleQuotation = true;
+				continue;
+			}
+			if(byte == ' ')
+			{
 				continue;
 			}
 			if(byte == ',')
