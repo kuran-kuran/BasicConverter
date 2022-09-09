@@ -1028,6 +1028,10 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 					{
 						dataFlag = true;
 					}
+					AnalyzeCommand(lexical, number, subNumber, false);
+					lexical = {code_80_xx[byte], ""};
+					this->debugLine += Format("%s", code_80_xx[byte]);
+					encodeAfter = false;
 					if(code_80_xx[byte] == "COLOR")
 					{
 						ConvertSub(buffer, lexical, byte, processedDelimiter, number, subNumber);
@@ -1066,10 +1070,6 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 						phase = 1;
 						break;
 					}
-					AnalyzeCommand(lexical, number, subNumber, false);
-					lexical = {code_80_xx[byte], ""};
-					this->debugLine += Format("%s", code_80_xx[byte]);
-					encodeAfter = false;
 				}
 				else
 				{
@@ -3020,10 +3020,6 @@ std::string MZ1Z001::ParseData(const std::string& data)
 			if(byte == '\"')
 			{
 				doubleQuotation = true;
-				continue;
-			}
-			if(byte == ' ')
-			{
 				continue;
 			}
 			if(byte == ',')
