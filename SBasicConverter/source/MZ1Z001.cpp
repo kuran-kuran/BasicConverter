@@ -172,23 +172,6 @@ bool MZ1Z001::ConvertFile(const std::string filepath, const std::string outputFi
 	writeData += "#include \"Command.hpp\"\n";
 	writeData += "#include \"" + writeHeaderPath + "\"\n";
 	writeData += "\n";
-	// ユーザー定義リテラル
-	writeData += "// User defined literals\n";
-	writeData += "dms::String operator \"\" _s(const char* str, std::size_t length)\n";
-	writeData += "{\n";
-	writeData += "\treturn dms::String(str);\n";
-	writeData += "}\n";
-	writeData += "\n";
-	writeData += "dms::Variable operator \"\" _n(unsigned long long x)\n";
-	writeData += "{\n";
-	writeData += "\treturn static_cast<int>(x);\n";
-	writeData += "}\n";
-	writeData += "\n";
-	writeData += "dms::Variable operator \"\" _f( long double value )\n";
-	writeData += "{\n";
-	writeData += "\treturn static_cast<double>(value);\n";
-	writeData += "}\n";
-	writeData += "\n";
 	// グローバル
 	writeData += "// Grobal\n";
 	writeData += "Executer* executer = Executer::GetInstance();\n";
@@ -882,7 +865,7 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 	this->forPhase = 0;
 	this->defFnFlag = false;
 	this->closeBracketFlag = false;
-	if(number == 9140)
+	if(number == 9005)
 	{
 		int a = 0;
 	}
@@ -3029,10 +3012,6 @@ std::string MZ1Z001::ParseData(const std::string& data)
 			if(byte == '\"')
 			{
 				doubleQuotation = true;
-				continue;
-			}
-			if(byte == ' ')
-			{
 				continue;
 			}
 			if(byte == ',')
