@@ -14,11 +14,7 @@
 #include "Array.hpp"
 #include "BeepMusic.hpp"
 #include "Format.hpp"
-
-// User defined literals
-dms::String operator "" _s(const char* str, std::size_t length);
-dms::Variable operator "" _n(unsigned long long x);
-dms::Variable operator "" _f( long double value );
+#include "Literals.hpp"
 
 class Executer
 {
