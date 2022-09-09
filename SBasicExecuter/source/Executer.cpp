@@ -804,7 +804,7 @@ dms::String Executer::Chr(dms::Variable code)
 
 dms::String Executer::Str(dms::Variable number)
 {
-	if(number > 0)
+	if(number >= 0)
 	{
 		return number.ToString().substr(1);
 	}
