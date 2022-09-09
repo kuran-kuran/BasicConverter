@@ -330,6 +330,7 @@ void Screen::DrawFont(int x, int y, int charcterNumber, unsigned int color, unsi
 
 void Screen::Print(dms::String text, bool newline)
 {
+	this->isTabControll = false;
 	for(size_t i = 0; i < text.size(); ++ i)
 	{
 		int character = static_cast<unsigned char>(text[i]);
@@ -816,6 +817,24 @@ void Screen::HideCursor(void)
 bool Screen::ControlCode(int character)
 {
 	KeyBoard& keyBoard = KeyBoard::GetInstance();
+	if(this->isTabControll == true)
+	{
+		int textX = character > GetTextX() ? character : GetTextX();
+		int x = textX % GetTextWidth();
+		int addY = textX / GetTextWidth();
+		SetTextX(x);
+		if(addY > 0)
+		{
+			int y = GetTextY() + addY;
+			if(y >= GetTextHeight())
+			{
+				y = GetTextHeight() - 1;
+			}
+			SetTextY(y);
+		}
+		this->isTabControll = false;
+		return true;
+	}
 	bool controll = false;
 	switch(character)
 	{
@@ -889,6 +908,10 @@ bool Screen::ControlCode(int character)
 	case 15:
 		// ‚©‚È‰ğœ
 		keyBoard.SetKana(false);
+		controll = true;
+		break;
+	case 16:
+		isTabControll = true;
 		controll = true;
 		break;
 	}

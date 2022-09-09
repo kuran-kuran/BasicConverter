@@ -98,6 +98,7 @@ private:
 	int scrollLeft;
 	int scrollBottom;
 	int scrollRight;
+	bool isTabControll;
 };
 
 #endif

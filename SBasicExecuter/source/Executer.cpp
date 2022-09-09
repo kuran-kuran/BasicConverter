@@ -832,21 +832,9 @@ dms::Variable Executer::Peek(dms::Variable address)
 
 dms::String Executer::Tab(dms::Variable number)
 {
-	int textX = this->screen.GetTextX() + number.GetInt();
-	int x = textX % this->screen.GetTextWidth();
-	int addY = textX / this->screen.GetTextWidth();
-	// タブ位置にカーソル移動
-	this->screen.SetTextX(x);
-	if(addY > 0)
-	{
-		int y = this->screen.GetTextY() + addY;
-		if(y >= this->screen.GetTextHeight())
-		{
-			y = this->screen.GetTextHeight() - 1;
-		}
-		this->screen.SetTextY(y);
-	}
-	return "";
+	dms::String result = "\x10";
+	result.push_back(number.GetInt() & 0xFF);
+	return result;
 }
 
 dms::String Executer::Space(dms::Variable number)
