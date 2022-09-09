@@ -343,7 +343,7 @@ void Scenario2050(dms::String& input, int type, int& k, int& l)
 			dms::Variable flag8 = Executer::GetInstance()->Peek(0xFFF8);
 			if((vendingMachineFlag == 1) && (flag8 == 1))
 			{
-				Executer::GetInstance()->Poke(dms::Variable(0xFFF0), 5);
+				Executer::GetInstance()->Poke(dms::Variable(0xF6A2), 5);
 				k = 5;
 			}
 			else
@@ -355,7 +355,7 @@ void Scenario2050(dms::String& input, int type, int& k, int& l)
 				}
 				else
 				{
-					Executer::GetInstance()->Poke(dms::Variable(0xFFF0), 6);
+					Executer::GetInstance()->Poke(dms::Variable(0xF6A2), 6);
 					k = 6;
 				}
 			}
