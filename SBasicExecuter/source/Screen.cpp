@@ -557,7 +557,7 @@ void Screen::ReturnText(void)
 	++ this->textY;
 	if(this->textY > this->scrollBottom)
 	{
-		// todo 1行スクロールする
+		// 1行スクロールする
 		int width = this->scrollRight - this->scrollLeft + 1;
 		int height = this->scrollBottom - this->scrollTop + 1;
 		ScrollText(this->scrollLeft, this->scrollTop, width, height, 1);
@@ -842,6 +842,10 @@ bool Screen::ControlCode(int character)
 		++ this->textY;
 		if(this->textY > this->scrollBottom)
 		{
+			// 1行スクロールする
+			int width = this->scrollRight - this->scrollLeft + 1;
+			int height = this->scrollBottom - this->scrollTop + 1;
+			ScrollText(this->scrollLeft, this->scrollTop, width, height, 1);
 			this->textY = this->scrollBottom;
 		}
 		controll = true;

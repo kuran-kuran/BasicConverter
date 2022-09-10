@@ -127,6 +127,8 @@ bool Executer::ExecuteLoop(void)
 	if(this->input == true)
 	{
 		StoreInput();
+		this->mainMemory[0x11D1] = this->screen.GetTextX();
+		this->mainMemory[0x11D2] = this->screen.GetTextY();
 		return this->end;
 	}
 	if(this->executeLine >= this->lineList.size())
