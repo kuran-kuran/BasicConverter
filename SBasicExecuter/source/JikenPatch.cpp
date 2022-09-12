@@ -51,6 +51,7 @@ void DrawArrow(dms::String* parameter)
 	int color = (*parameter)[1]; // 矢印の色 (2:赤, 6:黄色)
 	int y = (*parameter)[2]; // Y座標
 	int x = (*parameter)[3]; // X座標
+	int addX = color == 6 ? 3 : x== 58 ? 3 : 0;
 	int data5 = (*parameter)[4];
 	unsigned char data = 0x80 >> data5;
 	unsigned char arrowPattern[] = {32,112,168,32,32,32,32,32, 32,32,32,32,32,168,112,32, 0,0,32,16,248,16,32,0, 0,0,32,64,248,64,32,0};
@@ -58,7 +59,7 @@ void DrawArrow(dms::String* parameter)
 	static unsigned int colorTable[8] = { 0xFF000000, 0xFF0000FF, 0xFFFF0000, 0xFFFF00FF, 0xFF00FF00, 0xFF00FFFF, 0xFFFFFF00, 0xFFFFFFFF };
 	for(int i = 0; i < 8; ++ i)
 	{
-		int drawX = x * 4;
+		int drawX = x * 4 + addX;
 		int drawY = y + i;
 		unsigned char drawPattern = arrowPattern[dir + i];
 		for(int j = 0; j < 8; ++ j)
