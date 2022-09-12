@@ -1003,7 +1003,7 @@ void Executer::StoreInput(void)
 			Print(Chr(4) + " " + Chr(4), false);
 		}
 	}
-	else if(getText == "\x0d")
+	else if((this->inputText.empty() == false) && (getText == "\x0d"))
 	{
 		EndInput();
 		this->screen.ReturnText();
