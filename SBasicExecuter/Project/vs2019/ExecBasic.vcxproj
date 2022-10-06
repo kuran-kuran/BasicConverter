@@ -140,6 +140,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <Image Include="..\..\source\Windows\icon.ico" />
     <Image Include="ExecBasic.ico" />
   </ItemGroup>
   <ItemGroup>

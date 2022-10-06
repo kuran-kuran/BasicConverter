@@ -25,6 +25,7 @@
     <Image Include="ExecBasic.ico">
       <Filter>ソース ファイル\source\Windows</Filter>
     </Image>
+    <Image Include="..\..\source\Windows\icon.ico" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\Data.cpp">

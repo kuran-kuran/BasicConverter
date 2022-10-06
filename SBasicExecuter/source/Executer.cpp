@@ -154,6 +154,11 @@ void Executer::ExecuteNoWaitLoop(void)
 	}
 }
 
+void Executer::SetGreenDisplay(bool green)
+{
+	this->screen.SetGreenDisplay(green);
+}
+
 void Executer::Flip(void)
 {
 	if(this->input == false)
