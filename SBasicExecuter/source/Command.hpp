@@ -58,7 +58,7 @@ inline void Next(dms::Variable* index)
 	Executer::GetInstance()->Next(index);
 }
 
-void If(bool conditions, int matchJumpLine, int mismatchJumpLine)
+inline void If(bool conditions, int matchJumpLine, int mismatchJumpLine)
 {
 	return Executer::GetInstance()->If(conditions, matchJumpLine, mismatchJumpLine);
 }
@@ -83,34 +83,54 @@ inline void Print(dms::String text, bool newline)
 	Executer::GetInstance()->Print(text, newline);
 }
 
-inline void Set(dms::Variable x, dms::Variable y)
+inline void Set(dms::Variable x, dms::Variable y, dms::Variable color = -1, dms::Variable overlap = -1)
 {
-	Executer::GetInstance()->Set(x, y);
+	Executer::GetInstance()->Set(x, y, color, overlap);
 }
 
-inline void Reset(dms::Variable x, dms::Variable y)
+inline void Reset(dms::Variable x, dms::Variable y, dms::Variable color = -1, dms::Variable overlap = -1)
 {
-	Executer::GetInstance()->Reset(x, y);
+	Executer::GetInstance()->Reset(x, y, color, overlap);
 }
 
-inline void Line(dms::Variable x0, dms::Variable y0, dms::Variable x1, dms::Variable y1)
+inline void Line(dms::Variable x0, dms::Variable y0, dms::Variable x1, dms::Variable y1, dms::Variable color = -1, dms::Variable overlap = -1)
 {
-	Executer::GetInstance()->Line(x0, y0, x1, y1);
+	Executer::GetInstance()->Line(x0, y0, x1, y1, color, overlap);
 }
 
-inline void Line(std::vector<dms::Variable> positionList)
+inline void Line(std::vector<dms::Variable> positionList, dms::Variable color = -1, dms::Variable overlap = -1)
 {
-	Executer::GetInstance()->Line(positionList);
+	Executer::GetInstance()->Line(positionList, color, overlap);
 }
 
-inline void Bline(std::vector<dms::Variable> positionList)
+inline void Bline(std::vector<dms::Variable> positionList, dms::Variable color = -1, dms::Variable overlap = -1)
 {
-	Executer::GetInstance()->Bline(positionList);
+	Executer::GetInstance()->Bline(positionList, color, overlap);
 }
 
-inline void Paint(dms::Variable x, dms::Variable y, unsigned int color, std::vector<unsigned int> boarderColorList)
+inline void Paint(dms::Variable x, dms::Variable y, std::vector<dms::Variable> boarderColorList, dms::Variable color = -1, dms::Variable overlap = -1)
 {
-	Executer::GetInstance()->Paint(x, y, color, boarderColorList);
+	Executer::GetInstance()->Paint(x, y, boarderColorList, color, overlap);
+}
+
+inline void Box(dms::Variable x1, dms::Variable y1, dms::Variable x2, dms::Variable y2, dms::Variable f = -1, dms::Variable color = -1, dms::Variable overlap = -1)
+{
+	Executer::GetInstance()->Box(x1, y1, x2, y2, f, color, overlap);
+}
+
+inline void Circle(dms::Variable x, dms::Variable y, dms::Variable r, dms::Variable h = -1, dms::Variable ks = -1, dms::Variable ke = -1, dms::Variable o = 0, dms::Variable color = -1, dms::Variable overlap = -1)
+{
+	Executer::GetInstance()->Circle(x, y, r, h, ks, ke, o, color, overlap);
+}
+
+inline void Color(dms::Variable priority = 0, dms::Variable color = -1, dms::Variable output = -1, dms::Variable overlap = -1)
+{
+	Executer::GetInstance()->Color(priority, color, output, overlap);
+}
+
+inline void CColor(dms::Variable priority = 0, dms::Variable color = -1, dms::Variable backGroundColor = -1)
+{
+	Executer::GetInstance()->CColor(priority, color, backGroundColor);
 }
 
 inline void SetData(int number, std::vector<Data> data)
@@ -137,9 +157,9 @@ inline void Position(dms::Variable x, dms::Variable y)
 	Executer::GetInstance()->Position(x, y);
 }
 
-inline void Pattern(dms::Variable row, dms::String pattern)
+inline void Pattern(dms::Variable row, dms::String pattern, dms::Variable color = -1, dms::Variable overlap = -1)
 {
-	Executer::GetInstance()->Pattern(row, pattern);
+	Executer::GetInstance()->Pattern(row, pattern, color, overlap);
 }
 
 inline void GraphInput(int input)
@@ -152,42 +172,42 @@ inline void GraphOutput(unsigned int output)
 	Executer::GetInstance()->GraphOutput(output);
 }
 
-inline void ClearGraph(void)
+inline void ClearGraph(dms::Variable color = -1)
 {
-	return Executer::GetInstance()->ClearGraph();
+	return Executer::GetInstance()->ClearGraph(color);
 }
 
-inline void FillGraph(void)
+inline void FillGraph(dms::Variable color = -1)
 {
-	return Executer::GetInstance()->FillGraph();
+	return Executer::GetInstance()->FillGraph(color);
 }
 
-inline void SetStretchWidth(int stretch)
+inline void SetStretchWidth(dms::Variable stretch)
 {
 	return Executer::GetInstance()->SetStretchWidth(stretch);
 }
 
-inline void SetStretchHeight(int stretch)
+inline void SetStretchHeight(dms::Variable stretch)
 {
 	return Executer::GetInstance()->SetStretchHeight(stretch);
 }
 
-inline void SetTextStretchWidth(int stretch)
+inline void SetTextStretchWidth(dms::Variable stretch)
 {
 	return Executer::GetInstance()->SetTextStretchWidth(stretch);
 }
 
-inline void SetTextStretchHeight(int stretch)
+inline void SetTextStretchHeight(dms::Variable stretch)
 {
 	return Executer::GetInstance()->SetTextStretchHeight(stretch);
 }
 
-inline void ScrollXRange(int left, int right)
+inline void ScrollXRange(dms::Variable left, dms::Variable right)
 {
 	return Executer::GetInstance()->ScrollXRange(left, right);
 }
 
-inline void ScrollYRange(int top, int bottom)
+inline void ScrollYRange(dms::Variable top, dms::Variable bottom)
 {
 	return Executer::GetInstance()->ScrollYRange(top, bottom);
 }

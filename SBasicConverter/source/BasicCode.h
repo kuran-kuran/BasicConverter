@@ -67,10 +67,16 @@ const char *code_80_xx[] =
 	"GRAPH", "POSITION", "PATTERN",	"AUTO",
 	0, "IMAGE/P", "COPY/P", "PAGE/P",
 	0, "BOOT", "KLIST", "CHANGE",
-	0,	0,	"REW", "FAST",
+	"COLOR", "CCOLOR", "REW", "FAST",
+	// Cxh
 	0,	0,	0,	0, 	0,	0,	0,	0, 	0,	0,	0,	0, 	0,	0,	0,	0,
+	// Dxh
 	0,	0,	0,	0, 	0,	0,	0,	0, 	0,	0,	0,	0, 	0,	0,	0,	0,
-	0,	0,	0,	0, 	0,	0,	0,	0, 	0,	0,	0,	0, 	0,	0,	0,	0,
+	// Exh
+	0,	0,	0,	0,
+	"BOX", "PAINT", "CIRCLE", 0,
+	0,	0,	0,	0,
+	0,	0,	0,	0,
 	0,	0,	0,	0, 	0,	0,	0,	0, 	0,	0,	0,	0, 	0,	0,	0,	0
 };
 

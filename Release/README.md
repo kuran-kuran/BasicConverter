@@ -2,12 +2,20 @@
 
 ## ダウンロード
 
+### 2022/10/06 Version 1.0.0
+
+- COLOR BASIC MZ-1Z002に対応した。
+- ソフトハウス殺人事件用のパッチファイルを追加した。
+- その他細かいバグを修正した。
+
+[SBasicConverterVer1_0_0.zip](https://github.com/kuran-kuran/BasicConverter/raw/main/Release/SBasicConverterVer1_0_0.zip)
+
 ### 2022/04/25 Version 0.9.4
 
 - 条件文の戻り値をtrue/falseからVariableの-1/0に修正しました。
 - 小文字のp以降がファンクションキーと入れ替わってしまい入力できなかったのを修正した。
 
-[SBasicConverterVer0_9_3.zip](https://github.com/kuran-kuran/BasicConverter/raw/main/Release/SBasicConverterVer0_9_3.zip)
+[SBasicConverterVer0_9_4.zip](https://github.com/kuran-kuran/BasicConverter/raw/main/Release/SBasicConverterVer0_9_4.zip)
 
 ### 2022/04/24 Version 0.9.3
 

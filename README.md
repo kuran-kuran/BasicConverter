@@ -1,16 +1,18 @@
-# MZ-80B/2000 BASICコンバータ 0.9.4
-SHARP MZ-80B/2000のBASICをC++言語に変換します。VisualStudio2019でビルドするとWindowsで動作するexeファイルを作成することができます。
+# MZ-80B/2000 BASICコンバータ 1.0.0
+SHARP MZ-80B/2000のBASICをC++言語に変換します。
 
 https://github.com/kuran-kuran/BasicConverter
 
 ## はじめに
-このプログラムはMZ-80B/2000用のBASICで作られたプログラムをC++言語に変換します
+このプログラムはMZ-80B/2000用のBASICで作られたプログラムをWindows版VisualStudio2019用のC++言語に変換します
+変換されたC++言語のプログラムをVisualStudio2019でビルドするとWindowsで動作するexeファイルを作成することができます。
 
 ## 対応BASIC
 ### MZ-80B
 - SB-5520
 ### MZ-2000/2200
 - MZ-1Z001
+- MZ-1Z002
 
 BASIC中でUSR関数などでマシン語を呼んでいる場合は実行してもうまく動作しません。
 
@@ -35,20 +37,20 @@ https://github.com/kuran-kuran/BasicConverter/tree/main/Release
 
 ## 使い方
 SBasicConverter.exeにmztファイルをドロップしてください。
-するとBasic.cppファイルとConverter.logファイルが作成されます。
+するとBasic.hpp, Basic.cppファイルとConverter.logファイルが作成されます。
 エラーチェックなどは一切行っていないためlogファイルは今のところ全く意味がありません。
 
-## Basic.cppのビルド方法
-SBasicExecuter/sourceフォルダにBasic.cppをコピーして
+## Basic.hpp, Basic.cppのビルド方法
+SBasicExecuter/sourceフォルダにBasic.hppとBasic.cppをコピーして
 VisualStudio2019でExecBasic.slnファイルを開きビルドしてください。
 正常にコンバートできていればビルドできますが
-正常にコンバートできてない場合はエラーが出ます。
-その場合はプログラムを自分で直すかあきらめてください。
+正常にコンバートできてない場合はビルドエラーが出ます。
+その場合は元のBASICプログラムまたはコンバート後のC++プログラムを自分で直すかあきらめてください。
 作成したexeファイルを実行するときはexeと同じフォルダにmz2000font.pngを置いてください。
 
 ## 既知のバグ
-- GOTOの行番号先にプログラムが無いとビルドできない。
-- 計算式中の比較結果が0と-1になっていない。
+- 元のプログラムのGOTOの行番号先にプログラムが無いとビルドエラーが出ます。
+- 元のプログラムのMID文に「,」が無いとビルドエラーが出ます。
 
 ## ライセンス
 SBasicConverterおよびSBasicExecuterはMIT Licenseとします。
