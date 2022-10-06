@@ -4,7 +4,7 @@
 #include "MZ1Z002.hpp"
 
 static const char* const NAME = "MZ-80B/2000/2200用のMZTファイルをCPPファイルに変換するプログラム";
-static const char* const VERSION = "0.9.5";
+static const char* const VERSION = "1.0.0";
 static const char* const FILENAME = "SBasicConverter";
 static const unsigned int OPTION_HELP   = 0x00000001;
 
