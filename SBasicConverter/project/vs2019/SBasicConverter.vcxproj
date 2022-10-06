@@ -21,14 +21,14 @@
   <ItemGroup>
     <ClCompile Include="..\..\source\FileData.cpp" />
     <ClCompile Include="..\..\source\Format.cpp" />
-    <ClCompile Include="..\..\source\MZ1Z001.cpp" />
+    <ClCompile Include="..\..\source\MZ1Z002.cpp" />
     <ClCompile Include="..\..\source\SBasicConverter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\BasicCode.h" />
     <ClInclude Include="..\..\source\FileData.hpp" />
     <ClInclude Include="..\..\source\Format.hpp" />
-    <ClInclude Include="..\..\source\MZ1Z001.hpp" />
+    <ClInclude Include="..\..\source\MZ1Z002.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

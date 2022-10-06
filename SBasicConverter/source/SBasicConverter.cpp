@@ -1,17 +1,17 @@
 ﻿#include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
-#include "MZ1Z001.hpp"
+#include "MZ1Z002.hpp"
 
-static const char* const NAME = "MZTファイルをCPPファイルに変換するプログラム";
-static const char* const VERSION = "0.9.4";
+static const char* const NAME = "MZ-80B/2000/2200用のMZTファイルをCPPファイルに変換するプログラム";
+static const char* const VERSION = "1.0.0";
 static const char* const FILENAME = "SBasicConverter";
 static const unsigned int OPTION_HELP   = 0x00000001;
 
 int main(int argc, char* argv[])
 {
 	unsigned int option = 0;
-	std::string path1;// = "KORO.mzt";
+	std::string path1; // = "KORO.mzt";
 	std::string path2;
 	int i;
 	// オプション取得
@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
 	}
 	// コンバートする
 	std::cout << "Converte " << path1 << " to " << path2 << std::endl;
-	MZ1Z001 converter;
-	converter.Convert(path1.c_str(), path2.c_str());
+	MZ1Z002 converter;
+	converter.ConvertFile(path1.c_str(), path2.c_str());
 	std::cout << "Complete" << std::endl;
 }

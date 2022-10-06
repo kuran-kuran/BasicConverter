@@ -29,7 +29,6 @@ Screen::Screen(void)
 ,textY(0)
 ,graphicX(0)
 ,graphicY(0)
-,highPriorityText(true)
 ,stretchWidth(2)
 ,stretchHeight(1)
 ,textStretchWidth(2)
@@ -41,6 +40,8 @@ Screen::Screen(void)
 ,scrollLeft(0)
 ,scrollRight(79)
 ,scrollBottom(24)
+,greenDisplay(true)
+,isTabControll(false)
 {
 }
 
@@ -129,16 +130,32 @@ void Screen::Clear(unsigned int colorMask)
 	DrawRectangle(0, 0, this->screenWidth, this->screenHeight, 0, colorMask);
 }
 
-void Screen::ClearText(void)
+void Screen::ClearText(bool all)
 {
 	memset(this->textScreenBuffer, 0, sizeof(unsigned int) * screenWidth * screenHeight);
-	int width = this->scrollRight - this->scrollLeft;
-	int height = this->scrollBottom - this->scrollTop;
+	int width;
+	int height;
+	int top;
+	int left;
+	if(all == true)
+	{
+		width = this->textWidth;
+		height = this->textHeight;
+		top = 0;
+		left = 0;
+	}
+	else
+	{
+		width = this->scrollRight - this->scrollLeft;
+		height = this->scrollBottom - this->scrollTop;
+		top = this->scrollTop;
+		left = this->scrollLeft;
+	}
 	for(int y = 0; y <= height; ++ y)
 	{
 		for(int x = 0; x <= width; ++ x)
 		{
-			int address = (this->scrollTop + y) * textWidth + this->scrollLeft + x;
+			int address = (top + y) * textWidth + left + x;
 			this->textBuffer[address] = 0;
 		}
 	}
@@ -154,11 +171,11 @@ void Screen::Fill(unsigned int color, unsigned int colorMask)
 
 void Screen::DrawPoint(int x, int y, unsigned int color, unsigned int colorMask)
 {
+	this->graphicX = x;
+	this->graphicY = y;
 	int destinationAddress = this->screenWidth * y + x;
 	unsigned int writeColor = colorMask == 0xFFFFFFFF ? color : (this->screenBuffer[destinationAddress] & ~colorMask) | (color & colorMask);
 	this->screenBuffer[destinationAddress] = writeColor;
-	this->graphicX = x;
-	this->graphicY = y;
 }
 
 unsigned int Screen::GetPoint(int x, int y)
@@ -178,6 +195,29 @@ void Screen::DrawRectangle(int x, int y, int width, int height, unsigned int col
 		}
 		destinationAddress += this->screenWidth;
 	}
+}
+
+void Screen::DrawBox(int x, int y, int width, int height, unsigned int color, unsigned int colorMask, bool fill, unsigned int fillColor, unsigned int fillColorMask)
+{
+	if(fill == true)
+	{
+		for(int yy = 0; yy < height; ++ yy)
+		{
+			for(int xx = 0; xx < width; ++ xx)
+			{
+				DrawPoint(x + xx, y + yy, fillColor, fillColorMask);
+			}
+		}
+	}
+	std::vector<int> positionList =
+	{
+		x, y,
+		x + width, y,
+		x + width, y + height,
+		x, y + height,
+		x, y
+	};
+	DrawLine(positionList, color, colorMask);
 }
 
 void Screen::DrawLine(int x0, int y0, int x1, int y1, unsigned int color, unsigned int colorMask)
@@ -213,12 +253,12 @@ void Screen::DrawLine(std::vector<int>& positionList, unsigned int color, unsign
 	}
 }
 
-void Screen::DrawSprite(const unsigned int* buffer, int x, int y, int width, int height, bool enableColorKey, unsigned int colorKey)
+void Screen::DrawSprite(const unsigned int* buffer, int x, int y, int width, int height, unsigned int colorMask, bool enableColorKey, unsigned int colorKey)
 {
-	DrawSprite(buffer, x, y, width, height, 0, 0, width, enableColorKey, colorKey);
+	DrawSprite(buffer, x, y, width, height, 0, 0, width, colorMask, enableColorKey, colorKey);
 }
 
-void Screen::DrawSprite(const unsigned int* buffer, int x, int y, int width, int height, int sourceX, int sourceY, int sourceWidth, bool enableColorKey, unsigned int colorKey)
+void Screen::DrawSprite(const unsigned int* buffer, int x, int y, int width, int height, int sourceX, int sourceY, int sourceWidth, unsigned int colorMask, bool enableColorKey, unsigned int colorKey)
 {
 	if (x + width <= 0)
 	{
@@ -259,7 +299,7 @@ void Screen::DrawSprite(const unsigned int* buffer, int x, int y, int width, int
 		clip_height += y;
 		y = 0;
 	}
-	DrawSpriteNoClip(this->screenBuffer, clip_buffer, x, y, clip_width, clip_height, sourceWidth, enableColorKey, colorKey, false, 0);
+	DrawSpriteNoClip(this->screenBuffer, clip_buffer, x, y, clip_width, clip_height, sourceWidth, colorMask, enableColorKey, colorKey, false, 0);
 }
 
 void Screen::DrawFont(int x, int y, int charcterNumber, unsigned int color)
@@ -273,7 +313,7 @@ void Screen::DrawFont(int x, int y, int charcterNumber, unsigned int color)
 	int fontX = (charcterNumber / 16) * this->fontHeight;
 	int fontY = (charcterNumber % 16) * this->fontWidth;
 	unsigned int* fontBuffer = &(this->fontBuffer[fontY * this->fontBufferWidth + fontX]);
-	DrawSpriteNoClip(this->textScreenBuffer, fontBuffer, x * 8, y * 8, this->fontWidth, this->fontHeight, this->fontBufferWidth, true, 0, false, 0);
+	DrawSpriteNoClip(this->textScreenBuffer, fontBuffer, x * 8, y * 8, this->fontWidth, this->fontHeight, this->fontBufferWidth, color, true, 0, true, 0x00000000);
 }
 
 void Screen::DrawFont(int x, int y, int charcterNumber, unsigned int color, unsigned int backColor)
@@ -287,11 +327,12 @@ void Screen::DrawFont(int x, int y, int charcterNumber, unsigned int color, unsi
 	int fontX = (charcterNumber / 16) * this->fontHeight;
 	int fontY = (charcterNumber % 16) * this->fontWidth;
 	unsigned int* fontBuffer = &(this->fontBuffer[fontY * this->fontBufferWidth + fontX]);
-	DrawSpriteNoClip(this->textScreenBuffer, fontBuffer, x * 8, y * 8, this->fontWidth, this->fontHeight, this->fontBufferWidth, true, 0, true, backColor);
+	DrawSpriteNoClip(this->textScreenBuffer, fontBuffer, x * 8, y * 8, this->fontWidth, this->fontHeight, this->fontBufferWidth, true, 0, color, true, backColor);
 }
 
 void Screen::Print(dms::String text, bool newline)
 {
+	this->isTabControll = false;
 	for(size_t i = 0; i < text.size(); ++ i)
 	{
 		int character = static_cast<unsigned char>(text[i]);
@@ -339,6 +380,52 @@ void Screen::Pattern(int row, dms::String& pattern, unsigned int color, unsigned
 	}
 	this->graphicX = x;
 	this->graphicY = y;
+}
+
+void Screen::DrawCircle(int x, int y, int r, double h, double ks, double ke, int o, unsigned int color, unsigned int colorMask)
+{
+	double start = ks;
+	double end = -ke;
+	double radius = static_cast<double>(r);
+	double xStart = cos(start) * radius;
+	double yStart = sin(start) * radius;
+	if(h < 1.0)
+	{
+		yStart *= h;
+	}
+	else if(h > 1.0)
+	{
+		xStart /= h;
+	}
+	xStart += static_cast<double>(x);
+	yStart += static_cast<double>(y);
+	double xBefore = xStart;
+	double yBefore = yStart;
+	double step = M_PI * 2.0 / 360.0;
+	start -= step;
+	for(double i = start; i > end; i -= step)
+	{
+		double nextX = cos(i) * radius;
+		double nextY = sin(i) * radius;
+		if(h < 1.0)
+		{
+			nextY *= h;
+		}
+		else if(h > 1.0)
+		{
+			nextX /= h;
+		}
+		nextX += static_cast<double>(x);
+		nextY += static_cast<double>(y);
+		DrawLine(static_cast<int>(xBefore), static_cast<int>(yBefore), static_cast<int>(nextX), static_cast<int>(nextY), color, colorMask);
+		xBefore = nextX;
+		yBefore = nextY;
+	}
+	if(o != 0)
+	{
+		DrawLine(static_cast<int>(xStart), static_cast<int>(yStart), static_cast<int>(x), static_cast<int>(y), color, colorMask);
+		DrawLine(static_cast<int>(xBefore), static_cast<int>(yBefore), static_cast<int>(x), static_cast<int>(y), color, colorMask);
+	}
 }
 
 void Screen::ScrollXRange(int left, int right)
@@ -414,12 +501,23 @@ int Screen::GetTextWidth(void)
 
 int Screen::GetTextHeight(void)
 {
-	return this->textHeight;;
+	return this->textHeight;
 }
 
-void Screen::Flip(unsigned int textColorMask, unsigned int graphicColorMask)
+int Screen::GetGraphicWidth(void)
 {
-	if(highPriorityText == true)
+	return this->screenWidth;
+}
+
+int Screen::GetGraphicHeight(void)
+{
+	return this->screenHeight;
+}
+
+void Screen::Flip(unsigned int textColorMask, unsigned int graphicColorMask, unsigned int backGroundColor, int priority)
+{
+	FillFrameBuffer(backGroundColor);
+	if(priority == 0)
 	{
 		FlipGraphic(graphicColorMask);
 		FlipText(textColorMask);
@@ -432,8 +530,7 @@ void Screen::Flip(unsigned int textColorMask, unsigned int graphicColorMask)
 		FlipGraphic(graphicColorMask);
 	}
 }
-
-void Screen::DrawSpriteNoClip(unsigned int* distinationBuffer, const unsigned int* buffer, int x, int y, int width, int height, int sourceWidth, bool enableColorKey, unsigned int colorKey, bool enableBackColor, unsigned int backColor)
+void Screen::DrawSpriteNoClip(unsigned int* distinationBuffer, const unsigned int* buffer, int x, int y, int width, int height, int sourceWidth, unsigned int colorMask, bool enableColorKey, unsigned int colorKey, bool enableBackColor, unsigned int backColor)
 {
 	int sourceAddress = 0;
 	int destinationAddress = this->screenWidth * y + x;
@@ -444,7 +541,7 @@ void Screen::DrawSpriteNoClip(unsigned int* distinationBuffer, const unsigned in
 			unsigned int color = buffer[sourceAddress + scan_x];
 			if(enableColorKey == false || ((enableColorKey == true) && (color != colorKey)))
 			{
-				distinationBuffer[destinationAddress + scan_x] = color;
+				distinationBuffer[destinationAddress + scan_x] = color & colorMask;
 			}
 			else if (enableBackColor == true)
 			{
@@ -462,7 +559,7 @@ void Screen::ReturnText(void)
 	++ this->textY;
 	if(this->textY > this->scrollBottom)
 	{
-		// todo 1行スクロールする
+		// 1行スクロールする
 		int width = this->scrollRight - this->scrollLeft + 1;
 		int height = this->scrollBottom - this->scrollTop + 1;
 		ScrollText(this->scrollLeft, this->scrollTop, width, height, 1);
@@ -610,6 +707,21 @@ void Screen::DrawPattern(int x, int y, unsigned char pattern, unsigned int color
 	}
 }
 
+void Screen::FillFrameBuffer(unsigned int color)
+{
+	for(int y = 0; y < SCREEN_HEIGHT; ++ y)
+	{
+		int sourceY = y / this->stretchHeight;
+		int frameBufferAddress = (SCREEN_HEIGHT - y - 1) * SCREEN_WIDTH;
+		for(int x = 0; x < SCREEN_WIDTH; ++ x)
+		{
+			int sourceX = x / this->stretchWidth;
+			int sourceAddress = sourceY * this->screenWidth + sourceX;
+			this->frameBuffer[frameBufferAddress + x] = color;
+		}
+	}
+}
+
 void Screen::FlipGraphic(unsigned int colorMask)
 {
 	for(int y = 0; y < SCREEN_HEIGHT; ++ y)
@@ -620,7 +732,8 @@ void Screen::FlipGraphic(unsigned int colorMask)
 		{
 			int sourceX = x / this->stretchWidth;
 			int sourceAddress = sourceY * this->screenWidth + sourceX;
-			unsigned int writeColor = this->screenBuffer[sourceAddress] & colorMask; //colorMask == 0xFFFFFFFF ? this->screenBuffer[sourceAddress] : (this->frameBuffer[frameBufferAddress + x] & ~colorMask) | (this->screenBuffer[sourceAddress] & colorMask);
+			unsigned int writeColor = this->screenBuffer[sourceAddress] & colorMask;
+			writeColor = this->greenDisplay == true ? writeColor == 0 ? 0 : 0xFF00FF00 : writeColor;
 			this->frameBuffer[frameBufferAddress + x] = writeColor;
 		}
 	}
@@ -636,9 +749,11 @@ void Screen::FlipText(unsigned int colorMask)
 		{
 			int sourceX = x / this->textStretchWidth;
 			int sourceAddress = sourceY * this->screenWidth + sourceX;
-			if ((this->textScreenBuffer[sourceAddress] & 0xFFFFFF) != 0)
+			if (this->textScreenBuffer[sourceAddress] != 0)
 			{
-				unsigned int writeColor = colorMask == 0xFFFFFFFF ? this->textScreenBuffer[sourceAddress] : (this->frameBuffer[frameBufferAddress + x] & ~colorMask) | (this->textScreenBuffer[sourceAddress] & colorMask);
+//				unsigned int writeColor = colorMask == 0xFFFFFFFF ? this->textScreenBuffer[sourceAddress] : (this->frameBuffer[frameBufferAddress + x] & ~colorMask) | (this->textScreenBuffer[sourceAddress] & colorMask);
+				unsigned int writeColor = this->textScreenBuffer[sourceAddress] & colorMask;
+				writeColor = this->greenDisplay == true ? writeColor == 0 ? 0 : 0xFF00FF00 : writeColor;
 				this->frameBuffer[frameBufferAddress + x] = writeColor;
 			}
 		}
@@ -703,9 +818,32 @@ void Screen::HideCursor(void)
 	this->showCursor = false;
 }
 
+void Screen::SetGreenDisplay(bool green)
+{
+	this->greenDisplay = green;
+}
+
 bool Screen::ControlCode(int character)
 {
-
+	KeyBoard& keyBoard = KeyBoard::GetInstance();
+	if(this->isTabControll == true)
+	{
+		int textX = character > GetTextX() ? character : GetTextX();
+		int x = textX % GetTextWidth();
+		int addY = textX / GetTextWidth();
+		SetTextX(x);
+		if(addY > 0)
+		{
+			int y = GetTextY() + addY;
+			if(y >= GetTextHeight())
+			{
+				y = GetTextHeight() - 1;
+			}
+			SetTextY(y);
+		}
+		this->isTabControll = false;
+		return true;
+	}
 	bool controll = false;
 	switch(character)
 	{
@@ -713,6 +851,10 @@ bool Screen::ControlCode(int character)
 		++ this->textY;
 		if(this->textY > this->scrollBottom)
 		{
+			// 1行スクロールする
+			int width = this->scrollRight - this->scrollLeft + 1;
+			int height = this->scrollBottom - this->scrollTop + 1;
+			ScrollText(this->scrollLeft, this->scrollTop, width, height, 1);
 			this->textY = this->scrollBottom;
 		}
 		controll = true;
@@ -758,6 +900,31 @@ bool Screen::ControlCode(int character)
 		break;
 	case 6:
 		ClearText();
+		controll = true;
+		break;
+	case 9:
+		// GRPHモード
+		keyBoard.SetGrph(true);
+		controll = true;
+		break;
+	case 12:
+		// かなモード
+		keyBoard.SetKana(true);
+		controll = true;
+		break;
+	case 14:
+		// かな、GRPHモード解除
+		keyBoard.SetKana(false);
+		keyBoard.SetGrph(false);
+		controll = true;
+		break;
+	case 15:
+		// かな解除
+		keyBoard.SetKana(false);
+		controll = true;
+		break;
+	case 16:
+		isTabControll = true;
 		controll = true;
 		break;
 	}

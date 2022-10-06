@@ -25,6 +25,7 @@
     <Image Include="ExecBasic.ico">
       <Filter>ソース ファイル\source\Windows</Filter>
     </Image>
+    <Image Include="..\..\source\Windows\icon.ico" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\Data.cpp">
@@ -73,6 +74,12 @@
       <Filter>ソース ファイル\source\Windows</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\BeepMusic.cpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Json.cpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\source\Literals.cpp">
       <Filter>ソース ファイル\source</Filter>
     </ClCompile>
   </ItemGroup>
@@ -159,6 +166,12 @@
       <Filter>ソース ファイル\source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Array.hpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Json.hpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Literals.hpp">
       <Filter>ソース ファイル\source</Filter>
     </ClInclude>
   </ItemGroup>

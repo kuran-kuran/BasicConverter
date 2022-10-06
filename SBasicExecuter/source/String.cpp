@@ -212,62 +212,206 @@ namespace dms
 
 	int String::operator == (const char* text) const
 	{
-		return -(this->size() == strlen(text) && (memcmp(&this->buffer[0], text, this->size()) == 0));
+		if(text == NULL)
+		{
+			if(this->empty() == true)
+			{
+				return -1;
+			}
+			return 0;
+		}
+		else if(this->empty() == true)
+		{
+			return 0;
+		}
+		size_t size = this->size() < strlen(text) ? this->size() : strlen(text);
+		return -(this->size() == strlen(text) && (memcmp(&this->buffer[0], text, size) == 0));
 	}
 
 	int String::operator == (const String& text) const
 	{
-		return -(this->size() == text.size() && (memcmp(&this->buffer[0], text.c_str(), this->size()) == 0));
+		if(text.empty() == true)
+		{
+			if(this->empty() == true)
+			{
+				return -1;
+			}
+			return 0;
+		}
+		else if(this->empty() == true)
+		{
+			return 0;
+		}
+		size_t size = this->size() < text.size() ? this->size() : text.size();
+		return -(this->size() == text.size() && (memcmp(&this->buffer[0], text.c_str(), size) == 0));
 	}
 
 	int String::operator != (const char* text) const
 	{
-		return -(this->size() != strlen(text) && (memcmp(&this->buffer[0], text, this->size()) == 0));
+		if(*this == text)
+		{
+			return 0;
+		}
+		else
+		{
+			return -1;
+		}
 	}
 
 	int String::operator != (const String& text) const
 	{
-		return -(this->size() != text.size() && (memcmp(&this->buffer[0], text.c_str(), this->size()) == 0));
+		if(*this == text)
+		{
+			return 0;
+		}
+		else
+		{
+			return -1;
+		}
 	}
 
 	int String::operator < (const char* text) const
 	{
-		return -(this->size() != strlen(text) && (memcmp(&this->buffer[0], text, this->size()) < 0));
+		if(text == NULL)
+		{
+			if(this->empty() == true)
+			{
+				return 0;
+			}
+			return 0;
+		}
+		else if(this->empty() == true)
+		{
+			return -1;
+		}
+		size_t size = this->size() < strlen(text) ? this->size() : strlen(text);
+		return -(this->size() != strlen(text) && (memcmp(&this->buffer[0], text, size) < 0));
 	}
 
 	int String::operator < (const String& text) const
 	{
-		return -(this->size() != text.size() && (memcmp(&this->buffer[0], text.c_str(), this->size()) < 0));
+		if(text.empty() == true)
+		{
+			if(this->empty() == true)
+			{
+				return 0;
+			}
+			return 0;
+		}
+		else if(this->empty() == true)
+		{
+			return -1;
+		}
+		size_t size = this->size() < text.size() ? this->size() : text.size();
+		return -(this->size() != text.size() && (memcmp(&this->buffer[0], text.c_str(), size) < 0));
 	}
 
 	int String::operator > (const char* text) const
 	{
-		return -(this->size() != strlen(text) && (memcmp(&this->buffer[0], text, this->size()) > 0));
+		if(text == NULL)
+		{
+			if(this->empty() == true)
+			{
+				return 0;
+			}
+			return -1;
+		}
+		else if(this->empty() == true)
+		{
+			return 0;
+		}
+		size_t size = this->size() < strlen(text) ? this->size() : strlen(text);
+		return -(this->size() != strlen(text) && (memcmp(&this->buffer[0], text, size) > 0));
 	}
 
 	int String::operator > (const String& text) const
 	{
-		return -(this->size() != text.size() && (memcmp(&this->buffer[0], text.c_str(), this->size()) > 0));
+		if(text.empty() == true)
+		{
+			if(this->empty() == true)
+			{
+				return 0;
+			}
+			return -1;
+		}
+		else if(this->empty() == true)
+		{
+			return 0;
+		}
+		size_t size = this->size() < text.size() ? this->size() : text.size();
+		return -(this->size() != text.size() && (memcmp(&this->buffer[0], text.c_str(), size) > 0));
 	}
 
 	int String::operator <= (const char* text) const
 	{
-		return -(this->size() != strlen(text) && (memcmp(&this->buffer[0], text, this->size()) <= 0));
+		if(text == NULL)
+		{
+			if(this->empty() == true)
+			{
+				return -1;
+			}
+			return 0;
+		}
+		else if(this->empty() == true)
+		{
+			return -1;
+		}
+		size_t size = this->size() < strlen(text) ? this->size() : strlen(text);
+		return -(this->size() != strlen(text) && (memcmp(&this->buffer[0], text, size) <= 0));
 	}
 
 	int String::operator <= (const String& text) const
 	{
-		return -(this->size() != text.size() && (memcmp(&this->buffer[0], text.c_str(), this->size()) <= 0));
+		if(text.empty() == true)
+		{
+			if(this->empty() == true)
+			{
+				return -1;
+			}
+			return 0;
+		}
+		else if(this->empty() == true)
+		{
+			return -1;
+		}
+		size_t size = this->size() < text.size() ? this->size() : text.size();
+		return -(this->size() != text.size() && (memcmp(&this->buffer[0], text.c_str(), size) <= 0));
 	}
 
 	int String::operator >= (const char* text) const
 	{
-		return -(this->size() != strlen(text) && (memcmp(&this->buffer[0], text, this->size()) >= 0));
+		if(text == NULL)
+		{
+			if(this->empty() == true)
+			{
+				return -1;
+			}
+			return -1;
+		}
+		else if(this->empty() == true)
+		{
+			return 0;
+		}
+		size_t size = this->size() < strlen(text) ? this->size() : strlen(text);
+		return -(this->size() != strlen(text) && (memcmp(&this->buffer[0], text, size) >= 0));
 	}
 
 	int String::operator >= (const String& text) const
 	{
-		return -(this->size() != text.size() && (memcmp(&this->buffer[0], text.c_str(), this->size()) >= 0));
+		if(text.empty() == true)
+		{
+			if(this->empty() == true)
+			{
+				return -1;
+			}
+			return -1;
+		}
+		else if(this->empty() == true)
+		{
+			return 0;
+		}
+		size_t size = this->size() < text.size() ? this->size() : text.size();
+		return -(this->size() != text.size() && (memcmp(&this->buffer[0], text.c_str(), size) >= 0));
 	}
 
 	bool String::empty(void) const

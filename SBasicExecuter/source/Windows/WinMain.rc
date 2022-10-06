@@ -1,31 +1,36 @@
 #include "resource.h"
 
-IDI_ICON ICON "icon.ico"
+IDI_ICON                ICON                    "icon.ico"
 
 IDC_WINMAIN MENU
 BEGIN
     POPUP "File(&F)"
     BEGIN
-        MENUITEM "Close(&X)", IDM_EXIT
+        MENUITEM "Close(&X)",                   IDM_EXIT
     END
     POPUP "Setting"
     BEGIN
         POPUP "Speed"
         BEGIN
-            MENUITEM "MIN", ID_SPEED_MIN
-            MENUITEM "x1", ID_SPEEDx1
-            MENUITEM "x2", ID_SPEEDx2
-            MENUITEM "x5", ID_SPEEDx5
-            MENUITEM "x20", ID_SPEEDx20
-            MENUITEM "x100", ID_SPEEDx100
-            MENUITEM "x200", ID_SPEEDx200
-            MENUITEM "MAX", ID_SPEED_MAX
+            MENUITEM "MIN",                         ID_SPEED_MIN
+            MENUITEM "x1",                          ID_SPEEDx1
+            MENUITEM "x2",                          ID_SPEEDx2
+            MENUITEM "x5",                          ID_SPEEDx5
+            MENUITEM "x20",                         ID_SPEEDx20
+            MENUITEM "x100",                        ID_SPEEDx100
+            MENUITEM "x200",                        ID_SPEEDx200
+            MENUITEM "MAX",                         ID_SPEED_MAX
         END
         POPUP "ScreenSize"
         BEGIN
-            MENUITEM "x1", ID_WINDOWSIZEx1
-            MENUITEM "x2", ID_WINDOWSIZEx2
-            MENUITEM "x3", ID_WINDOWSIZEx3
+            MENUITEM "x1",                          ID_WINDOWSIZEx1
+            MENUITEM "x2",                          ID_WINDOWSIZEx2
+            MENUITEM "x3",                          ID_WINDOWSIZEx3
+        END
+        POPUP "Display"
+        BEGIN
+            MENUITEM "Color",                       ID_DISPLAYCOLOR_COLOR
+            MENUITEM "Green",                       ID_DISPLAYCOLOR_GREEN
         END
     END
 END
