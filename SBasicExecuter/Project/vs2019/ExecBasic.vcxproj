@@ -151,6 +151,7 @@
     <ClCompile Include="..\..\source\FileData.cpp" />
     <ClCompile Include="..\..\source\Format.cpp" />
     <ClCompile Include="..\..\source\JikenPatch.cpp" />
+    <ClCompile Include="..\..\source\Json.cpp" />
     <ClCompile Include="..\..\source\Line.cpp" />
     <ClCompile Include="..\..\source\Literals.cpp" />
     <ClCompile Include="..\..\source\Png.cpp" />
@@ -182,6 +183,7 @@
     <ClInclude Include="..\..\source\FileData.hpp" />
     <ClInclude Include="..\..\source\Format.hpp" />
     <ClInclude Include="..\..\source\JikenPatch.hpp" />
+    <ClInclude Include="..\..\source\Json.hpp" />
     <ClInclude Include="..\..\source\Line.hpp" />
     <ClInclude Include="..\..\source\Literals.hpp" />
     <ClInclude Include="..\..\source\Png.hpp" />
