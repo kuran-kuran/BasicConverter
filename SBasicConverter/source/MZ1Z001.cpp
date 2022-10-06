@@ -575,6 +575,7 @@ std::vector<char> MZ1Z001::PreConvertLine(const std::vector<char>& buffer, int n
 			pattern = false;
 			firstVariable = false;
 			first = true;
+			remFlag = false;
 			continue;
 		}
 		if((phase == 1) && (byte == ';'))
@@ -915,6 +916,7 @@ bool MZ1Z001::Convert(const std::vector<char>& buffer, int number, int condition
 				break;
 			}
 			Delimiter(number, subNumber);
+			remFlag = false;
 			processedDelimiter = true;
 			lexical = {"NOP", ""};
 			this->defKeyFlag = false;
