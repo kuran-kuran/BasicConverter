@@ -1,7 +1,7 @@
 ﻿#include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
-#include "MZ1Z001.hpp"
+#include "MZ1Z002.hpp"
 
 static const char* const NAME = "MZ-80B/2000/2200用のMZTファイルをCPPファイルに変換するプログラム";
 static const char* const VERSION = "0.9.5";
@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
 	}
 	// コンバートする
 	std::cout << "Converte " << path1 << " to " << path2 << std::endl;
-	MZ1Z001 converter;
+	MZ1Z002 converter;
 	converter.ConvertFile(path1.c_str(), path2.c_str());
 	std::cout << "Complete" << std::endl;
 }
