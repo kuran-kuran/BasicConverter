@@ -79,6 +79,9 @@
     <ClCompile Include="..\..\source\Json.cpp">
       <Filter>ソース ファイル\source</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\source\Literals.cpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\source\Data.hpp">
@@ -166,6 +169,9 @@
       <Filter>ソース ファイル\source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Json.hpp">
+      <Filter>ソース ファイル\source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\source\Literals.hpp">
       <Filter>ソース ファイル\source</Filter>
     </ClInclude>
   </ItemGroup>

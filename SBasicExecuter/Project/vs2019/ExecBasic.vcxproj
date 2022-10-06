@@ -153,6 +153,7 @@
     <ClCompile Include="..\..\source\Format.cpp" />
     <ClCompile Include="..\..\source\Json.cpp" />
     <ClCompile Include="..\..\source\Line.cpp" />
+    <ClCompile Include="..\..\source\Literals.cpp" />
     <ClCompile Include="..\..\source\Png.cpp" />
     <ClCompile Include="..\..\source\Screen.cpp" />
     <ClCompile Include="..\..\source\Stack.cpp" />
@@ -182,6 +183,7 @@
     <ClInclude Include="..\..\source\Format.hpp" />
     <ClInclude Include="..\..\source\Json.hpp" />
     <ClInclude Include="..\..\source\Line.hpp" />
+    <ClInclude Include="..\..\source\Literals.hpp" />
     <ClInclude Include="..\..\source\Png.hpp" />
     <ClInclude Include="..\..\source\Screen.hpp" />
     <ClInclude Include="..\..\source\Setting.hpp" />
