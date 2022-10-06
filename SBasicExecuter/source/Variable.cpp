@@ -657,7 +657,7 @@ namespace dms
 	dms::String Variable::IntToString(int value)
 	{
 		char buffer[256];
-		if(value > 0)
+		if(value >= 0)
 		{
 			sprintf_s(buffer, 256, " %d", value);
 		}
@@ -671,7 +671,7 @@ namespace dms
 	dms::String Variable::DoubleToString(double value)
 	{
 		char buffer[256];
-		if(value > 0.0)
+		if(value >= 0.0)
 		{
 			sprintf_s(buffer, 256, " %g", value);
 		}

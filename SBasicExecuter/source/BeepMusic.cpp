@@ -120,6 +120,7 @@ void BeepMusic::MML(const dms::String& mml)
 	{
 		MakeTone(note, this->duration);
 	}
+	this->outOfData = false;
 }
 
 void BeepMusic::SetTempo(int tempo)
