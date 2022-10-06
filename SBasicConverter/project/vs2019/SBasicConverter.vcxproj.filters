@@ -15,7 +15,7 @@
     <ClCompile Include="..\..\source\Format.cpp">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\MZ1Z001.cpp">
+    <ClCompile Include="..\..\source\MZ1Z002.cpp">
       <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>
@@ -29,7 +29,7 @@
     <ClInclude Include="..\..\source\BasicCode.h">
       <Filter>source</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\MZ1Z001.hpp">
+    <ClInclude Include="..\..\source\MZ1Z002.hpp">
       <Filter>source</Filter>
     </ClInclude>
   </ItemGroup>
