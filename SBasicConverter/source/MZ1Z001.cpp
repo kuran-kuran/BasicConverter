@@ -260,7 +260,6 @@ bool MZ1Z001::ConvertFile(const std::string filepath, const std::string outputFi
 	writeData += "};\n";
 	writeData += "\n";
 	// §ŒäƒvƒƒOƒ‰ƒ€
-	writeData += "\n";
 	writeData += "void SetTimeCallback(dms::String* string)\n";
 	writeData += "{\n";
 	writeData += "\tSetTime(*string);\n";
