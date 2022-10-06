@@ -2,6 +2,8 @@
 #include <mmsystem.h>
 #include "resource.h"
 #include "KeyBoard.hpp"
+#include "WinMain.hpp"
+#include "../Executer.hpp"
 #include "../Format.hpp"
 #include "../FileData.hpp"
 #include "../Json.hpp"
@@ -31,8 +33,9 @@ struct Setting
 {
 	int screenScale;
 	int execSpeed;
+	int displayColor;
 };
-Setting setting = {1, 5};
+Setting setting = {1, 5, DISPLAY_COLOR};
 
 // DIBSectionとScreenバッファのサイズは同じ、ウインドウに転送するときに拡大して大きさを整える
 void InitializeCreateDIBSection(HWND windowHandle)
@@ -145,6 +148,7 @@ void LoadSetting(void)
 		settingJson.Set(jsonText);
 		setting.screenScale = dms::Json::Int(settingJson["screenScale"]);
 		setting.execSpeed = dms::Json::Int(settingJson["execSpeed"]);
+		setting.displayColor = dms::Json::Int(settingJson["displayColor"]);
 	}
 }
 
@@ -154,6 +158,7 @@ void SaveSetting(void)
 	dms::Json settingJson;
 	settingJson.SetData("screenScale", setting.screenScale);
 	settingJson.SetData("execSpeed", setting.execSpeed);
+	settingJson.SetData("displayColor", setting.displayColor);
 	std::string jsonText = settingJson.Encode();
 	if(jsonText.empty() == false)
 	{
@@ -166,6 +171,7 @@ void SaveSetting(void)
 LRESULT CALLBACK WndProc(HWND windowHandle, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	static HIMC himcPrev = 0;
+	Executer* executer = Executer::GetInstance();
 	switch (message)
 	{
 	case WM_COMMAND:
@@ -236,6 +242,18 @@ LRESULT CALLBACK WndProc(HWND windowHandle, UINT message, WPARAM wParam, LPARAM 
 			UncheckSpeedMenu();
 			CheckMenuItem(GetMenu(windowHandle), ID_SPEED_MAX, MF_BYCOMMAND | MF_CHECKED);
 			setting.execSpeed = INT_MAX;
+			break;
+		case ID_DISPLAYCOLOR_COLOR:
+			CheckMenuItem(GetMenu(windowHandle), ID_DISPLAYCOLOR_COLOR, MF_BYCOMMAND | MF_CHECKED);
+			CheckMenuItem(GetMenu(windowHandle), ID_DISPLAYCOLOR_GREEN, MF_BYCOMMAND | MF_UNCHECKED);
+			setting.displayColor = DISPLAY_COLOR;
+			executer->SetGreenDisplay(false);
+			break;
+		case ID_DISPLAYCOLOR_GREEN:
+			CheckMenuItem(GetMenu(windowHandle), ID_DISPLAYCOLOR_COLOR, MF_BYCOMMAND | MF_UNCHECKED);
+			CheckMenuItem(GetMenu(windowHandle), ID_DISPLAYCOLOR_GREEN, MF_BYCOMMAND | MF_CHECKED);
+			setting.displayColor = DISPLAY_GREEN;
+			executer->SetGreenDisplay(true);
 			break;
 		default:
 			return DefWindowProc(windowHandle, message, wParam, lParam);
@@ -316,6 +334,7 @@ void InitializeWindow(HINSTANCE instance, int cmd_show, int width, int height, L
 	UpdateWindow(windowHandle);
 	CheckMenuItem(GetMenu(windowHandle), ID_WINDOWSIZEx1 + setting.screenScale - 1, MF_BYCOMMAND | MF_CHECKED);
 	CheckMenuItem(GetMenu(windowHandle), ID_SPEEDx1 + GetSpeedId(setting.execSpeed) - 1, MF_BYCOMMAND | MF_CHECKED);
+	CheckMenuItem(GetMenu(windowHandle), ID_DISPLAYCOLOR_COLOR + setting.displayColor, MF_BYCOMMAND | MF_CHECKED);
 }
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
@@ -330,6 +349,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 	timeBeginPeriod(timeCaps.wPeriodMin);
 	// メインループ初期化
 	MainLoop_Setup(reinterpret_cast<unsigned int*>(bitmap));
+	// ディスプレイカラー設定
+	Executer* executer = Executer::GetInstance();
+	executer->SetGreenDisplay(setting.displayColor == DISPLAY_COLOR ? false : true);
 	// メインループ
 	DWORD frameTime = 1000 / FPS;
 	DWORD beforeTime = timeGetTime();

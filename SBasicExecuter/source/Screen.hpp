@@ -54,6 +54,7 @@ public:
 	void ReturnText(void);
 	void ShowCursor(void);
 	void HideCursor(void);
+	void SetGreenDisplay(bool green);
 	void DrawPattern(int x, int y, unsigned char pattern, unsigned int color, unsigned int colorMask = 0xFFFFFFFF);
 private:
 	static const int cursorCountMax;
@@ -98,6 +99,7 @@ private:
 	int scrollLeft;
 	int scrollBottom;
 	int scrollRight;
+	bool greenDisplay;
 	bool isTabControll;
 };
 

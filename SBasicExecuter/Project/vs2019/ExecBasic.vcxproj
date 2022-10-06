@@ -140,6 +140,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <Image Include="..\..\source\Windows\icon.ico" />
     <Image Include="ExecBasic.ico" />
   </ItemGroup>
   <ItemGroup>
@@ -150,7 +151,6 @@
     <ClCompile Include="..\..\source\Executer.cpp" />
     <ClCompile Include="..\..\source\FileData.cpp" />
     <ClCompile Include="..\..\source\Format.cpp" />
-    <ClCompile Include="..\..\source\JikenPatch.cpp" />
     <ClCompile Include="..\..\source\Json.cpp" />
     <ClCompile Include="..\..\source\Line.cpp" />
     <ClCompile Include="..\..\source\Literals.cpp" />
@@ -172,7 +172,6 @@
     <ClInclude Include="..\..\library\zlib\zconf.h" />
     <ClInclude Include="..\..\library\zlib\zlib.h" />
     <ClInclude Include="..\..\source\Array.hpp" />
-    <ClInclude Include="..\..\source\Basic.hpp" />
     <ClInclude Include="..\..\source\BeepMusic.hpp" />
     <ClInclude Include="..\..\source\Command.hpp" />
     <ClInclude Include="..\..\source\Config.hpp" />
@@ -182,7 +181,6 @@
     <ClInclude Include="..\..\source\Executer.hpp" />
     <ClInclude Include="..\..\source\FileData.hpp" />
     <ClInclude Include="..\..\source\Format.hpp" />
-    <ClInclude Include="..\..\source\JikenPatch.hpp" />
     <ClInclude Include="..\..\source\Json.hpp" />
     <ClInclude Include="..\..\source\Line.hpp" />
     <ClInclude Include="..\..\source\Literals.hpp" />

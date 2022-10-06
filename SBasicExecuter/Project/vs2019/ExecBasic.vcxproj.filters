@@ -25,6 +25,7 @@
     <Image Include="ExecBasic.ico">
       <Filter>ソース ファイル\source\Windows</Filter>
     </Image>
+    <Image Include="..\..\source\Windows\icon.ico" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\source\Data.cpp">
@@ -75,13 +76,10 @@
     <ClCompile Include="..\..\source\BeepMusic.cpp">
       <Filter>ソース ファイル\source</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\source\JikenPatch.cpp">
+    <ClCompile Include="..\..\source\Json.cpp">
       <Filter>ソース ファイル\source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\source\Literals.cpp">
-      <Filter>ソース ファイル\source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\source\Json.cpp">
       <Filter>ソース ファイル\source</Filter>
     </ClCompile>
   </ItemGroup>
@@ -170,16 +168,10 @@
     <ClInclude Include="..\..\source\Array.hpp">
       <Filter>ソース ファイル\source</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\source\Basic.hpp">
-      <Filter>ソース ファイル\source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\JikenPatch.hpp">
+    <ClInclude Include="..\..\source\Json.hpp">
       <Filter>ソース ファイル\source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\source\Literals.hpp">
-      <Filter>ソース ファイル\source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\source\Json.hpp">
       <Filter>ソース ファイル\source</Filter>
     </ClInclude>
   </ItemGroup>

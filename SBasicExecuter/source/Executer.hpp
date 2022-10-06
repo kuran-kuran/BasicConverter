@@ -23,6 +23,7 @@ public:
 	void Initialize(std::vector<void (*)(void)> lineList, unsigned int* frameBuffer);
 	bool ExecuteLoop(void);
 	void ExecuteNoWaitLoop(void);
+	void SetGreenDisplay(bool green);
 	void Clear(void);
 	void Cls(void);
 	void Flip(void);
