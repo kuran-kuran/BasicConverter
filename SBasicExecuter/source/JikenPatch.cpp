@@ -795,7 +795,6 @@ void Scenario(dms::String* parameter)
 	{
 		return;
 	}
-	int a = (*parameter)[0];
 	unsigned char parameter0 = static_cast<unsigned char>((*parameter)[0]);
 	unsigned char parameter1 = static_cast<unsigned char>((*parameter)[1]);
 	unsigned char parameter3 = static_cast<unsigned char>((*parameter)[3]);
