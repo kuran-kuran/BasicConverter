@@ -367,7 +367,7 @@ void Scenario2050(dms::String& input, int type, int& k, int& l)
 			if((l == 4) && (flag8 == 4))
 			{
 				// ÉLÉ~ÉKÉL
-				k = 11;
+				k = 8;
 				l = 11;
 			}
 			else if(l == 6)
@@ -876,7 +876,7 @@ void DrawRect(dms::String* parameter)
 	{
 		for(int xx = 0; xx < w.GetInt(); ++ xx)
 		{
-			int drawX = x.GetInt() * 4 + xx * 4;
+			int drawX = x.GetInt() * 8 + xx * 8;
 			int drawY = y.GetInt() + yy;
 			for(int i = 0; i < 3; ++ i)
 			{
@@ -893,13 +893,13 @@ void DrawRect(dms::String* parameter)
 					drawPattern = g.GetInt();
 					break;
 				}
-				for(int j = 0; j < 4; ++ j)
+				for(int j = 0; j < 8; ++ j)
 				{
-					unsigned int dot = (drawPattern >> j) & 1;
-					screen.DrawPoint(drawX + j, drawY, 0, maskTable[i]);
+					unsigned int dot = (drawPattern >> (7 - j)) & 1;
+					screen.DrawPoint1Dot(drawX + j, drawY, 0, maskTable[i]);
 					if(dot > 0)
 					{
-						screen.DrawPoint(drawX + j, drawY, 0xFFFFFFFF, maskTable[i]);
+						screen.DrawPoint1Dot(drawX + j, drawY, 0xFFFFFFFF, maskTable[i]);
 					}
 				}
 			}
