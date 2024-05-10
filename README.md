@@ -1,4 +1,4 @@
-# MZ-80B/2000 BASICコンバータ 1.0.0
+# MZ-80B/2000 BASICコンバータ 1.0.1
 SHARP MZ-80B/2000のBASICをC++言語に変換します。
 
 https://github.com/kuran-kuran/BasicConverter
@@ -17,7 +17,9 @@ https://github.com/kuran-kuran/BasicConverter
 BASIC中でUSR関数などでマシン語を呼んでいる場合は実行してもうまく動作しません。
 
 ## ダウンロード
+https://github.com/kuran-kuran/BasicConverter/releases
 
+### 古いバージョンはこちら
 https://github.com/kuran-kuran/BasicConverter/tree/main/Release
 
 ## ファイル構成
