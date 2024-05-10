@@ -167,6 +167,13 @@ void Executer::ExecuteNoWaitLoop(void)
 	}
 }
 
+void Executer::ResetExecuteLine(void)
+{
+	this->input = false;
+	this->screen.HideCursor();
+	this->executeLine = 0;
+}
+
 void Executer::SetGreenDisplay(bool green)
 {
 	this->screen.SetGreenDisplay(green);

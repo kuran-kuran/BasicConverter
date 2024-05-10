@@ -31,6 +31,7 @@ MZ1Z002::MZ1Z002(void)
 ,closeBracesFlag(false)
 ,closeBracketFlag(false)
 ,addColorFlag(false)
+,circleFlag(false)
 ,buffer(NULL)
 ,linePointer(128)
 ,programBuffer()
@@ -274,6 +275,12 @@ bool MZ1Z002::ConvertFile(const std::string filepath, const std::string outputFi
 	writeData += "\n";
 	writeData += "void MainLoop_Finalize()\n";
 	writeData += "{\n";
+	writeData += "}\n";
+	writeData += "\n";
+	writeData += "void MainLoop_Reset()\n";
+	writeData += "{\n";
+	writeData += "\tClr();\n";
+	writeData += "\texecuter->ResetExecuteLine();\n";
 	writeData += "}\n";
 	writeData += "\n";
 	writeData += "void MainLoop_Loop()\n";
