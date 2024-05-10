@@ -14,6 +14,7 @@
 
 void MainLoop_Setup(unsigned int* frameBuffer);
 void MainLoop_Finalize(void);
+void MainLoop_Reset(void);
 void MainLoop_Loop(void);
 void MainLoop_NoWaitLoop(void);
 void MainLoop_Flip(void);
@@ -181,6 +182,9 @@ LRESULT CALLBACK WndProc(HWND windowHandle, UINT message, WPARAM wParam, LPARAM 
 		{
 		case IDM_EXIT:
 			DestroyWindow(windowHandle);
+			break;
+		case ID_FILE_RESET:
+			MainLoop_Reset();
 			break;
 		case ID_WINDOWSIZEx1:
 			CheckMenuItem(GetMenu(windowHandle), ID_WINDOWSIZEx1, MF_BYCOMMAND | MF_CHECKED);

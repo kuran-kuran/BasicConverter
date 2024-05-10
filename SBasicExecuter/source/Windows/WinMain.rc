@@ -7,6 +7,7 @@ BEGIN
     POPUP "File(&F)"
     BEGIN
         MENUITEM "Close(&X)",                   IDM_EXIT
+        MENUITEM "Reset",                       ID_FILE_RESET
     END
     POPUP "Setting"
     BEGIN

@@ -17,10 +17,12 @@ public:
 	void SetStretchHeight(int stretch);
 	void SetTextStretchWidth(int stretch);
 	void SetTextStretchHeight(int stretch);
+	void SetStretchWidthDoubleDot(bool stretchDoubleDot);
 	void Clear(unsigned int colorMask = 0xFFFFFFFF);
 	void ClearText(bool all = false);
 	void Fill(unsigned int color, unsigned int colorMask = 0xFFFFFFFF);
 	void DrawPoint(int x, int y, unsigned int color, unsigned int colorMask = 0xFFFFFFFF);
+	void DrawPoint1Dot(int x, int y, unsigned int color, unsigned int colorMask = 0xFFFFFFFF);
 	unsigned int GetPoint(int x, int y);
 	void DrawRectangle(int x, int y, int width, int height, unsigned int color, unsigned int colorMask = 0xFFFFFFFF);
 	void DrawBox(int x, int y, int width, int height, unsigned int color, unsigned int colorMask = 0xFFFFFFFF, bool fill = false, unsigned int fillColor = 0xFFFFFFFF, unsigned int fillColorMask = 0xFFFFFFFF);
@@ -59,7 +61,7 @@ public:
 private:
 	static const int cursorCountMax;
 	void DrawSpriteNoClip(unsigned int* distinationBuffer, const unsigned int* buffer, int x, int y, int width, int height, int sourceWidth, unsigned int colorMask, bool enableColorKey, unsigned int colorKey, bool enableBackColor, unsigned int backColor);
-	bool CheckColor(unsigned int color, std::vector<unsigned int> checkColor);
+	bool CheckColor(unsigned int color, std::vector<unsigned int>& checkColor);
 	void PaintProc(int x, int y, unsigned int color, std::vector<unsigned int>& borderColorList);
 	void ScrollText(int x, int y, int width, int height, int dir);
 	void ReDrawText(void);
@@ -101,6 +103,7 @@ private:
 	int scrollRight;
 	bool greenDisplay;
 	bool isTabControll;
+	bool stretchDoubleDot;
 };
 
 #endif

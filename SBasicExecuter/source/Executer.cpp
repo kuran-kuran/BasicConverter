@@ -167,6 +167,13 @@ void Executer::ExecuteNoWaitLoop(void)
 	}
 }
 
+void Executer::ResetExecuteLine(void)
+{
+	this->input = false;
+	this->screen.HideCursor();
+	this->executeLine = 0;
+}
+
 void Executer::SetGreenDisplay(bool green)
 {
 	this->screen.SetGreenDisplay(green);
@@ -667,7 +674,15 @@ void Executer::FillGraph(dms::Variable color)
 
 void Executer::SetStretchWidth(dms::Variable stretch)
 {
-	this->screen.SetStretchWidth(stretch.GetInt());
+	//this->screen.SetStretchWidth(stretch.GetInt());
+	if(stretch.GetInt() == 2)
+	{
+		this->screen.SetStretchWidthDoubleDot(true);
+	}
+	else
+	{
+		this->screen.SetStretchWidthDoubleDot(false);
+	}
 	GraphOutput(0b000);
 	GraphInput(1);
 	ClearGraph();

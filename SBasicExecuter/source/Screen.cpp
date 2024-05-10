@@ -29,7 +29,7 @@ Screen::Screen(void)
 ,textY(0)
 ,graphicX(0)
 ,graphicY(0)
-,stretchWidth(2)
+,stretchWidth(1)
 ,stretchHeight(1)
 ,textStretchWidth(2)
 ,textStretchHeight(1)
@@ -42,6 +42,7 @@ Screen::Screen(void)
 ,scrollBottom(24)
 ,greenDisplay(true)
 ,isTabControll(false)
+,stretchDoubleDot(true)
 {
 }
 
@@ -104,6 +105,11 @@ void Screen::LoadFont(void* buffer, int bufferSize)
 void Screen::SetStretchWidth(int stretch)
 {
 	this->stretchWidth = stretch;
+}
+
+void Screen::SetStretchWidthDoubleDot(bool stretchDoubleDot)
+{
+	this->stretchDoubleDot = stretchDoubleDot;
 }
 
 void Screen::SetStretchHeight(int stretch)
@@ -173,6 +179,20 @@ void Screen::DrawPoint(int x, int y, unsigned int color, unsigned int colorMask)
 {
 	this->graphicX = x;
 	this->graphicY = y;
+	if(stretchDoubleDot == true)
+	{
+		x *= 2;
+		DrawPoint1Dot(x, y, color, colorMask);
+		DrawPoint1Dot(x + 1, y, color, colorMask);
+	}
+	else
+	{
+		DrawPoint1Dot(x, y, color, colorMask);
+	}
+}
+
+void Screen::DrawPoint1Dot(int x, int y, unsigned int color, unsigned int colorMask)
+{
 	int destinationAddress = this->screenWidth * y + x;
 	unsigned int writeColor = colorMask == 0xFFFFFFFF ? color : (this->screenBuffer[destinationAddress] & ~colorMask) | (color & colorMask);
 	this->screenBuffer[destinationAddress] = writeColor;
@@ -180,6 +200,10 @@ void Screen::DrawPoint(int x, int y, unsigned int color, unsigned int colorMask)
 
 unsigned int Screen::GetPoint(int x, int y)
 {
+	if(stretchDoubleDot == true)
+	{
+		x *= 2;
+	}
 	return this->screenBuffer[this->screenWidth * y + x];
 }
 
@@ -568,7 +592,7 @@ void Screen::ReturnText(void)
 }
 
 // color‚ªcheckColor‚ÉŠÜ‚Ü‚ê‚é‚©
-bool Screen::CheckColor(unsigned int color, std::vector<unsigned int> checkColor)
+bool Screen::CheckColor(unsigned int color, std::vector<unsigned int>& checkColor)
 {
 	if(checkColor.empty() == true)
 	{
@@ -694,16 +718,36 @@ void Screen::ReDrawText(void)
 
 void Screen::DrawPattern(int x, int y, unsigned char pattern, unsigned int color, unsigned int colorMask)
 {
-	for(int i = 0; i < 8; ++i)
+	if(stretchDoubleDot == true)
 	{
-		int destinationAddress = this->screenWidth * y + x + 7 - i;
-		if((destinationAddress < 0) || (destinationAddress >= this->screenBufferSize))
+		x *= 2;
+		for(int i = 0; i < 8; ++i)
 		{
-			continue;
+			int destinationAddress = this->screenWidth * y + x;
+			destinationAddress += ((7 - i) * 2);
+			if((destinationAddress < 0) || (destinationAddress >= this->screenBufferSize))
+			{
+				continue;
+			}
+			unsigned int patternColor = color * ((pattern >> i) & 1);
+			unsigned int writeColor = colorMask == 0xFFFFFFFF ? patternColor : (this->screenBuffer[destinationAddress] & ~colorMask) | (patternColor & colorMask);
+			this->screenBuffer[destinationAddress] = writeColor;
+			this->screenBuffer[destinationAddress + 1] = writeColor;
 		}
-		unsigned int patternColor = color * ((pattern >> i) & 1);
-		unsigned int writeColor = colorMask == 0xFFFFFFFF ? patternColor : (this->screenBuffer[destinationAddress] & ~colorMask) | (patternColor & colorMask);
-		this->screenBuffer[destinationAddress] = writeColor;
+	}
+	else
+	{
+		for(int i = 0; i < 8; ++i)
+		{
+			int destinationAddress = this->screenWidth * y + x + 7 - i;
+			if((destinationAddress < 0) || (destinationAddress >= this->screenBufferSize))
+			{
+				continue;
+			}
+			unsigned int patternColor = color * ((pattern >> i) & 1);
+			unsigned int writeColor = colorMask == 0xFFFFFFFF ? patternColor : (this->screenBuffer[destinationAddress] & ~colorMask) | (patternColor & colorMask);
+			this->screenBuffer[destinationAddress] = writeColor;
+		}
 	}
 }
 
